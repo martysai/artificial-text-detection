@@ -1,0 +1,9 @@
+datasets
+huggingface
+EasyNMT
+wandb
+torch
+sklearn
+transformers
+numpy
+PyHamcrest
