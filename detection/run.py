@@ -2,8 +2,8 @@ import wandb
 
 from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
 
-from models.validate import compute_metrics
-from data.generate import generate
+from detection.models.validate import compute_metrics
+from detection.data.generate import generate
 
 
 def run(

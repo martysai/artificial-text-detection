@@ -1,11 +1,10 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Iterable
 from sklearn.model_selection import train_test_split
 
 from datasets import load_dataset
-from datasets import arrow_dataset
 
 from detection.models.translation import TranslationModel
-from dataset import TextDetectionDataset
+from detection.data.dataset import TextDetectionDataset
 
 from transformers import DistilBertTokenizerFast
 
@@ -17,7 +16,7 @@ TEST_SIZE = 0.2
 
 
 def get_buffer(
-        dataset: arrow_dataset.Dataset,
+        dataset: Iterable,
         transform: Callable
 ) -> List[str]:
     buffer = []

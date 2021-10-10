@@ -1,8 +1,8 @@
 from easynmt import EasyNMT
 from typing import List, Union
-from detection.data.generate import TRG_LANG
 
 EASY_NMT_MODEL_NAME = 'opus-mt'
+TRG_LANG = 'en'
 
 
 class TranslationModel:

@@ -3,6 +3,13 @@ from unittest import TestCase
 
 from detection.data.generate import get_buffer
 
+SRC_LANG = 'ru'
+TRG_LANG = 'en'
+
+
+def reverse_transform(s: str) -> str:
+    return ''.join(reversed(s))
+
 
 class TestBaseline(TestCase):
     @classmethod
@@ -13,10 +20,17 @@ class TestBaseline(TestCase):
         pass
 
     def test_buffer(self):
-        dataset = ...  # TODO: arrow_dataset.DataSet
-        transform = reversed
-        buffer = get_buffer(dataset, transform)
+        dataset = [
+            {
+                SRC_LANG: 'добрый вечер',
+                TRG_LANG: 'good evening',
+            },
+            {
+                SRC_LANG: 'прошу прощения',
+                TRG_LANG: 'i am sorry',
+            }
+        ]
+        buffer = get_buffer(dataset, reverse_transform)
 
-        # TODO: fulfil equal_to
-        assert_that(len(buffer), equal_to(...))
-        assert_that(buffer[0], equal_to(...))
+        assert_that(len(buffer), equal_to(4))
+        assert_that(buffer[0], equal_to('речев йырбод'))
