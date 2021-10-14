@@ -1,6 +1,7 @@
 import argparse
 import os.path
 
+import torch
 import wandb
 
 from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
@@ -10,9 +11,21 @@ from detection.data.generate import generate
 
 
 def set_args(parser: argparse.ArgumentParser):
-    runtime = parser.add_argument_group('Checkpoints')
-    runtime.add_argument('--model_path', type=str, default='model.pth',
-                         help='Model checkpoint path')
+    checkpoints = parser.add_argument_group('Checkpoints')
+    checkpoints.add_argument('--model_path', type=str, default='model.pth',
+                             help='Model checkpoint path')
+    train_args = parser.add_argument_group('Training arguments')
+    train_args.add_argument('--epochs', type=int, default=50,
+                            help='# epochs')
+    train_args.add_argument('--train_batch', type=int, default=512,
+                            help='train batch size')
+    train_args.add_argument('--eval_batch', type=int, default=512,
+                            help='eval batch size')
+    train_args.add_argument('--log_steps', type=int, default=10,
+                            help='# steps for logging')
+    train_args.add_argument('--warmup_steps', type=int, default=100)
+    train_args.add_argument('--weight_decay', type=int, default=1e-4)
+
     return parser
 
 
@@ -25,13 +38,13 @@ def run(
     training_args = TrainingArguments(
         evaluation_strategy='epoch',
         output_dir='./results',
-        num_train_epochs=50,
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=8,
-        warmup_steps=500,
-        weight_decay=0.01,
+        num_train_epochs=args.epochs,
+        per_device_train_batch_size=args.train_batch,
+        per_device_eval_batch_size=args.eval_batch,
+        warmup_steps=args.warmup_steps,
+        weight_decay=args.weight_decay,
         logging_dir='./logs',
-        logging_steps=10,
+        logging_steps=args.log_steps,
         report_to='wandb',
         run_name=run_name,
     )
@@ -60,9 +73,12 @@ def run(
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(
-        'Deep Learning Hometask 1',
+        'Text Detection',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     set_args(arg_parser)
     known_args, _ = arg_parser.parse_known_args()
+    known_args.cuda = torch.cuda.is_available()
+    known_args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
+                                     cuda.is_available() else 'cpu')
     run(known_args)
