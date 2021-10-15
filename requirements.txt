@@ -7,3 +7,6 @@ sklearn
 transformers
 numpy
 PyHamcrest
+requests
+packaging
+filelock

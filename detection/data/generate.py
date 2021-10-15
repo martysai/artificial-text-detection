@@ -28,7 +28,7 @@ def get_buffer(
 
 
 def generate() -> Tuple[TextDetectionDataset, TextDetectionDataset]:
-    dataset = load_dataset(DATASET, lang1=SRC_LANG, lang2=TRG_LANG)
+    dataset = load_dataset(DATASET, lang1=TRG_LANG, lang2=SRC_LANG)
     dataset = dataset['train']['translation']
     model = TranslationModel()
 
