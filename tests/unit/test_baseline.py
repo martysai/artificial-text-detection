@@ -1,11 +1,16 @@
 import argparse
+import numpy as np
 import os
+import shutil
 import torch
 
 from hamcrest import assert_that, equal_to
 from unittest import TestCase
 
+from transformers import EvalPrediction
+
 from detection.data.generate import get_buffer
+from detection.models.validate import compute_metrics
 from detection.run import run, set_args
 
 SRC_LANG = 'ru'
@@ -16,7 +21,7 @@ def reverse_transform(s: str) -> str:
     return ''.join(reversed(s))
 
 
-class TestBaseline(TestCase):
+class TestFunctionality(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         pass
@@ -40,6 +45,21 @@ class TestBaseline(TestCase):
         assert_that(len(buffer), equal_to(4))
         assert_that(buffer[0], equal_to('речев йырбод'))
 
+    def test_compute_metrics(self):
+        eval_pred = EvalPrediction(
+            predictions=np.array([[0], [1]]),
+            label_ids=np.array([0, 1]),
+        )
+        results = compute_metrics(eval_pred)
+        metrics_names = list(results.keys())
+        metrics_values = list(results.values())
+
+        assert_that(metrics_names, equal_to(['accuracy', 'f1', 'precision', 'recall']))
+        for value in metrics_values:
+            assert_that(type(value), equal_to(float))
+
+
+class TestBaseline(TestCase):
     def test_run(self):
         arg_parser = argparse.ArgumentParser(
             'Text Detection',
@@ -57,5 +77,5 @@ class TestBaseline(TestCase):
         test_model_name = 'test_model.pth'
         trainer.model.save_pretrained(test_model_name)
 
-        assert_that(os.path.exists(test_model_name), equal_to(True))
-        os.remove(test_model_name)
+        if os.path.exists(test_model_name):
+            shutil.rmtree(test_model_name)

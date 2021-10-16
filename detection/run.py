@@ -1,5 +1,5 @@
 import argparse
-import os.path
+import os
 
 import torch
 import wandb
@@ -28,6 +28,10 @@ def set_args(parser: argparse.ArgumentParser):
     train_args.add_argument('--warmup_steps', type=int, default=100)
     train_args.add_argument('--weight_decay', type=int, default=1e-4)
 
+    libraries = parser.add_argument_group('Libraries')
+    libraries.add_argument('--wandb_path', type=str, default='wandb.key',
+                           help='A path to wandb personal token')
+
     return parser
 
 
@@ -35,6 +39,15 @@ def run(
     args,
     run_name: str = 'default',
 ) -> Trainer:
+    working_dir = os.path.dirname(os.getcwd())
+    wandb_path = os.path.join(working_dir, args.wandb_path)
+    if not os.path.exists(wandb_path):
+        raise FileNotFoundError('Put wandb personal token into '
+                                f"args.wandb_path = '{wandb_path}'")
+    with open(wandb_path, 'r') as wandb_file:
+        token = wandb_file.read()
+        wandb.login(key=token)
+
     train_dataset, eval_dataset = generate(size=args.size)
 
     training_args = TrainingArguments(
