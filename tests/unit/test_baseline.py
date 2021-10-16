@@ -49,7 +49,7 @@ class TestBaseline(TestCase):
         args, _ = arg_parser.parse_known_args()
 
         args.epochs = 1
-
+        args.size = 128
         args.cuda = torch.cuda.is_available()
         args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
                                    cuda.is_available() else 'cpu')

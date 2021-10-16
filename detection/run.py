@@ -23,6 +23,8 @@ def set_args(parser: argparse.ArgumentParser):
                             help='eval batch size')
     train_args.add_argument('--log_steps', type=int, default=10,
                             help='# steps for logging')
+    train_args.add_argument('--size', type=int, default=10000,
+                            help='# samples in the tatoeba dataset')
     train_args.add_argument('--warmup_steps', type=int, default=100)
     train_args.add_argument('--weight_decay', type=int, default=1e-4)
 
@@ -33,7 +35,7 @@ def run(
     args,
     run_name: str = 'default',
 ) -> Trainer:
-    train_dataset, eval_dataset = generate()
+    train_dataset, eval_dataset = generate(size=args.size)
 
     training_args = TrainingArguments(
         evaluation_strategy='epoch',
