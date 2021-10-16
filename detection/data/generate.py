@@ -13,6 +13,7 @@ DATASET = 'tatoeba'
 SRC_LANG = 'ru'
 TRG_LANG = 'en'
 TEST_SIZE = 0.2
+DATASET_SIZE = 10000
 
 
 def get_buffer(
@@ -27,9 +28,9 @@ def get_buffer(
     return buffer
 
 
-def generate() -> Tuple[TextDetectionDataset, TextDetectionDataset]:
+def generate(size: int = DATASET_SIZE) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
     dataset = load_dataset(DATASET, lang1=TRG_LANG, lang2=SRC_LANG)
-    dataset = dataset['train']['translation']
+    dataset = dataset['train'][:size]['translation']
     model = TranslationModel()
 
     buffer = get_buffer(dataset, model)
