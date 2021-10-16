@@ -28,14 +28,6 @@ def compute_metrics(
         'references': labels,
     }
 
-    # metrics_dict = {
-    #     metric_name: METRICS[metric_name].compute(**metrics_args)
-    #     for metric_name in METRIC_NAMES
-    # }
-    # metrics_dict = {
-    #     metric_name: next(iter(value_dict.values()))
-    #     for metric_name, value_dict in metrics_dict.items()
-    # }
     metrics_dict = {}
     for metric_name in METRIC_NAMES:
         metrics_dict.update(METRICS[metric_name].compute(**metrics_args))
