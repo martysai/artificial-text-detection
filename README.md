@@ -9,3 +9,4 @@ Solutions for true/generated text differentiation.
 - [X] Run on remote server
 - [X] Add run on the specific size
 - [ ] Debug the load model error in vast.ai service
+- [ ] Check why kaggle run doesn't draw plots for wandb.ai
