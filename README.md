@@ -7,4 +7,5 @@ Solutions for true/generated text differentiation.
 - [X] Set up CI/CD testing
 - [X] Add tests for other functions
 - [X] Run on remote server
-- [ ] Add run on the specific size
+- [X] Add run on the specific size
+- [ ] Debug the load model error in vast.ai service
