@@ -68,12 +68,13 @@ class TestBaseline(TestCase):
         set_args(arg_parser)
         args, _ = arg_parser.parse_known_args()
 
+        args.run_name = 'test_run'
         args.epochs = 1
         args.size = 128
         args.cuda = torch.cuda.is_available()
         args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
                                    cuda.is_available() else 'cpu')
-        trainer = run(args, run_name='test_run')
+        trainer = run(args)
         test_model_name = 'test_model.pth'
         trainer.model.save_pretrained(test_model_name)
 

@@ -31,14 +31,13 @@ def set_args(parser: argparse.ArgumentParser):
     libraries = parser.add_argument_group('Libraries')
     libraries.add_argument('--wandb_path', type=str, default='wandb.key',
                            help='A path to wandb personal token')
+    libraries.add_argument('--run_name', type=str, default='default',
+                           help='A name of run to be used in wandb')
 
     return parser
 
 
-def run(
-    args,
-    run_name: str = 'default',
-) -> Trainer:
+def run(args) -> Trainer:
     working_dir = os.path.dirname(os.getcwd())
     wandb_path = os.path.join(working_dir, args.wandb_path)
     if not os.path.exists(wandb_path):
@@ -47,6 +46,9 @@ def run(
     with open(wandb_path, 'r') as wandb_file:
         token = wandb_file.read()
         wandb.login(key=token)
+        wandb.init(project='text-detection')
+        wandb.run.name = args.run_name
+        wandb.run.save()
 
     train_dataset, eval_dataset = generate(size=args.size)
 
@@ -61,7 +63,7 @@ def run(
         logging_dir='./logs',
         logging_steps=args.log_steps,
         report_to='wandb',
-        run_name=run_name,
+        run_name=args.run_name,
     )
 
     if not os.path.exists(args.model_path):
