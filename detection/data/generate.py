@@ -1,10 +1,13 @@
-from typing import Callable, List, Tuple, Iterable
+import logging
+
+from typing import Callable, List, Tuple
 from sklearn.model_selection import train_test_split
 
 from datasets import load_dataset
 
 from detection.models.translation import TranslationModel
 from detection.data.dataset import TextDetectionDataset
+from detection.data.arguments import form_args
 
 from transformers import DistilBertTokenizerFast
 
@@ -14,15 +17,18 @@ SRC_LANG = 'ru'
 TRG_LANG = 'en'
 TEST_SIZE = 0.2
 DATASET_SIZE = 10000
+LOGGING_FREQ = 250
 
 
 def get_buffer(
-        dataset: Iterable,
+        dataset,
         transform: Callable
 ) -> List[str]:
     buffer = []
-    for sample in dataset:
+    for i, sample in enumerate(dataset):
         src, trg = sample[SRC_LANG], sample[TRG_LANG]
+        if (i + 1) % LOGGING_FREQ == 0:
+            logging.info(f'[{i + 1}/{len(dataset)}] Preprocessing sample = {src}')
         gen = transform(src)
         buffer.extend([gen, trg])
     return buffer
@@ -48,3 +54,8 @@ def generate(size: int = DATASET_SIZE) -> Tuple[TextDetectionDataset, TextDetect
     eval_dataset = TextDetectionDataset(eval_encodings, val_labels)
 
     return train_dataset, eval_dataset
+
+
+if __name__ == '__main__':
+    main_args = form_args()
+    generate(main_args.size)

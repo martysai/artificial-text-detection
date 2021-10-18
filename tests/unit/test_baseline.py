@@ -11,7 +11,9 @@ from transformers import EvalPrediction
 
 from detection.data.generate import get_buffer
 from detection.models.validate import compute_metrics
-from detection.run import run, set_args
+from detection import run
+from detection.data.arguments import form_args
+
 
 SRC_LANG = 'ru'
 TRG_LANG = 'en'
@@ -61,13 +63,7 @@ class TestFunctionality(TestCase):
 
 class TestBaseline(TestCase):
     def test_run(self):
-        arg_parser = argparse.ArgumentParser(
-            'Text Detection',
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter
-        )
-        set_args(arg_parser)
-        args, _ = arg_parser.parse_known_args()
-
+        args = form_args()
         args.run_name = 'test_run'
         args.epochs = 1
         args.size = 128

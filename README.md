@@ -10,6 +10,7 @@ Solutions for true/generated text differentiation.
 - [X] Add run on the specific size
 - [X] Debug the load model error in vast.ai service
 - [X] Check why kaggle run doesn't draw plots for wandb.ai
+- [ ] Separate preprocess and run: finish with dataset saving in generate.py and loading in run.py
 - [ ] Debug `wandb-internal.log` repeating requests
 - [ ] Metrics understanding
 - [ ] Model improvement
