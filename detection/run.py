@@ -1,7 +1,11 @@
 import argparse
+import logging
 import os
+import sys
 
+import datasets
 import torch
+import transformers
 import wandb
 
 from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
@@ -37,6 +41,23 @@ def set_args(parser: argparse.ArgumentParser):
     return parser
 
 
+def setup_logging(training_args: TrainingArguments) -> None:
+    logger = logging.getLogger(__name__)
+
+    # Setup logging
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+        datefmt="%m/%d/%Y %H:%M:%S",
+        handlers=[logging.StreamHandler(sys.stdout)],
+    )
+
+    # set the main code and the modules it uses to the same log-level according to the node
+    log_level = training_args.get_process_log_level()
+    logger.setLevel(log_level)
+    datasets.utils.logging.set_verbosity(log_level)
+    transformers.utils.logging.set_verbosity(log_level)
+
+
 def run(args) -> Trainer:
     working_dir = os.path.dirname(os.getcwd())
     wandb_path = os.path.join(working_dir, args.wandb_path)
@@ -46,9 +67,7 @@ def run(args) -> Trainer:
     with open(wandb_path, 'r') as wandb_file:
         token = wandb_file.read()
         wandb.login(key=token)
-        wandb.init(project='text-detection')
-        wandb.run.name = args.run_name
-        wandb.run.save()
+        wandb.init(project='text-detection', name=args.run_name)
 
     train_dataset, eval_dataset = generate(size=args.size)
 
@@ -65,6 +84,7 @@ def run(args) -> Trainer:
         report_to='wandb',
         run_name=args.run_name,
     )
+    setup_logging(training_args)
 
     if not os.path.exists(args.model_path):
         model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased')

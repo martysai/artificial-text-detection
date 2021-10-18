@@ -14,3 +14,4 @@ Solutions for true/generated text differentiation.
 - [ ] Metrics understanding
 - [ ] Model improvement
 - [ ] Test passing in github actions
+- [ ] Realize how to set a limit on kaggle working limit
