@@ -17,7 +17,7 @@ def set_args(parser: argparse.ArgumentParser):
                             help='eval batch size')
     train_args.add_argument('--log_steps', type=int, default=10,
                             help='# steps for logging')
-    train_args.add_argument('--size', type=int, default=10000,
+    train_args.add_argument('--size', type=int, default=514000,
                             help='# samples in the tatoeba dataset')
     train_args.add_argument('--warmup_steps', type=int, default=100)
     train_args.add_argument('--weight_decay', type=int, default=1e-4)
@@ -30,7 +30,7 @@ def set_args(parser: argparse.ArgumentParser):
 
     preprocessed = parser.add_argument_group('Preprocessed dataset')
     working_dir = os.path.dirname(os.getcwd())
-    dataset_path = os.path.join(working_dir, 'source.txt')
+    dataset_path = os.path.join(working_dir, 'dataset')
     preprocessed.add_argument('--dataset_path', default=dataset_path)
 
     return parser

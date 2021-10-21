@@ -10,3 +10,4 @@ PyHamcrest
 requests
 packaging
 filelock
+torch
