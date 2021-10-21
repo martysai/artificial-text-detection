@@ -1,44 +1,36 @@
-import argparse
+import logging
 import os
+import sys
 
-import torch
+import datasets
+import transformers
 import wandb
 
 from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
 
 from detection.models.validate import compute_metrics
-from detection.data.generate import generate
+from detection.data.generate import generate, extract_dataset
+from detection.data.arguments import form_args
 
 
-def set_args(parser: argparse.ArgumentParser):
-    checkpoints = parser.add_argument_group('Checkpoints')
-    checkpoints.add_argument('--model_path', type=str, default='model.pth',
-                             help='Model checkpoint path')
-    train_args = parser.add_argument_group('Training arguments')
-    train_args.add_argument('--epochs', type=int, default=50,
-                            help='# epochs')
-    train_args.add_argument('--train_batch', type=int, default=512,
-                            help='train batch size')
-    train_args.add_argument('--eval_batch', type=int, default=512,
-                            help='eval batch size')
-    train_args.add_argument('--log_steps', type=int, default=10,
-                            help='# steps for logging')
-    train_args.add_argument('--size', type=int, default=10000,
-                            help='# samples in the tatoeba dataset')
-    train_args.add_argument('--warmup_steps', type=int, default=100)
-    train_args.add_argument('--weight_decay', type=int, default=1e-4)
+def setup_logging(training_args: TrainingArguments) -> None:
+    logger = logging.getLogger(__name__)
 
-    libraries = parser.add_argument_group('Libraries')
-    libraries.add_argument('--wandb_path', type=str, default='wandb.key',
-                           help='A path to wandb personal token')
+    # Setup logging
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+        datefmt="%m/%d/%Y %H:%M:%S",
+        handlers=[logging.StreamHandler(sys.stdout)],
+    )
 
-    return parser
+    # set the main code and the modules it uses to the same log-level according to the node
+    log_level = training_args.get_process_log_level()
+    logger.setLevel(log_level)
+    datasets.utils.logging.set_verbosity(log_level)
+    transformers.utils.logging.set_verbosity(log_level)
 
 
-def run(
-    args,
-    run_name: str = 'default',
-) -> Trainer:
+def run(args) -> Trainer:
     working_dir = os.path.dirname(os.getcwd())
     wandb_path = os.path.join(working_dir, args.wandb_path)
     if not os.path.exists(wandb_path):
@@ -47,8 +39,14 @@ def run(
     with open(wandb_path, 'r') as wandb_file:
         token = wandb_file.read()
         wandb.login(key=token)
+        wandb.init(project='text-detection', name=args.run_name)
 
-    train_dataset, eval_dataset = generate(size=args.size)
+    if not (os.path.exists(f'{args.dataset_path}.train') or os.path.exists(f'{args.dataset_path}.eval')):
+        train_dataset, eval_dataset = generate(size=args.size, dataset_path=args.dataset_path)
+    else:
+        logging.info('Datasets have already been processed. Paths: '
+                     f'dataset path = {args.dataset_path}')
+        train_dataset, eval_dataset = extract_dataset(args.dataset_path)
 
     training_args = TrainingArguments(
         evaluation_strategy='epoch',
@@ -61,8 +59,9 @@ def run(
         logging_dir='./logs',
         logging_steps=args.log_steps,
         report_to='wandb',
-        run_name=run_name,
+        run_name=args.run_name,
     )
+    setup_logging(training_args)
 
     if not os.path.exists(args.model_path):
         model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased')
@@ -87,13 +86,5 @@ def run(
 
 
 if __name__ == '__main__':
-    arg_parser = argparse.ArgumentParser(
-        'Text Detection',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
-    set_args(arg_parser)
-    known_args, _ = arg_parser.parse_known_args()
-    known_args.cuda = torch.cuda.is_available()
-    known_args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
-                                     cuda.is_available() else 'cpu')
-    run(known_args)
+    main_args = form_args()
+    run(main_args)
