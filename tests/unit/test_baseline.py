@@ -1,4 +1,3 @@
-import argparse
 import numpy as np
 import os
 import shutil
@@ -13,10 +12,7 @@ from detection.data.generate import get_buffer
 from detection.models.validate import compute_metrics
 from detection import run
 from detection.data.arguments import form_args
-
-
-SRC_LANG = 'ru'
-TRG_LANG = 'en'
+from detection.utils import get_mock_dataset
 
 
 def reverse_transform(s: str) -> str:
@@ -32,16 +28,7 @@ class TestFunctionality(TestCase):
         pass
 
     def test_buffer(self):
-        dataset = [
-            {
-                SRC_LANG: 'добрый вечер',
-                TRG_LANG: 'good evening',
-            },
-            {
-                SRC_LANG: 'прошу прощения',
-                TRG_LANG: 'i am sorry',
-            }
-        ]
+        dataset = get_mock_dataset()
         buffer = get_buffer(dataset, reverse_transform)
 
         assert_that(len(buffer), equal_to(4))
@@ -67,6 +54,7 @@ class TestBaseline(TestCase):
         args.run_name = 'test_run'
         args.epochs = 1
         args.size = 128
+        args.is_mock_data = True
         args.cuda = torch.cuda.is_available()
         args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
                                    cuda.is_available() else 'cpu')

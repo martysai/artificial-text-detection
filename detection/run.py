@@ -42,7 +42,8 @@ def run(args) -> Trainer:
         wandb.init(project='text-detection', name=args.run_name)
 
     if not (os.path.exists(f'{args.dataset_path}.train') or os.path.exists(f'{args.dataset_path}.eval')):
-        train_dataset, eval_dataset = generate(size=args.size, dataset_path=args.dataset_path)
+        train_dataset, eval_dataset = generate(size=args.size, dataset_path=args.dataset_path,
+                                               is_mock_data=args.is_mock_data)
     else:
         logging.info('Datasets have already been processed. Paths: '
                      f'dataset path = {args.dataset_path}')

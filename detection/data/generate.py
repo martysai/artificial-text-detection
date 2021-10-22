@@ -8,6 +8,7 @@ from datasets import load_dataset
 from detection.models.translation import TranslationModel
 from detection.data.dataset import TextDetectionDataset
 from detection.data.arguments import form_args
+from detection.utils import get_mock_dataset
 
 from transformers import DistilBertTokenizerFast
 
@@ -39,8 +40,7 @@ def save_dataset(dataset_path: str, train_dataset: TextDetectionDataset,
 
 def get_buffer(
         dataset,
-        transform: Callable,
-        dataset_path: str = None
+        transform: Callable
 ) -> List[str]:
     buffer = []
     for i, sample in enumerate(dataset):
@@ -54,12 +54,16 @@ def get_buffer(
 
 
 def generate(size: int = DATASET_SIZE,
-             dataset_path: str = None) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
-    dataset = load_dataset(DATASET, lang1=TRG_LANG, lang2=SRC_LANG)
-    dataset = dataset['train'][:size]['translation']
+             dataset_path: str = None,
+             is_mock_data: bool = False) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
+    if is_mock_data:
+        dataset = get_mock_dataset()
+    else:
+        dataset = load_dataset(DATASET, lang1=TRG_LANG, lang2=SRC_LANG)
+        dataset = dataset['train'][:size]['translation']
     model = TranslationModel()
 
-    buffer = get_buffer(dataset, model, dataset_path)
+    buffer = get_buffer(dataset, model)
     labels = [0, 1] * len(dataset)
 
     train_texts, val_texts, train_labels, val_labels = train_test_split(
