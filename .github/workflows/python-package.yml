@@ -37,5 +37,5 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        echo 5dc7d1772c3a31107e45510b4aae2c482c7b4cc9 >> /home/runner/work/text-detection/wandb.key
+        echo "5dc7d1772c3a31107e45510b4aae2c482c7b4cc9" >> /home/runner/work/text-detection/wandb.key
         pytest
