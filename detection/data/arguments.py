@@ -21,6 +21,7 @@ def set_args(parser: argparse.ArgumentParser):
                             help='# samples in the tatoeba dataset')
     train_args.add_argument('--warmup_steps', type=int, default=100)
     train_args.add_argument('--weight_decay', type=int, default=1e-4)
+    train_args.add_argument('--is_mock_data', type=bool, default=False)
 
     libraries = parser.add_argument_group('Libraries')
     libraries.add_argument('--wandb_path', type=str, default='wandb.key',
