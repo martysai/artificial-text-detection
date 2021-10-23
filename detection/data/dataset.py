@@ -6,9 +6,10 @@ import torch
 
 
 class TextDetectionDataset(torch.utils.data.Dataset):
-    def __init__(self, encodings, labels):
+    def __init__(self, encodings, labels, device: Optional[str] = None):
         self.encodings = encodings
         self.labels = labels
+        self.device = device if device else 'cpu'
 
     @staticmethod
     def load(dataset_path: str, suffix: Optional[str] = 'train') -> Any:
@@ -24,14 +25,9 @@ class TextDetectionDataset(torch.utils.data.Dataset):
             compressed_dataset = zlib.compress(dumped_dataset)
             file.write(compressed_dataset)
 
-    def to(self, device: Optional[str] = None):
-        if not device:
-            return self
-        self.encodings = self.encodings.to(device)
-
     def __getitem__(self, idx):
-        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
-        item['labels'] = torch.tensor(self.labels[idx])
+        item = {key: torch.tensor(val[idx]).to(self.device) for key, val in self.encodings.items()}
+        item['labels'] = torch.tensor(self.labels[idx]).to(self.device)
         return item
 
     def __len__(self):

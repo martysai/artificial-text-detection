@@ -52,8 +52,8 @@ def run(args) -> Trainer:
         print(message)
         train_dataset = TextDetectionDataset.load(args.dataset_path, suffix='train')
         eval_dataset = TextDetectionDataset.load(args.dataset_path, suffix='eval')
-        train_dataset = train_dataset.to(args.device)
-        eval_dataset = eval_dataset.to(args.device)
+        train_dataset.device = args.device
+        eval_dataset.device = args.device
 
     training_args = TrainingArguments(
         evaluation_strategy='epoch',

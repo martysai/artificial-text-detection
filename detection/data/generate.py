@@ -76,7 +76,7 @@ def generate(size: int = DATASET_SIZE,
     else:
         dataset = load_dataset(DATASET, lang1=TRG_LANG, lang2=SRC_LANG)
         dataset = dataset['train'][:size]['translation']
-    model = TranslationModel()
+    model = TranslationModel(device=device)
 
     buffer = get_buffer(dataset, model, dataset_path=dataset_path, device=device)
     train_dataset, eval_dataset = buffer2dataset(buffer, device=device)
