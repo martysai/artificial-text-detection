@@ -9,8 +9,9 @@ import wandb
 from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
 
 from detection.models.validate import compute_metrics
-from detection.data.generate import generate, extract_dataset
+from detection.data.generate import generate
 from detection.data.arguments import form_args
+from detection.data.dataset import TextDetectionDataset
 
 
 def setup_logging(training_args: TrainingArguments) -> None:
@@ -47,7 +48,8 @@ def run(args) -> Trainer:
     else:
         logging.info('Datasets have already been processed. Paths: '
                      f'dataset path = {args.dataset_path}')
-        train_dataset, eval_dataset = extract_dataset(args.dataset_path)
+        train_dataset = TextDetectionDataset.load(args.dataset_path, suffix='train')
+        eval_dataset = TextDetectionDataset.load(args.dataset_path, suffix='eval')
 
     training_args = TrainingArguments(
         evaluation_strategy='epoch',

@@ -20,16 +20,14 @@ def reverse_transform(s: str) -> str:
 
 
 class TestFunctionality(TestCase):
+    dataset = None
+
     @classmethod
     def setUpClass(cls) -> None:
-        pass
-
-    def setUp(self) -> None:
-        pass
+        cls.dataset = get_mock_dataset()
 
     def test_buffer(self):
-        dataset = get_mock_dataset()
-        buffer = get_buffer(dataset, reverse_transform)
+        buffer = get_buffer(self.dataset, reverse_transform)
 
         assert_that(len(buffer), equal_to(4))
         assert_that(buffer[0], equal_to('речев йырбод'))

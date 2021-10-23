@@ -21,23 +21,6 @@ DATASET_SIZE = 10000
 LOGGING_FREQ = 250
 
 
-def extract_dataset(dataset_path: str) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
-    with open(f'{dataset_path}.train', 'rb') as train_file:
-        train_dataset = pickle.load(train_file)
-    with open(f'{dataset_path}.eval', 'rb') as eval_file:
-        eval_dataset = pickle.load(eval_file)
-    return train_dataset, eval_dataset
-
-
-def save_dataset(dataset_path: str, train_dataset: TextDetectionDataset,
-                 eval_dataset: TextDetectionDataset) -> None:
-    if dataset_path:
-        with open(f'{dataset_path}.train', 'wb') as train_file:
-            pickle.dump(train_dataset, train_file, protocol=pickle.HIGHEST_PROTOCOL)
-        with open(f'{dataset_path}.eval', 'wb') as eval_file:
-            pickle.dump(eval_dataset, eval_file, protocol=pickle.HIGHEST_PROTOCOL)
-
-
 def get_buffer(
         dataset,
         transform: Callable
@@ -77,7 +60,8 @@ def generate(size: int = DATASET_SIZE,
     train_dataset = TextDetectionDataset(train_encodings, train_labels)
     eval_dataset = TextDetectionDataset(eval_encodings, val_labels)
 
-    save_dataset(dataset_path, train_dataset, eval_dataset)
+    train_dataset.save(dataset_path, suffix='train')
+    eval_dataset.save(dataset_path, suffix='eval')
 
     return train_dataset, eval_dataset
 

@@ -11,7 +11,7 @@ Solutions for true/generated text differentiation.
 - [X] Debug the load model error in vast.ai service
 - [X] Check why kaggle run doesn't draw plots for wandb.ai
 - [X] Separate preprocess and run: finish with dataset saving in generate.py and loading in run.py
-- [ ] Add `zlib.compress` to `pickle.dump`
+- [X] Add `zlib.compress` to `pickle.dump`
 - [ ] Metrics understanding
 - [ ] Model improvement
 - [X] Test passing in github actions
