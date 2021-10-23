@@ -2,7 +2,7 @@
 
 
 # text-detection
-Solutions for true/generated text differentiation.
+Solutions for true/generated text distinction.
 
 ### Roadmap:
 
