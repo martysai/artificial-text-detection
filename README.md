@@ -1,3 +1,6 @@
+[![codecov](https://codecov.io/gh/MaratSaidov/text-detection/branch/main/graph/badge.svg?token=HF8IQEADRU)](https://codecov.io/gh/MaratSaidov/text-detection)
+
+
 # text-detection
 Solutions for true/generated text differentiation.
 
