@@ -11,7 +11,8 @@ on:
 
 jobs:
   build:
-
+    env:
+      CODECOV_TOKEN: '64df6512-425f-4939-bfde-fae43f13534c'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -39,3 +40,8 @@ jobs:
       run: |
         cp /home/runner/work/text-detection/text-detection/wandb.key /home/runner/work/text-detection/wandb.key
         pytest
+    - name: "Upload coverage to Codecov"
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        token: ${{ env.CODECOV_TOKEN }}
