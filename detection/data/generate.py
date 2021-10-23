@@ -21,7 +21,8 @@ SAVING_FREQ = 50000
 LOGGING_FREQ = 250
 
 
-def buffer2dataset(buffer: List[str]) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
+def buffer2dataset(buffer: List[str],
+                   device: Optional[str] = None) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
     labels = [0, 1] * (len(buffer) // 2)
     train_texts, val_texts, train_labels, val_labels = train_test_split(
         buffer, labels, test_size=TEST_SIZE
@@ -29,6 +30,10 @@ def buffer2dataset(buffer: List[str]) -> Tuple[TextDetectionDataset, TextDetecti
     tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
     train_encodings = tokenizer(train_texts, truncation=True, padding=True)
     eval_encodings = tokenizer(val_texts, truncation=True, padding=True)
+
+    if device:
+        train_encodings = train_encodings.to(device)
+        eval_encodings = eval_encodings.to(device)
 
     train_dataset = TextDetectionDataset(train_encodings, train_labels)
     eval_dataset = TextDetectionDataset(eval_encodings, val_labels)
@@ -39,7 +44,8 @@ def buffer2dataset(buffer: List[str]) -> Tuple[TextDetectionDataset, TextDetecti
 def get_buffer(
         dataset,
         transform: Callable,
-        dataset_path: Optional[str] = None
+        dataset_path: Optional[str] = None,
+        device: Optional[str] = None,
 ) -> List[str]:
     buffer = []
     for i, sample in enumerate(dataset):
@@ -54,7 +60,7 @@ def get_buffer(
             saving_message = f'[{i + 1}/{len(dataset)}] Saving a dataset...'
             logging.info(saving_message)
             print(saving_message)
-            train_dataset, eval_dataset = buffer2dataset(buffer)
+            train_dataset, eval_dataset = buffer2dataset(buffer, device=device)
             train_dataset.save(dataset_path, suffix='train')
             eval_dataset.save(dataset_path, suffix='eval')
 
@@ -62,8 +68,9 @@ def get_buffer(
 
 
 def generate(size: int = DATASET_SIZE,
-             dataset_path: str = None,
-             is_mock_data: bool = False) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
+             dataset_path: Optional[str] = None,
+             is_mock_data: bool = False,
+             device: Optional[str] = None) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
     if is_mock_data:
         dataset = get_mock_dataset()
     else:
@@ -71,8 +78,8 @@ def generate(size: int = DATASET_SIZE,
         dataset = dataset['train'][:size]['translation']
     model = TranslationModel()
 
-    buffer = get_buffer(dataset, model, dataset_path=dataset_path)
-    train_dataset, eval_dataset = buffer2dataset(buffer)
+    buffer = get_buffer(dataset, model, dataset_path=dataset_path, device=device)
+    train_dataset, eval_dataset = buffer2dataset(buffer, device=device)
     train_dataset.save(dataset_path, suffix='train')
     eval_dataset.save(dataset_path, suffix='eval')
 

@@ -42,14 +42,18 @@ def run(args) -> Trainer:
         wandb.login(key=token)
         wandb.init(project='text-detection', name=args.run_name)
 
-    if not (os.path.exists(f'{args.dataset_path}.train') or os.path.exists(f'{args.dataset_path}.eval')):
+    if not (os.path.exists(f'{args.dataset_path}.train') and os.path.exists(f'{args.dataset_path}.eval')):
         train_dataset, eval_dataset = generate(size=args.size, dataset_path=args.dataset_path,
                                                is_mock_data=args.is_mock_data)
     else:
-        logging.info('Datasets have already been processed. Paths: '
-                     f'dataset path = {args.dataset_path}')
+        message = 'Datasets have already been processed. Paths: ' + \
+                  f'dataset path = {args.dataset_path}'
+        logging.info(message)
+        print(message)
         train_dataset = TextDetectionDataset.load(args.dataset_path, suffix='train')
         eval_dataset = TextDetectionDataset.load(args.dataset_path, suffix='eval')
+        train_dataset = train_dataset.to(args.device)
+        eval_dataset = eval_dataset.to(args.device)
 
     training_args = TrainingArguments(
         evaluation_strategy='epoch',
@@ -68,6 +72,7 @@ def run(args) -> Trainer:
 
     if not os.path.exists(args.model_path):
         model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased')
+        model = model.to(args.device)
     else:
         # TODO: specify how to load a model
         pass
