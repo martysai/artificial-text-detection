@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple
 
 import torch
 from sklearn.model_selection import train_test_split
