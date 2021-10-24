@@ -11,9 +11,9 @@ def set_args(parser: argparse.ArgumentParser):
     train_args = parser.add_argument_group('Training arguments')
     train_args.add_argument('--epochs', type=int, default=50,
                             help='# epochs')
-    train_args.add_argument('--train_batch', type=int, default=512,
+    train_args.add_argument('--train_batch', type=int, default=16,
                             help='train batch size')
-    train_args.add_argument('--eval_batch', type=int, default=512,
+    train_args.add_argument('--eval_batch', type=int, default=16,
                             help='eval batch size')
     train_args.add_argument('--log_steps', type=int, default=10,
                             help='# steps for logging')

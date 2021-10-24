@@ -1,28 +1,25 @@
-import pickle
-import zlib
 from typing import Any, Optional
 
 import torch
 
 
 class TextDetectionDataset(torch.utils.data.Dataset):
-    def __init__(self, encodings, labels):
+    def __init__(self, encodings, labels, device: Optional[str] = None):
         self.encodings = encodings
         self.labels = labels
+        self.device = device if device else 'cpu'
 
     @staticmethod
     def load(dataset_path: str, suffix: Optional[str] = 'train') -> Any:
-        with open(f'{dataset_path}.{suffix}', 'rb') as file:
-            compressed_dataset = file.read()
-            dumped_dataset = zlib.decompress(compressed_dataset)
-            dataset = pickle.loads(dumped_dataset)
-        return dataset
+        dataset_settings = torch.load(f'{dataset_path}.{suffix}')
+        return TextDetectionDataset(**dataset_settings)
 
     def save(self, dataset_path: str, suffix: Optional[str] = 'train') -> None:
-        with open(f'{dataset_path}.{suffix}', 'wb') as file:
-            dumped_dataset = pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
-            compressed_dataset = zlib.compress(dumped_dataset)
-            file.write(compressed_dataset)
+        torch.save({
+            'encodings': self.encodings,
+            'labels': self.labels,
+            'device': self.device
+        }, f'{dataset_path}.{suffix}')
 
     def __getitem__(self, idx):
         item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
