@@ -24,7 +24,7 @@ LOGGING_FREQ = 250
 
 def buffer2dataset(buffer: List[str],
                    device: Optional[str] = None) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
-    labels = [0, 1] * (len(buffer) // 2)
+    labels = torch.FloatTensor([0, 1] * (len(buffer) // 2))
     train_texts, val_texts, train_labels, val_labels = train_test_split(
         buffer, labels, test_size=TEST_SIZE
     )
@@ -35,6 +35,8 @@ def buffer2dataset(buffer: List[str],
     if device:
         train_encodings = train_encodings.to(device)
         eval_encodings = eval_encodings.to(device)
+        train_labels = train_labels.to(device)
+        val_labels = val_labels.to(device)
 
     train_dataset = TextDetectionDataset(train_encodings, train_labels)
     eval_dataset = TextDetectionDataset(eval_encodings, val_labels)
