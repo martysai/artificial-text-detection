@@ -4,7 +4,7 @@ from unittest import TestCase
 from hamcrest import assert_that, equal_to
 from transformers import EvalPrediction
 
-from detection.data.generate import get_buffer
+from detection.data.generate import get_buffer, buffer2dataset
 from detection.models.validate import compute_metrics
 from detection.utils import get_mock_dataset
 
@@ -15,16 +15,16 @@ def reverse_transform(s: str) -> str:
 
 class TestFunctionality(TestCase):
     dataset = None
+    buffer = None
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.dataset = get_mock_dataset()
+        cls.buffer = get_buffer(cls.dataset, reverse_transform)
 
     def test_buffer(self):
-        buffer = get_buffer(self.dataset, reverse_transform)
-
-        assert_that(len(buffer), equal_to(4))
-        assert_that(buffer[0], equal_to('речев йырбод'))
+        assert_that(len(self.buffer), equal_to(4))
+        assert_that(self.buffer[0], equal_to('речев йырбод'))
 
     def test_compute_metrics(self):
         eval_pred = EvalPrediction(
@@ -38,3 +38,8 @@ class TestFunctionality(TestCase):
         assert_that(metrics_names, equal_to(['accuracy', 'f1', 'precision', 'recall']))
         for value in metrics_values:
             assert_that(type(value), equal_to(float))
+
+    def test_buffer2dataset(self):
+        train_dataset, eval_dataset = buffer2dataset(self.buffer, device='cpu')
+        assert_that(len(train_dataset.encodings), equal_to(2))
+        assert_that(len(eval_dataset.encodings), equal_to(2))

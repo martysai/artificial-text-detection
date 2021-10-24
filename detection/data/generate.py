@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Union
 
 import torch
 from sklearn.model_selection import train_test_split
@@ -33,10 +33,13 @@ def buffer2dataset(buffer: List[str],
     eval_encodings = tokenizer(val_texts, truncation=True, padding=True)
 
     if device:
-        train_encodings = train_encodings.to(device)
-        eval_encodings = eval_encodings.to(device)
-        train_labels = train_labels.to(device)
-        val_labels = val_labels.to(device)
+        try:
+            train_encodings = train_encodings.to(device)
+            eval_encodings = eval_encodings.to(device)
+            train_labels = train_labels.to(device)
+            val_labels = val_labels.to(device)
+        except AttributeError:
+            pass
 
     train_dataset = TextDetectionDataset(train_encodings, train_labels)
     eval_dataset = TextDetectionDataset(eval_encodings, val_labels)
