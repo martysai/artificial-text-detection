@@ -71,7 +71,7 @@ def run(args) -> Trainer:
     setup_logging(training_args)
 
     if not os.path.exists(args.model_path):
-        model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=2)
+        model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=1)
         model = model.to(args.device)
     else:
         # TODO: specify how to load a model
