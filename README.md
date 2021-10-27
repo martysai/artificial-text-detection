@@ -1,3 +1,4 @@
+[![Build Status][build_status_badge]](build_status_link)
 [![codecov](https://codecov.io/gh/MaratSaidov/text-detection/branch/main/graph/badge.svg?token=HF8IQEADRU)](https://codecov.io/gh/MaratSaidov/text-detection)
 
 
@@ -18,3 +19,6 @@ Solutions for true/generated text distinction.
 - [ ] Metrics understanding
 - [ ] Model improvement
 - [X] Test passing in github actions
+
+[build_status_badge]: https://github.com/maratsaidov/text-detection/actions/workflows/python-package.yml/badge.svg
+[build_status_link]: https://github.com/maratsaidov/text-detection/actions/workflows/python-package.yml
