@@ -6,8 +6,7 @@ name: ATD Build
 on:
   push:
     branches:
-      - main
-      - 'poetry'
+      - '**'
   pull_request:
     branches: [ main ]
 
