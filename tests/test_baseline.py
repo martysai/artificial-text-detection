@@ -10,6 +10,8 @@ from detection.data.arguments import form_args
 
 class TestBaseline(TestCase):
     def test_run(self):
+        if os.environ.get('GITHUB_ACTIONS'):
+            pass
         args = form_args()
         args.run_name = 'test_run'
         args.epochs = 1
