@@ -1,18 +1,19 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python package
+name: ATD Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main poetry ]
   pull_request:
     branches: [ main ]
 
 jobs:
   build:
     env:
-      CODECOV_TOKEN: '64df6512-425f-4939-bfde-fae43f13534c'
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

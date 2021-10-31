@@ -32,15 +32,9 @@ def setup_logging(training_args: TrainingArguments) -> None:
 
 
 def run(args) -> Trainer:
-    working_dir = os.path.dirname(os.getcwd())
-    wandb_path = os.path.join(working_dir, args.wandb_path)
-    if not os.path.exists(wandb_path):
-        raise FileNotFoundError('Put wandb personal token into '
-                                f"args.wandb_path = '{wandb_path}'")
-    with open(wandb_path, 'r') as wandb_file:
-        token = wandb_file.read()
-        wandb.login(key=token)
-        wandb.init(project='text-detection', name=args.run_name)
+    token = os.environ.get('WANDB_TOKEN', None)
+    wandb.login(key=token)
+    wandb.init(project='artificial-text-detection', name=args.run_name)
 
     if not (os.path.exists(f'{args.dataset_path}.train') and os.path.exists(f'{args.dataset_path}.eval')):
         train_dataset, eval_dataset = generate(size=args.size, dataset_path=args.dataset_path,

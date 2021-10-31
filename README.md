@@ -1,24 +1,24 @@
 [![Build Status][build_status_badge]](build_status_link)
 [![codecov](https://codecov.io/gh/MaratSaidov/text-detection/branch/main/graph/badge.svg?token=HF8IQEADRU)](https://codecov.io/gh/MaratSaidov/text-detection)
+[![DVC](https://img.shields.io/badge/-Data_Version_Control-white.svg?logo=data-version-control&style=social)](https://dvc.org/?utm_campaign=badge)
 
-
-# text-detection
+# Artificial Text Detection
 Solutions for true/generated text distinction.
 
-### Roadmap:
+### Installation steps:
 
-- [X] Add tests data
-- [X] Set up CI/CD testing
-- [X] Add tests for other functions
-- [X] Run on remote server
-- [X] Add run on the specific size
-- [X] Debug the load model error in vast.ai service
-- [X] Check why kaggle run doesn't draw plots for wandb.ai
-- [X] Separate preprocess and run: finish with dataset saving in generate.py and loading in run.py
-- [X] Add `zlib.compress` to `pickle.dump`
-- [ ] Metrics understanding
-- [ ] Model improvement
-- [X] Test passing in github actions
+```bash
+make poetry-download
+make install
+make lint
+```
 
-[build_status_badge]: https://github.com/maratsaidov/text-detection/actions/workflows/python-package.yml/badge.svg
-[build_status_link]: https://github.com/maratsaidov/text-detection/actions/workflows/python-package.yml
+### Data Version Control usage:
+
+```bash
+pip install "dvc[gdrive]"
+```
+
+
+[build_status_badge]: https://github.com/maratsaidov/text-detection/actions/workflows/build.yml/badge.svg
+[build_status_link]: https://github.com/maratsaidov/text-detection/actions/workflows/build.yml
