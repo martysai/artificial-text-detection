@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     env:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      CODECOV_TOKEN: '57678761-f52d-45bd-8f11-bcdb9a003dde'
       POETRY_WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
     runs-on: ubuntu-latest
     strategy:
