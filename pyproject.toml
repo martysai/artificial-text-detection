@@ -29,20 +29,6 @@ pydocstyle = "^6.1.1"
 pylint = "^2.9.6"
 pytest = "^6.2.4"
 
-# requirements
-EasyNMT = "^2.0.1"
-PyHamcrest = "^2.0.2"
-datasets = "^1.12.1"
-filelock = "^3.3.0"
-huggingface = "^0.0.1"
-packaging = "^21.0"
-requests = "^2.26.0"
-scikit-learn = "^1.0"
-torch = "^1.9.1"
-transformers = "^4.11.3"
-wandb = "^0.12.4"
-
-
 [tool.black]
 # https://github.com/psf/black
 target-version = ["py38"]
