@@ -30,7 +30,6 @@ jobs:
     - name: "Poetry initialization"
       run: |
         make poetry-download
-        poetry shell
         make install
     - name: "Test with pytest"
       run: |
