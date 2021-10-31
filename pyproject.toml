@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "artificial-text-detection"
+version = "0.1.0"
+description = ""
+authors = ["Marat Saidov <msaidov@sbdagroup.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.26.0"
+torch = "^1.10.0"
+datasets = "^1.14.0"
+huggingface = "^0.0.1"
+EasyNMT = "^2.0.1"
+scikit-learn = "^1.0.1"
+PyHamcrest = "^2.0.2"
+packaging = "^21.2"
+filelock = "^3.3.2"
+pytest = "^6.2.5"
+wandb = "^0.12.6"
+pytest-cov = "^3.0.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+run_detection = "detection.run:run"

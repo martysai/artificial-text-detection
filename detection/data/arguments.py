@@ -24,8 +24,6 @@ def set_args(parser: argparse.ArgumentParser):
     train_args.add_argument('--is_mock_data', type=bool, default=False)
 
     libraries = parser.add_argument_group('Libraries')
-    libraries.add_argument('--wandb_path', type=str, default='wandb.key',
-                           help='A path to wandb personal token')
     libraries.add_argument('--run_name', type=str, default='default',
                            help='A name of run to be used in wandb')
 
