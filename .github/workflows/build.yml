@@ -31,10 +31,11 @@ jobs:
     - name: "Poetry initialization"
       run: |
         make poetry-download
+        poetry shell
         make install
     - name: "Test with pytest"
       run: |
-        pytest --cov=./ --cov-report=xml
+        poetry run pytest --cov=./ --cov-report=xml
     - name: "Upload the coverage to Codecov"
       uses: codecov/codecov-action@v2
       with:
