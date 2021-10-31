@@ -14,7 +14,7 @@ jobs:
   build:
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
+      POETRY_WANDB_TOKEN: ${{ secrets.WANDB_TOKEN }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

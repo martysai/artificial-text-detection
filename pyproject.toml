@@ -17,6 +17,7 @@ packaging = "^21.2"
 filelock = "^3.3.2"
 pytest = "^6.2.5"
 wandb = "^0.12.6"
+pytest-cov = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 

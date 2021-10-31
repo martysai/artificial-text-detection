@@ -32,7 +32,7 @@ def setup_logging(training_args: TrainingArguments) -> None:
 
 
 def run(args) -> Trainer:
-    token = os.environ.get('WANDB_TOKEN', None)
+    token = os.environ.get('POETRY_WANDB_TOKEN', None)
     wandb.login(key=token)
     wandb.init(project='artificial-text-detection', name=args.run_name)
 
