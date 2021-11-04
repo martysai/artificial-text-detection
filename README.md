@@ -21,4 +21,4 @@ pip install "dvc[gdrive]"
 
 
 [build_status_badge]: https://github.com/MaratSaidov/artificial-text-detection/actions/workflows/build.yml/badge.svg
-[build_status_link]: https://github.com/maratsaidov/artificial-text-detection/actions/workflows/build.yml
+[build_status_link]: https://github.com/MaratSaidov/artificial-text-detection/actions/workflows/build.yml
