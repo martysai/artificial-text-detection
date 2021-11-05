@@ -1,11 +1,10 @@
 import os
-import shutil
 import torch
 
 from unittest import TestCase
 
-from detection import run
-from detection.data.arguments import form_args
+from detection.arguments import form_args
+from detection.pipeline import pipeline
 
 
 class TestBaseline(TestCase):
@@ -20,4 +19,4 @@ class TestBaseline(TestCase):
         args.cuda = torch.cuda.is_available()
         args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
                                    cuda.is_available() else 'cpu')
-        run(args)
+        pipeline(args)

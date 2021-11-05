@@ -1,7 +1,7 @@
 from hamcrest import assert_that, equal_to
 from unittest import TestCase
 
-from detection.data.arguments import form_args
+from detection.arguments import form_args
 
 
 class TestArguments(TestCase):

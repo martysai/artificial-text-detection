@@ -1,0 +1,10 @@
+stages:
+  # Preprocessing datasets 
+  load:
+    cmd: python detection/data/factory.py
+    params:
+      - datasets
+    outs:
+      - resources/data/tatoeba
+      - resources/data/wikimatrix
+

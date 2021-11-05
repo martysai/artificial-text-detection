@@ -9,6 +9,8 @@ def set_args(parser: argparse.ArgumentParser):
                              help='Model checkpoint path')
 
     train_args = parser.add_argument_group('Training arguments')
+    train_args.add_argument('--dataset_name', type=str, default='tatoeba',
+                            help='dataset name which will be loaded. ')
     train_args.add_argument('--epochs', type=int, default=50,
                             help='# epochs')
     train_args.add_argument('--train_batch', type=int, default=16,
@@ -31,6 +33,7 @@ def set_args(parser: argparse.ArgumentParser):
     working_dir = os.path.dirname(os.getcwd())
     dataset_path = os.path.join(working_dir, 'dataset')
     preprocessed.add_argument('--dataset_path', default=dataset_path)
+    preprocessed.add_argument('--ext', default='bin')
 
     return parser
 
