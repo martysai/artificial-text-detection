@@ -1,14 +1,16 @@
 import os
-from typing import Tuple
+import os.path as path
+from typing import Any, List
 
 import transformers
 import wandb
 from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
 
 from detection.models.validate import compute_metrics
-from detection.arguments import form_args
+from detection.arguments import form_args, get_dataset_path
 from detection.data.factory import collect
 from detection.data.generate import generate
+from detection.utils import TrainEvalDatasets
 from detection.data.wrapper import TextDetectionDataset
 
 
@@ -22,11 +24,11 @@ def stop_experiment_tracking() -> None:
     wandb.finish()
 
 
-def create_binary_datasets(args) -> None:
-    collect(args.dataset_name, save=True, ext=args.ext)
+def create_binary_datasets(args) -> List[Any]:
+    return collect(args.dataset_name, save=True, ext=args.bin_ext)
 
 
-def load_translated_datasets(args) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
+def load_translated_datasets(args) -> TrainEvalDatasets:
     train_dataset = TextDetectionDataset.load(args.dataset_path, suffix='train')
     train_dataset.device = args.device
     eval_dataset = TextDetectionDataset.load(args.dataset_path, suffix='eval')
@@ -34,11 +36,13 @@ def load_translated_datasets(args) -> Tuple[TextDetectionDataset, TextDetectionD
     return train_dataset, eval_dataset
 
 
-def translate_binary_datasets(args) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
-    # TODO: можно ли их разделить на превращение и перевод?
-    if not (os.path.exists(f'{args.dataset_path}.train') and os.path.exists(f'{args.dataset_path}.eval')):
-        train_dataset, eval_dataset = generate(size=args.size, dataset_path=args.dataset_path,
-                                               is_mock_data=args.is_mock_data)
+def translate_binary_datasets(datasets: List[Any], args) -> TrainEvalDatasets:
+    # TODO: дописать функционал с разными языками
+    dataset = datasets[0]
+    train_path = get_dataset_path(args.dataset_name, f'train.{args.ds_ext}')
+    eval_path = get_dataset_path(args.dataset_name, f'eval.{args.ds_ext}')
+    if not (path.exists(train_path) and path.exists(eval_path)):
+        train_dataset, eval_dataset = generate(dataset)
     else:
         print('Datasets have already been processed. Paths: '
               f'dataset path = {args.dataset_path}')
@@ -85,9 +89,9 @@ def train_text_detection_model(
 def pipeline(args) -> Trainer:
     setup_experiment_tracking(args)
 
-    create_binary_datasets(args)
+    datasets = create_binary_datasets(args)
 
-    train_dataset, eval_dataset = translate_binary_datasets(args)
+    train_dataset, eval_dataset = translate_binary_datasets(datasets, args)
 
     trainer = train_text_detection_model(train_dataset, eval_dataset, args)
     stop_experiment_tracking()

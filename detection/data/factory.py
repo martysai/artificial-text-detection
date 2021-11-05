@@ -64,8 +64,9 @@ class DatasetFactory:
 
 
 def save_binary_dataset(dataset: Any, ext: str = 'bin') -> None:
+    # TODO: add proper pickling
     with open(f'{dataset_path}.{suffix}', 'wb') as file:
-        dumped_dataset = pickle.dumps(self, protocol=pickle.HIGHEST_PROTOCOL)
+        dumped_dataset = pickle.dumps(dataset, protocol=pickle.HIGHEST_PROTOCOL)
         compressed_dataset = zlib.compress(dumped_dataset)
         file.write(compressed_dataset)
 
@@ -75,23 +76,19 @@ def collect(chosen_dataset_name: str, save: bool = False, ext: str = 'bin') -> L
     TODO: написать развёрнутый docstring
     """
     collection = []
-    for dataset_name, langs in LANGS.items():
-        if dataset_name != chosen_dataset_name and \
-                chosen_dataset_name != 'all':
-            continue
-        for langs_pair in langs:
-            source_dataset = DatasetFactory.get(dataset_name, langs_pair)
-            if source_dataset:
-                collection.append(source_dataset)
+    langs = LANGS[chosen_dataset_name]
+    for langs_pair in langs:
+        source_dataset = DatasetFactory.get(chosen_dataset_name, langs_pair)
+        if source_dataset:
+            collection.append(source_dataset)
     if save:
-        for binary_dataset in collection:
-            save_binary_dataset(binary_dataset, ext=ext)
+        for dataset in collection:
+            save_binary_dataset(dataset, ext=ext)
     return collection
 
 
 if __name__ == '__main__':
-    # TODO: realize should I use any of parameters here
     main_args = form_args()
-    source_datasets = collect(ext=ext)
-    for dataset in source_datasets:
-        pickle.dumps('')
+    source_datasets = collect(main_args.dataset_name, save=True, ext=main_args.bin_ext)
+    for binary_dataset in source_datasets:
+        save_binary_dataset(binary_dataset, ext=main_args.bin_ext)

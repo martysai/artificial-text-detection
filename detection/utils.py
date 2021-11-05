@@ -1,10 +1,10 @@
-import os.path as path
 from typing import List, Optional, Tuple
 
 import torch
 from sklearn.model_selection import train_test_split
 from transformers import DistilBertTokenizerFast
 
+from detection.arguments import get_dataset_path
 from detection.data.wrapper import TextDetectionDataset
 
 
@@ -65,12 +65,6 @@ def translations_list_to_dataset(
     return train_dataset, eval_dataset
 
 
-def get_dataset_path(dataset_name: str, ext: str = 'bin') -> str:
-    dir_path = path.dirname(path.realpath(__file__))
-    dvc_path = path.join(dir_path, "resources/data")
-    return path.join(dvc_path, f"{dataset_name}.{ext}")
-
-
 def save_translations(
         translations: List[str],
         dataset_name: str,
@@ -78,8 +72,8 @@ def save_translations(
         ext: str) -> TrainEvalDatasets:
     dataset_path = get_dataset_path(dataset_name, ext=ext)
     train_dataset, eval_dataset = translations_list_to_dataset(translations, device=device)
-    train_dataset.save(dataset_path, suffix=f'train.{ext}')
-    eval_dataset.save(dataset_path, suffix=f'eval.{ext}')
+    train_dataset.save(dataset_path)
+    eval_dataset.save(dataset_path)
     return train_dataset, eval_dataset
 
 
