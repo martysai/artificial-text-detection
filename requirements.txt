@@ -1,1 +1,14 @@
-
+datasets
+huggingface
+EasyNMT
+wandb
+torch
+sklearn
+transformers
+numpy
+PyHamcrest
+requests
+packaging
+filelock
+torch
+pytest

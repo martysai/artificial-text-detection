@@ -1,97 +1,114 @@
-import logging
-from typing import Callable, List, Optional, Tuple
-
-import torch
-from sklearn.model_selection import train_test_split
-from datasets import load_dataset
+import os.path as path
+from typing import Any, Callable, Collection, Dict, List, Optional, Union
 
 from detection.models.translation import TranslationModel
-from detection.data.dataset import TextDetectionDataset
-from detection.data.arguments import form_args
-from detection.utils import get_mock_dataset
-
-from transformers import DistilBertTokenizerFast
+from detection.arguments import form_args, get_dataset_path
+from detection.data.factory import BinaryDataset, DatasetFactory, collect, load_binary_dataset
+from detection.utils import MockDataset, TrainEvalDatasets, log, save, save_translations
 
 
-DATASET = 'tatoeba'
-SRC_LANG = 'ru'
-TRG_LANG = 'en'
-TEST_SIZE = 0.2
 DATASET_SIZE = 10000
-SAVING_FREQ = 50000
-LOGGING_FREQ = 250
 
 
-def buffer2dataset(buffer: List[str],
-                   device: Optional[str] = None) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
-    labels = torch.FloatTensor([0, 1] * (len(buffer) // 2))
-    train_texts, val_texts, train_labels, val_labels = train_test_split(
-        buffer, labels, test_size=TEST_SIZE
-    )
-    tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-    train_encodings = tokenizer(train_texts, truncation=True, padding=True)
-    eval_encodings = tokenizer(val_texts, truncation=True, padding=True)
-
-    if device:
-        try:
-            train_encodings = train_encodings.to(device)
-            eval_encodings = eval_encodings.to(device)
-            train_labels = train_labels.to(device)
-            val_labels = val_labels.to(device)
-        except AttributeError:
-            pass
-
-    train_dataset = TextDetectionDataset(train_encodings, train_labels)
-    eval_dataset = TextDetectionDataset(eval_encodings, val_labels)
-
-    return train_dataset, eval_dataset
+def extend_translations(
+        translations: List[str],
+        dataset: Collection[Dict[str, str]],
+        dataset_name: str,
+        translate: Callable[[str], str],
+        index: int,
+        sample: Dict[str, Any]) -> List[str]:
+    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
+    src, trg = sample[src_lang], sample[trg_lang]
+    log(index, len(dataset), src)
+    # TODO: правда ли, что эта операция происходит на GPU?
+    gen = translate(src)
+    translations.extend([gen, trg])
+    return translations
 
 
-def get_buffer(
-        dataset,
-        transform: Callable,
-        dataset_path: Optional[str] = None,
+def translate_dataset(
+        dataset: Collection[Dict[str, str]],
+        translate: Callable[[str], str],
+        dataset_name: Optional[str] = None,
         device: Optional[str] = None,
+        ext: str = 'bin'
 ) -> List[str]:
-    buffer = []
+    translations = []
     for i, sample in enumerate(dataset):
-        src, trg = sample[SRC_LANG], sample[TRG_LANG]
-        if (i + 1) % LOGGING_FREQ == 0:
-            logging_message = f'[{i + 1}/{len(dataset)}] Preprocessing sample = {src}'
-            logging.info(logging_message)
-            print(logging_message)
-        gen = transform(src)
-        buffer.extend([gen, trg])
-        if (i + 1) % SAVING_FREQ == 0 and dataset_path:
-            saving_message = f'[{i + 1}/{len(dataset)}] Saving a dataset...'
-            logging.info(saving_message)
-            print(saving_message)
-            train_dataset, eval_dataset = buffer2dataset(buffer, device=device)
-            train_dataset.save(dataset_path, suffix='train')
-            eval_dataset.save(dataset_path, suffix='eval')
-
-    return buffer
+        translations = extend_translations(
+            translations, dataset, dataset_name, translate, i, sample
+        )
+        save(translations, dataset_name, i, len(dataset), device, ext)
+    return translations
 
 
-def generate(size: int = DATASET_SIZE,
-             dataset_path: Optional[str] = None,
-             is_mock_data: bool = False,
-             device: Optional[str] = None) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
-    if is_mock_data:
-        dataset = get_mock_dataset()
-    else:
-        dataset = load_dataset(DATASET, lang1=TRG_LANG, lang2=SRC_LANG)
-        dataset = dataset['train'][:size]['translation']
+def get_generation_dataset(dataset: BinaryDataset,
+                           dataset_name: Optional[str],
+                           size: Optional[int] = None) -> Union[Collection[Dict[str, str]], MockDataset]:
+    """
+    This method prepares a dataset which is put in generate.
+    """
+    if not dataset:
+        return MockDataset()
+    if dataset_name == 'tatoeba':
+        dataset = dataset['train']['translation']
+    elif dataset_name == 'wikimatrix':
+        # TODO: extend for wikimatrix
+        pass
+    if size:
+        dataset = dataset[:size]
+    return dataset
+
+
+def generate(dataset: BinaryDataset,
+             dataset_name: str,
+             size: Optional[int] = None,
+             device: Optional[str] = None,
+             ext: str = 'bin') -> TrainEvalDatasets:
+    """
+    Parameters
+    ----------
+        dataset: detection.data.factory.BinaryDataset
+        dataset_name: str
+        size: Optional[int]
+        device: Optional[str]
+        ext: str
+
+    Returns
+    -------
+        datasets: TrainEvalDatasets
+            A tuple containing train and eval datasets.
+    """
+    dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
     model = TranslationModel(device=device)
-
-    buffer = get_buffer(dataset, model, dataset_path=dataset_path, device=device)
-    train_dataset, eval_dataset = buffer2dataset(buffer, device=device)
-    train_dataset.save(dataset_path, suffix='train')
-    eval_dataset.save(dataset_path, suffix='eval')
-
-    return train_dataset, eval_dataset
+    translations = translate_dataset(
+        dataset=dataset,
+        translate=model,
+        dataset_name=dataset_name,
+        device=device,
+        ext=ext
+    )
+    return save_translations(translations, dataset_name, device, ext)
 
 
 if __name__ == '__main__':
+    # TODO: (для DVC) должен взаимодействовать с модулем collect()
     main_args = form_args()
-    generate(main_args.size)
+    tatoeba_path = get_dataset_path('tatoeba', 'bin')
+    if not path.exists(tatoeba_path):
+        datasets = collect(chosen_dataset_name='tatoeba', save=True, size=main_args.size, ext='bin')
+    else:
+        datasets = load_binary_dataset(main_args.dataset_name)
+
+    for binary_ind, binary_dataset in enumerate(datasets):
+        # TODO: add logs
+        train_dataset, eval_dataset = generate(
+            dataset=binary_dataset,
+            dataset_name='tatoeba',
+            device=main_args.device,
+            ext=main_args.ext
+        )
+        train_gen_path = get_dataset_path(f'tatoeba.train.{binary_ind + 1}', 'gen')
+        train_dataset.save(train_gen_path)
+        eval_gen_path = get_dataset_path(f'tatoeba.eval.{binary_ind + 1}', 'gen')
+        eval_dataset.save(eval_gen_path)

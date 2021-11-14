@@ -17,7 +17,16 @@ make lint
 ### Data Version Control usage:
 
 ```bash
-pip install "dvc[gdrive]"
+poetry add "dvc[gdrive]"
+```
+
+Check out `dvc.yaml` and `parameters.yaml` for a better pipelines understanding.
+
+
+### Simple run:
+
+```bash
+python detection/pipeline.py
 ```
 
 
