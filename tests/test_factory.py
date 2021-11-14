@@ -5,7 +5,7 @@ from hamcrest import assert_that, equal_to
 
 from detection.arguments import get_dataset_path
 from detection.data.factory import collect
-from detection.utils import get_mock_dataset_list, translations_list_to_dataset
+from detection.utils import MockDataset, translations_list_to_dataset
 
 
 class TestFactory(TestCase):
@@ -22,11 +22,8 @@ class TestFactory(TestCase):
 
 class TestUtils(TestCase):
     def test_translations_list(self):
-        translations = get_mock_dataset_list()
+        translations = MockDataset.list()
         train_dataset, eval_dataset = translations_list_to_dataset(translations, device='cpu')
 
         assert_that(len(train_dataset), equal_to(3))
         assert_that(len(eval_dataset), equal_to(1))
-
-    def test_translate_dataset(self):
-        pass

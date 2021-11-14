@@ -1,3 +1,4 @@
+import os
 import os.path as path
 from unittest import TestCase
 
@@ -8,7 +9,7 @@ from transformers import EvalPrediction
 from detection.data.factory import collect
 from detection.data.generate import get_generation_dataset, translate_dataset
 from detection.models.validate import compute_metrics
-from detection.utils import get_mock_dataset, save_translations
+from detection.utils import MockDataset, save_translations
 
 
 def reverse_transform(s: str) -> str:
@@ -21,13 +22,19 @@ class TestFunctionality(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.dataset = get_mock_dataset()
+        cls.dataset = MockDataset.dataset
+        cls.translations = translate_dataset(cls.dataset, reverse_transform, dataset_name='mock')
 
-        cls.translations = translate_dataset(cls.dataset, reverse_transform)
+    @classmethod
+    def tearDownClass(cls) -> None:
+        for suffix in ['train', 'eval']:
+            mock_path = path.join(path.dirname(os.getcwd()), f"resources/data/mock.{suffix}.bin")
+            if path.exists(mock_path):
+                os.remove(mock_path)
 
     def test_translations(self):
         assert_that(len(self.translations), equal_to(4))
-        assert_that(self.translations[0], equal_to('речев йырбод'))
+        assert_that(self.translations[:2], equal_to(['gnineve doog', 'добрый вечер']))
 
     def test_compute_metrics(self):
         eval_pred = EvalPrediction(
@@ -47,13 +54,19 @@ class TestFunctionality(TestCase):
         assert_that(len(train_dataset.encodings), equal_to(2))
         assert_that(len(eval_dataset.encodings), equal_to(2))
 
-        # TODO: add path.exists
+        for suffix in ['train', 'eval']:
+            elder_path = path.join(path.dirname(os.getcwd()), f"resources/data/mock.{suffix}.bin")
+            younger_path = path.join(os.getcwd(), f"resources/data/mock.{suffix}.bin")
+            assert_that(
+                path.exists(elder_path) or path.exists(younger_path),
+                equal_to(True)
+            )
 
     def test_generation_dataset(self):
         dataset_name, ext = 'tatoeba', 'bin'
         datasets = collect(dataset_name, save=True, ext=ext)
         dataset = datasets[0]
-        sized_dataset = get_generation_dataset(dataset, size=10)
+        sized_dataset = get_generation_dataset(dataset, dataset_name, size=10)
         assert_that(len(sized_dataset), equal_to(10))
-        unsized_dataset = get_generation_dataset(dataset)
+        unsized_dataset = get_generation_dataset(dataset, dataset_name)
         assert_that(len(unsized_dataset), equal_to(514195))

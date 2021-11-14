@@ -1,6 +1,6 @@
 import os
 import os.path as path
-from typing import Any, List
+from typing import List
 
 import transformers
 import wandb
@@ -8,7 +8,7 @@ from transformers import DistilBertForSequenceClassification, Trainer, TrainingA
 
 from detection.models.validate import compute_metrics
 from detection.arguments import form_args, get_dataset_path
-from detection.data.factory import save_binary_dataset, collect
+from detection.data.factory import BinaryDataset, collect, save_binary_dataset
 from detection.data.generate import generate
 from detection.utils import TrainEvalDatasets
 from detection.data.wrapper import TextDetectionDataset
@@ -24,10 +24,22 @@ def stop_experiment_tracking() -> None:
     wandb.finish()
 
 
-def create_binary_datasets(args) -> List[Any]:
-    source_datasets = collect(args.dataset_name, save=True, ext=args.bin_ext)
+def create_binary_datasets(args) -> List[BinaryDataset]:
+    """
+    A pipeline wrapper for collect method.
+
+    Parameters
+    ----------
+        args
+            Set of arguments
+
+    Returns
+    -------
+        Collected binary datasets.
+    """
+    source_datasets = collect(args.dataset_name, save=True, size=args.size, ext=args.bin_ext)
     for binary_dataset in source_datasets:
-        save_binary_dataset(binary_dataset, ext=main_args.bin_ext)
+        save_binary_dataset(binary_dataset, ext=args.bin_ext)
     return source_datasets
 
 
@@ -39,13 +51,30 @@ def load_translated_datasets(args) -> TrainEvalDatasets:
     return train_dataset, eval_dataset
 
 
-def translate_binary_datasets(datasets: List[Any], args) -> TrainEvalDatasets:
+def translate_binary_datasets(datasets: List[BinaryDataset],
+                              datasets_names: List[str],
+                              args) -> TrainEvalDatasets:
+    """
+    A pipeline wrapper for generate method.
+    TODO
+
+    Parameters
+    ----------
+        datasets:
+        datasets_names: List[str]
+        args
+
+    Returns
+    -------
+        train_dataset, eval_dataset: TrainEvalDatasets
+
+    """
     # TODO: дописать функционал с разными языками
-    dataset = datasets[0]
+    dataset, dataset_name = datasets[0], datasets_names[0]
     train_path = get_dataset_path(args.dataset_name, f'train.{args.ds_ext}')
     eval_path = get_dataset_path(args.dataset_name, f'eval.{args.ds_ext}')
     if not (path.exists(train_path) and path.exists(eval_path)):
-        train_dataset, eval_dataset = generate(dataset)
+        train_dataset, eval_dataset = generate(dataset, dataset_name, size=args.size)
     else:
         print('Datasets have already been processed. Paths: '
               f'dataset path = {args.dataset_path}')
@@ -90,11 +119,16 @@ def train_text_detection_model(
 
 
 def pipeline(args) -> Trainer:
+    """
+    TODO
+    """
     setup_experiment_tracking(args)
 
     datasets = create_binary_datasets(args)
+    # TODO: extend for multiple dataset names
+    datasets_names = [args.dataset_name]
 
-    train_dataset, eval_dataset = translate_binary_datasets(datasets, args)
+    train_dataset, eval_dataset = translate_binary_datasets(datasets, datasets_names, args)
 
     trainer = train_text_detection_model(train_dataset, eval_dataset, args)
     stop_experiment_tracking()
@@ -102,5 +136,5 @@ def pipeline(args) -> Trainer:
 
 
 if __name__ == '__main__':
-    main_args = form_args()
-    pipeline(main_args)
+    global_args = form_args()
+    pipeline(global_args)

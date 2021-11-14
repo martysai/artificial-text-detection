@@ -19,7 +19,7 @@ TEST_SIZE = 0.2
 TrainEvalDatasets = Tuple[TextDetectionDataset, TextDetectionDataset]
 
 
-def get_mock_dataset() -> List[dict]:
+class MockDataset:
     dataset = [
         {
             SRC_LANG: 'добрый вечер',
@@ -30,15 +30,14 @@ def get_mock_dataset() -> List[dict]:
             TRG_LANG: 'i am sorry',
         }
     ]
-    return dataset
+    dataset_name = 'mock'
 
-
-def get_mock_dataset_list() -> List[str]:
-    dataset = get_mock_dataset()
-    dataset_list = []
-    for dct in dataset:
-        dataset_list.extend([dct[SRC_LANG], dct[TRG_LANG]])
-    return dataset_list
+    @classmethod
+    def list(cls):
+        dataset_list = []
+        for dct in cls.dataset:
+            dataset_list.extend([dct[SRC_LANG], dct[TRG_LANG]])
+        return dataset_list
 
 
 def log(index: int, length: int, sample: str) -> None:
@@ -78,10 +77,11 @@ def save_translations(
         dataset_name: str,
         device: str,
         ext: str) -> TrainEvalDatasets:
-    dataset_path = get_dataset_path(dataset_name, ext=ext)
     train_dataset, eval_dataset = translations_list_to_dataset(translations, device=device)
-    train_dataset.save(dataset_path)
-    eval_dataset.save(dataset_path)
+    train_path = get_dataset_path(f'{dataset_name}.train', ext=ext)
+    eval_path = get_dataset_path(f'{dataset_name}.eval', ext=ext)
+    train_dataset.save(train_path)
+    eval_dataset.save(eval_path)
     return train_dataset, eval_dataset
 
 

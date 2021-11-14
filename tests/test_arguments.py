@@ -8,7 +8,7 @@ class TestArguments(TestCase):
     def test_compulsory_arguments(self):
         args = form_args()
         compulsory_args = [
-            'dataset_path',
+            'dataset_name',
             'run_name'
         ]
         for arg_name in compulsory_args:
