@@ -15,7 +15,7 @@ from detection.data.wrapper import TextDetectionDataset
 
 
 def setup_experiment_tracking(args) -> None:
-    token = os.environ.get('POETRY_WANDB_TOKEN', None)
+    token = os.environ.get('WANDB_TOKEN', None)
     wandb.login(key=token)
     wandb.init(project='artificial-text-detection', name=args.run_name)
 
