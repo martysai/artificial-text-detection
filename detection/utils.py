@@ -47,7 +47,7 @@ def log(index: int, length: int, sample: str) -> None:
 
 def translations_list_to_dataset(
         translations: List[str],
-        device: Optional[str] = None) -> Tuple[TextDetectionDataset, TextDetectionDataset]:
+        device: Optional[str] = None) -> TrainEvalDatasets:
     labels = torch.FloatTensor([0, 1] * (len(translations) // 2))
     train_texts, val_texts, train_labels, val_labels = train_test_split(
         translations, labels, test_size=TEST_SIZE
