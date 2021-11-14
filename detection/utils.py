@@ -33,6 +33,14 @@ def get_mock_dataset() -> List[dict]:
     return dataset
 
 
+def get_mock_dataset_list() -> List[str]:
+    dataset = get_mock_dataset()
+    dataset_list = []
+    for dct in dataset:
+        dataset_list.extend([dct[SRC_LANG], dct[TRG_LANG]])
+    return dataset_list
+
+
 def log(index: int, length: int, sample: str) -> None:
     if (index + 1) % LOGGING_FREQ == 0:
         print(f'[{index + 1}/{length}] Preprocessing sample = {sample}')

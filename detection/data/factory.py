@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 
 from datasets import load_dataset
 
-from detection.arguments import form_args
+from detection.arguments import form_args, get_dataset_path
 
 # --- Datasets configs description ---
 
@@ -51,7 +51,7 @@ class DatasetFactory:
         elif dataset_name == 'wikimatrix':
             pass
         entrypoint = ENTRYPOINTS[dataset_name]
-        source_dataset = entrypoint(config)
+        source_dataset = entrypoint(**config)
         source_dataset.dataset_name = dataset_name
         return source_dataset
 
@@ -63,9 +63,13 @@ class DatasetFactory:
         return None
 
 
+def load_binary_dataset():
+    pass
+
+
 def save_binary_dataset(dataset: Any, ext: str = 'bin') -> None:
-    # TODO: add proper pickling
-    with open(f'{dataset_path}.{suffix}', 'wb') as file:
+    dataset_path = get_dataset_path(dataset.dataset_name, ext=ext)
+    with open(dataset_path, 'wb') as file:
         dumped_dataset = pickle.dumps(dataset, protocol=pickle.HIGHEST_PROTOCOL)
         compressed_dataset = zlib.compress(dumped_dataset)
         file.write(compressed_dataset)
@@ -78,6 +82,8 @@ def collect(chosen_dataset_name: str, save: bool = False, ext: str = 'bin') -> L
     collection = []
     langs = LANGS[chosen_dataset_name]
     for langs_pair in langs:
+        if not langs_pair:
+            continue
         source_dataset = DatasetFactory.get(chosen_dataset_name, langs_pair)
         if source_dataset:
             collection.append(source_dataset)

@@ -8,7 +8,7 @@ from transformers import DistilBertForSequenceClassification, Trainer, TrainingA
 
 from detection.models.validate import compute_metrics
 from detection.arguments import form_args, get_dataset_path
-from detection.data.factory import collect
+from detection.data.factory import save_binary_dataset, collect
 from detection.data.generate import generate
 from detection.utils import TrainEvalDatasets
 from detection.data.wrapper import TextDetectionDataset
@@ -25,7 +25,10 @@ def stop_experiment_tracking() -> None:
 
 
 def create_binary_datasets(args) -> List[Any]:
-    return collect(args.dataset_name, save=True, ext=args.bin_ext)
+    source_datasets = collect(args.dataset_name, save=True, ext=args.bin_ext)
+    for binary_dataset in source_datasets:
+        save_binary_dataset(binary_dataset, ext=main_args.bin_ext)
+    return source_datasets
 
 
 def load_translated_datasets(args) -> TrainEvalDatasets:

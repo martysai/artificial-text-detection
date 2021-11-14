@@ -5,7 +5,7 @@ import torch
 
 
 def get_dataset_path(dataset_name: str, ext: str = 'bin') -> str:
-    dir_path = path.dirname(path.realpath(__file__))
+    dir_path = path.dirname(path.dirname(path.realpath(__file__)))
     dvc_path = path.join(dir_path, "resources/data")
     return path.join(dvc_path, f"{dataset_name}.{ext}")
 

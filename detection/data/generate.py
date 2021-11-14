@@ -45,8 +45,9 @@ def get_generation_dataset(dataset: Optional[Any] = None,
                            size: Optional[int] = None) -> Any:
     if not dataset:
         dataset = get_mock_dataset()
-    if size:
-        dataset = dataset['train'][:size]['translation']
+    if not size:
+        size = len(dataset['train'])
+    dataset = dataset['train'][:size]['translation']
     return dataset
 
 
