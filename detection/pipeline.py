@@ -74,7 +74,11 @@ def translate_binary_datasets(datasets: List[BinaryDataset],
     train_path = get_dataset_path(args.dataset_name, f'train.{args.ds_ext}')
     eval_path = get_dataset_path(args.dataset_name, f'eval.{args.ds_ext}')
     if not (path.exists(train_path) and path.exists(eval_path)):
-        train_dataset, eval_dataset = generate(dataset, dataset_name, size=args.size)
+        train_dataset, eval_dataset = generate(dataset,
+                                               dataset_name,
+                                               device=args.device,
+                                               size=args.size,
+                                               ext=args.ds_ext)
     else:
         print('Datasets have already been processed. Paths: '
               f'dataset path = {args.dataset_path}')

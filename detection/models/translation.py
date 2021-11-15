@@ -15,7 +15,7 @@ class TranslationModel:
             device=None,
     ) -> None:
         self.model = model if model else EasyNMT(EASY_NMT_MODEL_NAME)
-        if device:
+        if device and not isinstance(self.model, EasyNMT):
             self.model = self.model.to(device)
         self.source_lang = source_lang or SRC_LANG
         self.target_lang = target_lang or TRG_LANG

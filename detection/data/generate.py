@@ -106,9 +106,10 @@ if __name__ == '__main__':
             dataset=binary_dataset,
             dataset_name='tatoeba',
             device=main_args.device,
-            ext=main_args.ext
+            size=main_args.size,
+            ext=main_args.ds_ext
         )
-        train_gen_path = get_dataset_path(f'tatoeba.train.{binary_ind + 1}', 'gen')
+        train_gen_path = get_dataset_path(f'tatoeba.train.{binary_ind + 1}.gen', 'pth')
         train_dataset.save(train_gen_path)
-        eval_gen_path = get_dataset_path(f'tatoeba.eval.{binary_ind + 1}', 'gen')
+        eval_gen_path = get_dataset_path(f'tatoeba.eval.{binary_ind + 1}.gen', 'pth')
         eval_dataset.save(eval_gen_path)
