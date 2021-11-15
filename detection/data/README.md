@@ -13,3 +13,13 @@ dvc add ../../resources/data
 ```
 
 Do not forget to commit `data.dvc` file in order to pull processed datasets later.
+
+
+# Data naming rules:
+
+TODO: add naming rules for collect/generate/models.
+We use the following patterns for datasets naming:
+```
+collect: .bin
+generate: .gen.pth
+```
