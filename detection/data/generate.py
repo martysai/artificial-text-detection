@@ -98,7 +98,9 @@ if __name__ == '__main__':
     if not path.exists(tatoeba_path):
         datasets = collect(chosen_dataset_name='tatoeba', save=True, size=main_args.size, ext='bin')
     else:
-        datasets = load_binary_dataset(main_args.dataset_name)
+        binary_dataset = load_binary_dataset(main_args.dataset_name)
+        # TODO: improve for other languages
+        datasets = [binary_dataset]
 
     for binary_ind, binary_dataset in enumerate(datasets):
         # TODO: add logs
