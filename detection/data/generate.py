@@ -94,9 +94,9 @@ def generate(dataset: BinaryDataset,
 if __name__ == '__main__':
     # TODO: (для DVC) должен взаимодействовать с модулем collect()
     main_args = form_args()
-    tatoeba_path = get_dataset_path('tatoeba', 'bin')
-    if not path.exists(tatoeba_path):
-        datasets = collect(chosen_dataset_name='tatoeba', save=True, size=main_args.size, ext='bin')
+    binary_dataset_path = get_dataset_path(main_args.dataset_name, 'bin')
+    if not path.exists(binary_dataset_path):
+        datasets = collect(chosen_dataset_name=main_args.dataset_name, save=True, size=main_args.size, ext='bin')
     else:
         binary_dataset = load_binary_dataset(main_args.dataset_name)
         # TODO: improve for other languages
@@ -106,12 +106,12 @@ if __name__ == '__main__':
         # TODO: add logs
         train_dataset, eval_dataset = generate(
             dataset=binary_dataset,
-            dataset_name='tatoeba',
+            dataset_name=main_args.dataset_name,
             device=main_args.device,
             size=main_args.size,
             ext=main_args.ds_ext
         )
-        train_gen_path = get_dataset_path(f'tatoeba.train.{binary_ind + 1}.gen', 'pth')
+        train_gen_path = get_dataset_path(f'{main_args.dataset_name}.train.{binary_ind + 1}.gen', 'pth')
         train_dataset.save(train_gen_path)
-        eval_gen_path = get_dataset_path(f'tatoeba.eval.{binary_ind + 1}.gen', 'pth')
+        eval_gen_path = get_dataset_path(f'{main_args.dataset_name}.eval.{binary_ind + 1}.gen', 'pth')
         eval_dataset.save(eval_gen_path)
