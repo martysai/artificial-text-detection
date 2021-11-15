@@ -10,8 +10,10 @@ class TextDetectionDataset(torch.utils.data.Dataset):
         self.device = device if device else 'cpu'
 
     @staticmethod
-    def load(dataset_path: str, suffix: Optional[str] = 'train') -> Any:
-        dataset_settings = torch.load(f'{dataset_path}.{suffix}')
+    def load(dataset_path: str, device: Optional[str] = None) -> Any:
+        dataset_settings = torch.load(dataset_path)
+        if device:
+            dataset_settings['device'] = device
         return TextDetectionDataset(**dataset_settings)
 
     def save(self, dataset_path: str) -> None:

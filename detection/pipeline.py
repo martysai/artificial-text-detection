@@ -43,14 +43,6 @@ def create_binary_datasets(args) -> List[BinaryDataset]:
     return source_datasets
 
 
-def load_translated_datasets(args) -> TrainEvalDatasets:
-    train_dataset = TextDetectionDataset.load(args.dataset_path, suffix='train')
-    train_dataset.device = args.device
-    eval_dataset = TextDetectionDataset.load(args.dataset_path, suffix='eval')
-    eval_dataset.device = args.device
-    return train_dataset, eval_dataset
-
-
 def translate_binary_datasets(datasets: List[BinaryDataset],
                               datasets_names: List[str],
                               args) -> TrainEvalDatasets:
@@ -74,11 +66,16 @@ def translate_binary_datasets(datasets: List[BinaryDataset],
     train_path = get_dataset_path(args.dataset_name, f'train.{args.ds_ext}')
     eval_path = get_dataset_path(args.dataset_name, f'eval.{args.ds_ext}')
     if not (path.exists(train_path) and path.exists(eval_path)):
-        train_dataset, eval_dataset = generate(dataset, dataset_name, size=args.size)
+        train_dataset, eval_dataset = generate(dataset,
+                                               dataset_name,
+                                               device=args.device,
+                                               size=args.size,
+                                               ext=args.ds_ext)
     else:
         print('Datasets have already been processed. Paths: '
-              f'dataset path = {args.dataset_path}')
-        train_dataset, eval_dataset = load_translated_datasets(args)
+              f'train path = {train_path}; eval path: {eval_path}')
+        train_dataset = TextDetectionDataset.load(train_path, device=args.device)
+        eval_dataset = TextDetectionDataset.load(eval_path, device=args.device)
     return train_dataset, eval_dataset
 
 

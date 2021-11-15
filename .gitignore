@@ -6,6 +6,7 @@ __pycache__/
 # Data
 resources/data/*.bin
 resources/data/*.gen
+resources/data/*.pth
 
 # C extensions
 *.so
