@@ -10,35 +10,40 @@ from detection.utils import MockDataset, TrainEvalDatasets, log, save, save_tran
 DATASET_SIZE = 10000
 
 
-def extend_translations(
-        translations: List[str],
-        dataset: Collection[Dict[str, str]],
-        dataset_name: str,
-        translate: Callable[[str], str],
-        index: int,
-        sample: Dict[str, Any]) -> List[str]:
-    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
-    src, trg = sample[src_lang], sample[trg_lang]
-    log(index, len(dataset), src)
-    # TODO: правда ли, что эта операция происходит на GPU?
-    gen = translate(src)
-    translations.extend([gen, trg])
-    return translations
+# def extend_translations(
+#         translations: List[str],
+#         dataset: Collection[Dict[str, str]],
+#         dataset_name: str,
+#         translate: Callable[[str], str],
+#         index: int,
+#         sample: Dict[str, Any]) -> List[str]:
+#     src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
+#     src, trg = sample[src_lang], sample[trg_lang]
+#     log(index, len(dataset), src)
+#     gen = translate(src)
+#     translations.extend([gen, trg])
+#     return translations
 
 
 def translate_dataset(
         dataset: Collection[Dict[str, str]],
-        translate: Callable[[str], str],
+        translate: Callable[[Union[str, List[str]]], Union[str, List[str]]],
         dataset_name: Optional[str] = None,
         device: Optional[str] = None,
         ext: str = 'bin'
 ) -> List[str]:
-    translations = []
-    for i, sample in enumerate(dataset):
-        translations = extend_translations(
-            translations, dataset, dataset_name, translate, i, sample
-        )
-        save(translations, dataset_name, i, len(dataset), device, ext)
+    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
+    src_corpus = [sample[src_lang] for sample in dataset]
+    trg_corpus = [sample[trg_lang] for sample in dataset]
+    tld_corpus = translate(src_corpus, device=device, ext=ext)
+    translations = [] * (2 * len(trg_corpus))
+    translations[::2] = tld_corpus
+    translations[1::2] = trg_corpus
+    # for i, sample in enumerate(dataset):
+    #     translations = extend_translations(
+    #         translations, dataset, dataset_name, translate, i, sample
+    #     )
+    #     save(translations, dataset_name, i, len(dataset), device, ext)
     return translations
 
 
@@ -68,6 +73,7 @@ def generate(dataset: BinaryDataset,
     """
     Parameters
     ----------
+        TODO
         dataset: detection.data.factory.BinaryDataset
         dataset_name: str
         size: Optional[int]

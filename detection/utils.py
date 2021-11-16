@@ -40,9 +40,10 @@ class MockDataset:
         return dataset_list
 
 
-def log(index: int, length: int, sample: str) -> None:
+def log(index: int, length: int, src_sample: str, tld_sample: str) -> None:
     if (index + 1) % LOGGING_FREQ == 0:
-        print(f'[{index + 1}/{length}] Preprocessing sample = {sample}')
+        print(f'[{index + 1}/{length}] Preprocessing sample = {src_sample}\n'
+              f'[{index + 1}/{length}] Translated sample = {tld_sample}\n')
 
 
 def translations_list_to_dataset(
