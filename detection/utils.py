@@ -1,5 +1,6 @@
 from typing import List, Optional, Tuple
 
+import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 from transformers import DistilBertTokenizerFast
@@ -73,11 +74,23 @@ def translations_list_to_dataset(
     return train_dataset, eval_dataset
 
 
+def save_translations_texts(
+        sources: List[str],
+        translations: List[str],
+        dataset_name: str) -> None:
+    print('Saving sources/translations in csv...')
+    df_data = list(zip(sources, translations))
+    df = pd.DataFrame(data=df_data, columns=['sources', 'translations'])
+    csv_path = get_dataset_path(dataset_name, ext='csv')
+    df.to_csv(csv_path, index=False)
+
+
 def save_translations(
         translations: List[str],
         dataset_name: str,
         device: str,
         ext: str) -> TrainEvalDatasets:
+    print('Saving translations in pth...')
     train_dataset, eval_dataset = translations_list_to_dataset(translations, device=device)
     train_path = get_dataset_path(f'{dataset_name}.train', ext=ext)
     eval_path = get_dataset_path(f'{dataset_name}.eval', ext=ext)

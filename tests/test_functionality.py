@@ -1,5 +1,6 @@
 import os
 import os.path as path
+from typing import List, Union
 from unittest import TestCase
 
 import numpy as np
@@ -12,8 +13,10 @@ from detection.models.validate import compute_metrics
 from detection.utils import MockDataset, save_translations
 
 
-def reverse_transform(s: str) -> str:
-    return ''.join(reversed(s))
+def reverse_transform(s: Union[str, List[str]]) -> Union[str, List[str]]:
+    if isinstance(s, str):
+        return ''.join(reversed(s))
+    return [''.join(reversed(element)) for element in s]
 
 
 class TestFunctionality(TestCase):
