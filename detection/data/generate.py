@@ -4,7 +4,7 @@ from typing import Callable, Collection, Dict, List, Optional, Union
 from detection.models.translation import TranslationModel
 from detection.arguments import form_args, get_dataset_path
 from detection.data.factory import BinaryDataset, DatasetFactory, collect, load_binary_dataset
-from detection.utils import MockDataset, TrainEvalDatasets, log, save, save_translations
+from detection.utils import MockDataset, TrainEvalDatasets, log, save, save_translations, save_translations_texts
 
 
 def translate_dataset(
@@ -68,7 +68,9 @@ def generate(dataset: BinaryDataset,
         translate=model,
         dataset_name=dataset_name,
     )
-    # save_translations()
+    src_lang, _ = DatasetFactory.get_languages(dataset_name)
+    sources = [sample[src_lang] for sample in dataset]
+    save_translations_texts(sources, translations, dataset_name)
     return save_translations(translations, dataset_name, device, ext)
 
 
