@@ -111,18 +111,22 @@ if __name__ == '__main__':
             chosen_dataset_name=main_args.dataset_name,
             save=True,
             size=main_args.size,
-            ext=main_args.ext
+            ext=main_args.bin_ext
         )
     else:
-        datasets = [load_binary_dataset(main_args.dataset_name, langs=lang_pair, ext=main_args.ext)
+        datasets = [load_binary_dataset(main_args.dataset_name, langs=lang_pair, ext=main_args.bin_ext)
                     for lang_pair in languages]
 
     # Generating translations and saving torch datasets
-    for binary_ind, (binary_dataset, lang_pair) in enumerate(list(zip(datasets, languages))):
-        print(f'[{binary_ind + 1}/{len(datasets)}] Handling dataset with a name = {main_args.dataset_name}')
+    for dataset_ind, (binary_dataset, lang_pair) in enumerate(list(zip(datasets, languages))):
+        src_lang, trg_lang = languages[dataset_ind]
+        print(f'[{dataset_ind + 1}/{len(datasets)}] Handling dataset = {main_args.dataset_name}, '
+              f'src lang = {src_lang} trg_lang = {trg_lang}')
         torch_dataset = generate(
             dataset=binary_dataset,
             dataset_name=main_args.dataset_name,
+            src_lang=src_lang,
+            trg_lang=trg_lang,
             device=main_args.device,
             size=main_args.size,
             batch_size=main_args.easy_nmt_batch_size
