@@ -1,8 +1,10 @@
-from easynmt import EasyNMT
 from typing import List, Union
 
+from easynmt import EasyNMT
+
+BATCH_SIZE = 128
 EASY_NMT_MODEL_NAME = 'opus-mt'
-SRC_LANG = 'ru'
+SRC_LANG = 'de'
 TRG_LANG = 'en'
 
 
@@ -12,14 +14,12 @@ class TranslationModel:
             model=None,
             source_lang=None,
             target_lang=None,
-            device=None,
+            batch_size=None,
     ) -> None:
         self.model = model if model else EasyNMT(EASY_NMT_MODEL_NAME)
-        if device and not isinstance(self.model, EasyNMT):
-            self.model = self.model.to(device)
         self.source_lang = source_lang or SRC_LANG
         self.target_lang = target_lang or TRG_LANG
-        self.device = device
+        self.batch_size = batch_size or BATCH_SIZE
 
     def __call__(
             self,
@@ -28,5 +28,7 @@ class TranslationModel:
         return self.model.translate(
             source,
             source_lang=self.source_lang,
-            target_lang=self.target_lang
+            target_lang=self.target_lang,
+            batch_size=self.batch_size,
+            show_progress_bar=True
         )

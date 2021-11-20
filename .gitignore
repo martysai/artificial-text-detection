@@ -7,6 +7,7 @@ __pycache__/
 resources/data/*.bin
 resources/data/*.gen
 resources/data/*.pth
+resources/data/*.csv
 
 # C extensions
 *.so

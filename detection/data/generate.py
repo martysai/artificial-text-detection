@@ -1,45 +1,22 @@
 import os.path as path
-from typing import Any, Callable, Collection, Dict, List, Optional, Union
+from typing import Callable, Collection, Dict, List, Optional, Union
 
 from detection.models.translation import TranslationModel
 from detection.arguments import form_args, get_dataset_path
 from detection.data.factory import BinaryDataset, DatasetFactory, collect, load_binary_dataset
-from detection.utils import MockDataset, TrainEvalDatasets, log, save, save_translations
-
-
-DATASET_SIZE = 10000
-
-
-def extend_translations(
-        translations: List[str],
-        dataset: Collection[Dict[str, str]],
-        dataset_name: str,
-        translate: Callable[[str], str],
-        index: int,
-        sample: Dict[str, Any]) -> List[str]:
-    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
-    src, trg = sample[src_lang], sample[trg_lang]
-    log(index, len(dataset), src)
-    # TODO: правда ли, что эта операция происходит на GPU?
-    gen = translate(src)
-    translations.extend([gen, trg])
-    return translations
+from detection.utils import MockDataset, TrainEvalDatasets, log, save, save_translations, save_translations_texts
 
 
 def translate_dataset(
         dataset: Collection[Dict[str, str]],
-        translate: Callable[[str], str],
-        dataset_name: Optional[str] = None,
-        device: Optional[str] = None,
-        ext: str = 'bin'
+        translate: Callable[[Union[str, List[str]]], Union[str, List[str]]],
+        dataset_name: Optional[str] = None
 ) -> List[str]:
-    translations = []
-    for i, sample in enumerate(dataset):
-        translations = extend_translations(
-            translations, dataset, dataset_name, translate, i, sample
-        )
-        save(translations, dataset_name, i, len(dataset), device, ext)
-    return translations
+    # TODO: порефакторить все вызовы translate_dataset
+    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
+    sources = [sample[src_lang] for sample in dataset]
+    translated = translate(sources)
+    return translated
 
 
 def get_generation_dataset(dataset: BinaryDataset,
@@ -53,7 +30,7 @@ def get_generation_dataset(dataset: BinaryDataset,
     if dataset_name == 'tatoeba':
         dataset = dataset['train']['translation']
     elif dataset_name == 'wikimatrix':
-        # TODO: extend for wikimatrix
+        # TODO: transform to list for wikimatrix
         pass
     if size:
         dataset = dataset[:size]
@@ -68,6 +45,7 @@ def generate(dataset: BinaryDataset,
     """
     Parameters
     ----------
+        TODO
         dataset: detection.data.factory.BinaryDataset
         dataset_name: str
         size: Optional[int]
@@ -80,15 +58,18 @@ def generate(dataset: BinaryDataset,
             A tuple containing train and eval datasets.
     """
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
-    model = TranslationModel(device=device)
+    # TODO: add the support of languages
+    model = TranslationModel()
     translations = translate_dataset(
         dataset=dataset,
         translate=model,
         dataset_name=dataset_name,
-        device=device,
-        ext=ext
     )
-    return save_translations(translations, dataset_name, device, ext)
+    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
+    sources = [sample[src_lang] for sample in dataset]
+    targets = [sample[trg_lang] for sample in dataset]
+    save_translations_texts(sources, targets, translations, dataset_name)
+    return save_translations(targets, translations, dataset_name, device, ext)
 
 
 if __name__ == '__main__':
@@ -103,7 +84,8 @@ if __name__ == '__main__':
         datasets = [binary_dataset]
 
     for binary_ind, binary_dataset in enumerate(datasets):
-        # TODO: add logs
+        # TODO: add logs with languages
+        print(f'Handling a binary dataset = {binary_ind + 1}')
         train_dataset, eval_dataset = generate(
             dataset=binary_dataset,
             dataset_name=main_args.dataset_name,

@@ -1,16 +1,15 @@
-import os
 import torch
 
 from unittest import TestCase
 
 from detection.arguments import form_args
 from detection.pipeline import pipeline
+from tests import skip_github
 
 
 class TestPipeline(TestCase):
+    @skip_github
     def test_run(self):
-        if os.environ.get('GITHUB_ACTIONS'):
-            pass
         args = form_args()
         args.run_name = 'test_run'
         args.epochs = 1

@@ -33,7 +33,8 @@ ENTRYPOINTS = {
 }
 
 # --- Using languages description ---
-DEFAULT_LANGS = ['en', 'ru']
+# We suppose that languages follow the order: [source language, target language]
+DEFAULT_LANGS = ['de', 'en']
 LANGS = {
     'tatoeba': [
         DEFAULT_LANGS,
@@ -126,6 +127,7 @@ def collect(chosen_dataset_name: str,
     for langs_pair in langs:
         if not langs_pair:
             continue
+        print(f"Handling languages... Lang #1 = '{langs_pair[0]}'; Lang # 2 = '{langs_pair[1]}'...")
         source_dataset = DatasetFactory.get(chosen_dataset_name, langs_pair)
         source_dataset = DatasetFactory.crop(source_dataset, chosen_dataset_name, size)
         if source_dataset:

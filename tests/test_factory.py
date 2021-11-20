@@ -22,8 +22,8 @@ class TestFactory(TestCase):
 
 class TestUtils(TestCase):
     def test_translations_list(self):
-        translations = MockDataset.list()
-        train_dataset, eval_dataset = translations_list_to_dataset(translations, device='cpu')
+        targets, translations = MockDataset.targets(), MockDataset.translations()
+        train_dataset, eval_dataset = translations_list_to_dataset(targets, translations, device='cpu')
 
         assert_that(len(train_dataset), equal_to(3))
         assert_that(len(eval_dataset), equal_to(1))
