@@ -1,6 +1,7 @@
-import torch
-
 from unittest import TestCase
+
+import torch
+from hamcrest import assert_that, equal_to
 
 from detection.arguments import form_args
 from detection.pipeline import pipeline
@@ -18,4 +19,5 @@ class TestPipeline(TestCase):
         args.cuda = torch.cuda.is_available()
         args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
                                    cuda.is_available() else 'cpu')
-        pipeline(args)
+        trainers = pipeline(args)
+        assert_that(len(trainers), equal_to(2))

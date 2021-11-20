@@ -1,13 +1,18 @@
 import argparse
 import os.path as path
+from typing import List, Optional
 
 import torch
 
 
-def get_dataset_path(dataset_name: str, ext: str = 'bin') -> str:
+def get_dataset_path(dataset_name: str, langs: Optional[List[str]] = None, ext: str = 'bin') -> str:
     dir_path = path.dirname(path.dirname(path.realpath(__file__)))
     dvc_path = path.join(dir_path, "resources/data")
-    return path.join(dvc_path, f"{dataset_name}.{ext}")
+    if langs:
+        dataset_real_name = f"{dataset_name}.{langs[0]}-{langs[1]}.{ext}"
+    else:
+        dataset_real_name = f"{dataset_name}.{ext}"
+    return path.join(dvc_path, dataset_real_name)
 
 
 def set_args(parser: argparse.ArgumentParser):
@@ -18,6 +23,7 @@ def set_args(parser: argparse.ArgumentParser):
     checkpoints.add_argument('--ds_ext', default='pth')
 
     train_args = parser.add_argument_group('Training arguments')
+    train_args.add_argument('--easy_nmt_batch_size', type=int, default=16)
     train_args.add_argument('--dataset_name', type=str, default='tatoeba',
                             help='dataset name which will be loaded.')
     train_args.add_argument('--epochs', type=int, default=50,

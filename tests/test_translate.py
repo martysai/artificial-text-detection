@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 
 import pandas as pd
@@ -15,7 +16,7 @@ class TestTranslate(TestCase):
     """
     @classmethod
     def setUpClass(cls) -> None:
-        model = TranslationModel()
+        model = TranslationModel(src_lang='de', trg_lang='en')
         sources = [
             'Muiriel ist jetzt 20.',
             'Was ist das?',
@@ -46,11 +47,19 @@ class TestTranslate(TestCase):
 
     def test_save_to_csv(self) -> None:
         dataset_name = 'tatoeba_sample'
-        save_translations_texts(self.sources, self.targets, self.translations, dataset_name=dataset_name)
-        dataset_path = get_dataset_path(dataset_name, ext='csv')
+        save_translations_texts(
+            self.sources,
+            self.targets,
+            self.translations,
+            dataset_name=dataset_name,
+            src_lang='de',
+            trg_lang='en'
+        )
+        dataset_path = get_dataset_path(f'{dataset_name}.de-en', ext='csv')
         df_sample = pd.read_csv(dataset_path)
         assert_that(df_sample.columns.tolist(), has_items(*['sources', 'targets', 'translations']))
         assert_that(len(df_sample), equal_to(5))
+        os.remove(dataset_path)
 
     @skip_github
     def test_gpu_usage(self) -> None:

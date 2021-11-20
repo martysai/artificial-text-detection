@@ -10,7 +10,7 @@ from transformers import EvalPrediction
 from detection.data.factory import collect
 from detection.data.generate import get_generation_dataset, translate_dataset
 from detection.models.validate import compute_metrics
-from detection.utils import MockDataset, save_translations
+from detection.utils import MockDataset, translations_to_torch_dataset
 
 
 def reverse_transform(s: Union[str, List[str]]) -> Union[str, List[str]]:
@@ -27,14 +27,7 @@ class TestFunctionality(TestCase):
     def setUpClass(cls) -> None:
         cls.dataset = MockDataset.dataset
         cls.targets = MockDataset.targets()
-        cls.translations = translate_dataset(cls.dataset, reverse_transform, dataset_name='mock')
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for suffix in ['train', 'eval']:
-            mock_path = path.join(path.dirname(os.getcwd()), f"resources/data/mock.{suffix}.bin")
-            if path.exists(mock_path):
-                os.remove(mock_path)
+        cls.translations = translate_dataset(cls.dataset, reverse_transform, src_lang='de')
 
     def test_translations(self):
         assert_that(len(self.translations), equal_to(2))
@@ -53,26 +46,18 @@ class TestFunctionality(TestCase):
         for value in metrics_values:
             assert_that(type(value), equal_to(float))
 
-    def test_save_translations(self):
-        train_dataset, eval_dataset = save_translations(
+    def test_translations_to_torch(self):
+        dataset = translations_to_torch_dataset(
             self.targets,
             self.translations,
-            dataset_name='mock',
             device='cpu',
-            ext='bin'
         )
-        encodings_keys = list(train_dataset.encodings.keys())
+        encodings_keys = list(dataset.encodings.keys())
         assert_that(encodings_keys, has_items(*['input_ids', 'attention_mask']))
+
+        train_dataset, eval_dataset = dataset.split()
         assert_that(len(train_dataset.encodings['input_ids']), equal_to(3))
         assert_that(len(eval_dataset.encodings['input_ids']), equal_to(1))
-
-        for suffix in ['train', 'eval']:
-            elder_path = path.join(path.dirname(os.getcwd()), f"resources/data/mock.{suffix}.bin")
-            younger_path = path.join(os.getcwd(), f"resources/data/mock.{suffix}.bin")
-            assert_that(
-                path.exists(elder_path) or path.exists(younger_path),
-                equal_to(True)
-            )
 
     def test_generation_dataset(self):
         dataset_name, ext = 'tatoeba', 'bin'
