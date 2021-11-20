@@ -41,6 +41,10 @@ DEFAULT_LANGS = ['de', 'en']
 LANGS = {
     'tatoeba': [
         DEFAULT_LANGS,
+        ['en', 'nl'],
+        ['en', 'es'],
+        ['en', 'he'],
+        ['en', 'fi'],
         ['fr', 'ru'],
     ],
     'wikimatrix': [
