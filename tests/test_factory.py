@@ -12,7 +12,7 @@ class TestFactory(TestCase):
     def test_collect(self):
         dataset_name, ext = 'tatoeba', 'bin'
         datasets = collect(dataset_name, save=True, ext=ext)
-        assert_that(len(datasets), equal_to(2))
+        assert_that(len(datasets), equal_to(6))
         dataset_path = get_dataset_path(dataset_name, langs=['de', 'en'], ext=ext)
         assert_that(path.exists(dataset_path), equal_to(True))
         dataset_path = get_dataset_path(dataset_name, langs=['fr', 'ru'], ext=ext)
