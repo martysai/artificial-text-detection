@@ -4,7 +4,7 @@ from easynmt import EasyNMT
 
 BATCH_SIZE = 128
 EASY_NMT_MODEL_NAME = 'opus-mt'
-SRC_LANG = 'ru'
+SRC_LANG = 'de'
 TRG_LANG = 'en'
 
 

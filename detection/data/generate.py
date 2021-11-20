@@ -12,14 +12,11 @@ def translate_dataset(
         translate: Callable[[Union[str, List[str]]], Union[str, List[str]]],
         dataset_name: Optional[str] = None
 ) -> List[str]:
+    # TODO: порефакторить все вызовы translate_dataset
     src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
-    src_corpus = [sample[src_lang] for sample in dataset]
-    trg_corpus = [sample[trg_lang] for sample in dataset]
-    tld_corpus = translate(src_corpus)
-    translations = [''] * (2 * len(trg_corpus))
-    translations[::2] = tld_corpus
-    translations[1::2] = trg_corpus
-    return translations
+    sources = [sample[src_lang] for sample in dataset]
+    translated = translate(sources)
+    return translated
 
 
 def get_generation_dataset(dataset: BinaryDataset,
@@ -68,10 +65,11 @@ def generate(dataset: BinaryDataset,
         translate=model,
         dataset_name=dataset_name,
     )
-    src_lang, _ = DatasetFactory.get_languages(dataset_name)
+    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
     sources = [sample[src_lang] for sample in dataset]
-    save_translations_texts(sources, translations, dataset_name)
-    return save_translations(translations, dataset_name, device, ext)
+    targets = [sample[trg_lang] for sample in dataset]
+    save_translations_texts(sources, targets, translations, dataset_name)
+    return save_translations(targets, translations, dataset_name, device, ext)
 
 
 if __name__ == '__main__':

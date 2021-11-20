@@ -4,7 +4,7 @@ from typing import List, Union
 from unittest import TestCase
 
 import numpy as np
-from hamcrest import assert_that, equal_to
+from hamcrest import assert_that, equal_to, has_items
 from transformers import EvalPrediction
 
 from detection.data.factory import collect
@@ -26,6 +26,7 @@ class TestFunctionality(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.dataset = MockDataset.dataset
+        cls.targets = MockDataset.targets()
         cls.translations = translate_dataset(cls.dataset, reverse_transform, dataset_name='mock')
 
     @classmethod
@@ -36,8 +37,8 @@ class TestFunctionality(TestCase):
                 os.remove(mock_path)
 
     def test_translations(self):
-        assert_that(len(self.translations), equal_to(4))
-        assert_that(self.translations[:2], equal_to(['gnineve doog', 'добрый вечер']))
+        assert_that(len(self.translations), equal_to(2))
+        assert_that(self.translations, equal_to(['gat netug', 'diel rim tut se']))
 
     def test_compute_metrics(self):
         eval_pred = EvalPrediction(
@@ -53,9 +54,17 @@ class TestFunctionality(TestCase):
             assert_that(type(value), equal_to(float))
 
     def test_save_translations(self):
-        train_dataset, eval_dataset = save_translations(self.translations, dataset_name='mock', device='cpu', ext='bin')
-        assert_that(len(train_dataset.encodings), equal_to(2))
-        assert_that(len(eval_dataset.encodings), equal_to(2))
+        train_dataset, eval_dataset = save_translations(
+            self.targets,
+            self.translations,
+            dataset_name='mock',
+            device='cpu',
+            ext='bin'
+        )
+        encodings_keys = list(train_dataset.encodings.keys())
+        assert_that(encodings_keys, has_items(*['input_ids', 'attention_mask']))
+        assert_that(len(train_dataset.encodings['input_ids']), equal_to(3))
+        assert_that(len(eval_dataset.encodings['input_ids']), equal_to(1))
 
         for suffix in ['train', 'eval']:
             elder_path = path.join(path.dirname(os.getcwd()), f"resources/data/mock.{suffix}.bin")
@@ -72,4 +81,4 @@ class TestFunctionality(TestCase):
         sized_dataset = get_generation_dataset(dataset, dataset_name, size=10)
         assert_that(len(sized_dataset), equal_to(10))
         unsized_dataset = get_generation_dataset(dataset, dataset_name)
-        assert_that(len(unsized_dataset), equal_to(514195))
+        assert_that(len(unsized_dataset), equal_to(299769))
