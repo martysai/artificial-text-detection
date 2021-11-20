@@ -1,13 +1,12 @@
-import pickle
-import zlib
+import os.path as path
 from collections import defaultdict
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
-from datasets import dataset_dict, load_dataset
+from datasets import load_dataset
 
 from detection.arguments import form_args, get_dataset_path
+from detection.utils import BinaryDataset, save_binary_dataset
 
-BinaryDataset = Union[Any, dataset_dict.DatasetDict]
 SUPPORTED_DATASETS = ['mock', 'tatoeba', 'wikimatrix']
 
 # --- Datasets configs description ---
@@ -34,11 +33,15 @@ ENTRYPOINTS = {
 
 # --- Using languages description ---
 # We suppose that languages follow the order: [source language, target language]
+# Every dataset has a default language pair (it should be put first).
+# Then, generate.py should not support iterating through several languages.
+# This logic is put directly into scripts.
+
 DEFAULT_LANGS = ['de', 'en']
 LANGS = {
     'tatoeba': [
         DEFAULT_LANGS,
-        [],
+        ['fr', 'ru'],
     ],
     'wikimatrix': [
         DEFAULT_LANGS,
@@ -53,7 +56,7 @@ class DatasetFactory:
         if not size:
             return dataset
         if dataset_name == 'tatoeba':
-            # Figure out how to crop better
+            # TODO-Extra: Figure out how to crop better
             # dataset['train']['translation'] = dataset['train']['translation'][:size]
             pass
         elif dataset_name == 'wikimatrix':
@@ -73,29 +76,8 @@ class DatasetFactory:
         return source_dataset
 
     @staticmethod
-    def get_languages(dataset_name: str) -> Optional[List[str]]:
-        # TODO: extend for multiple language pairs
-        # for langs_pair in LANGS[dataset_name]:
-        #     if langs_pair:
-        #         return langs_pair
-        return DEFAULT_LANGS
-
-
-def load_binary_dataset(dataset_name: str, ext: str = 'bin') -> BinaryDataset:
-    dataset_path = get_dataset_path(dataset_name, ext=ext)
-    with open(dataset_path, 'rb') as file:
-        compressed_dataset = file.read()
-        dumped_dataset = zlib.decompress(compressed_dataset)
-        dataset = pickle.loads(dumped_dataset)
-    return dataset
-
-
-def save_binary_dataset(dataset: BinaryDataset, ext: str = 'bin') -> None:
-    dataset_path = get_dataset_path(dataset.dataset_name, ext=ext)
-    with open(dataset_path, 'wb') as file:
-        dumped_dataset = pickle.dumps(dataset, protocol=pickle.HIGHEST_PROTOCOL)
-        compressed_dataset = zlib.compress(dumped_dataset)
-        file.write(compressed_dataset)
+    def get_languages(dataset_name: str) -> List[List[str]]:
+        return LANGS[dataset_name]
 
 
 def collect(chosen_dataset_name: str,
@@ -123,23 +105,21 @@ def collect(chosen_dataset_name: str,
         raise ValueError('Wrong chosen dataset name')
 
     collection = []
-    langs = LANGS[chosen_dataset_name]
+    langs = DatasetFactory.get_languages(chosen_dataset_name)
     for langs_pair in langs:
         if not langs_pair:
             continue
         print(f"Handling languages... Lang #1 = '{langs_pair[0]}'; Lang # 2 = '{langs_pair[1]}'...")
         source_dataset = DatasetFactory.get(chosen_dataset_name, langs_pair)
         source_dataset = DatasetFactory.crop(source_dataset, chosen_dataset_name, size)
+        if save:
+            save_binary_dataset(source_dataset, langs=langs_pair, ext=ext)
         if source_dataset:
             collection.append(source_dataset)
-    if save:
-        for dataset in collection:
-            save_binary_dataset(dataset, ext=ext)
     return collection
 
 
 if __name__ == '__main__':
     main_args = form_args()
     source_datasets = collect(main_args.dataset_name, save=True, ext=main_args.bin_ext)
-    for binary_dataset in source_datasets:
-        save_binary_dataset(binary_dataset, ext=main_args.bin_ext)
+    print('Source datasets length =', len(source_datasets))

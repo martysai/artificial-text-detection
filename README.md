@@ -6,6 +6,13 @@
 # Artificial Text Detection
 Solutions for true/generated text distinction.
 
+### Contents
+
+Project description is put into:
+
+- [Framework Description Markdown](https://github.com/MaratSaidov/artificial-text-detection/blob/main/detection/README.md);
+- [Data Description Markdown](https://github.com/MaratSaidov/artificial-text-detection/blob/main/detection/data/README.md).
+
 ### Installation steps:
 
 ```bash
@@ -28,7 +35,6 @@ Check out `dvc.yaml` and `parameters.yaml` for a better pipelines understanding.
 ```bash
 python detection/pipeline.py
 ```
-
 
 [build_status_badge]: https://github.com/MaratSaidov/artificial-text-detection/actions/workflows/build.yml/badge.svg
 [build_status_link]: https://github.com/MaratSaidov/artificial-text-detection/actions/workflows/build.yml

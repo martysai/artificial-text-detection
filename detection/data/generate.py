@@ -3,17 +3,23 @@ from typing import Callable, Collection, Dict, List, Optional, Union
 
 from detection.models.translation import TranslationModel
 from detection.arguments import form_args, get_dataset_path
-from detection.data.factory import BinaryDataset, DatasetFactory, collect, load_binary_dataset
-from detection.utils import MockDataset, TrainEvalDatasets, log, save, save_translations, save_translations_texts
+from detection.data.factory import DatasetFactory, BinaryDataset, collect
+from detection.utils import (
+    MockDataset,
+    load_binary_dataset,
+    translations_to_torch_dataset,
+    save_translations_texts,
+)
+from detection.data.wrapper import TextDetectionDataset
+
+SRC_LANG = 'de'
 
 
 def translate_dataset(
         dataset: Collection[Dict[str, str]],
         translate: Callable[[Union[str, List[str]]], Union[str, List[str]]],
-        dataset_name: Optional[str] = None
+        src_lang: str = SRC_LANG,
 ) -> List[str]:
-    # TODO: порефакторить все вызовы translate_dataset
-    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
     sources = [sample[src_lang] for sample in dataset]
     translated = translate(sources)
     return translated
@@ -30,7 +36,7 @@ def get_generation_dataset(dataset: BinaryDataset,
     if dataset_name == 'tatoeba':
         dataset = dataset['train']['translation']
     elif dataset_name == 'wikimatrix':
-        # TODO: transform to list for wikimatrix
+        # TODO-WikiMatrix
         pass
     if size:
         dataset = dataset[:size]
@@ -39,61 +45,92 @@ def get_generation_dataset(dataset: BinaryDataset,
 
 def generate(dataset: BinaryDataset,
              dataset_name: str,
+             src_lang: Optional[str] = None,
+             trg_lang: Optional[str] = None,
              size: Optional[int] = None,
              device: Optional[str] = None,
-             ext: str = 'bin') -> TrainEvalDatasets:
+             batch_size: Optional[int] = None) -> TextDetectionDataset:
     """
+    Generating mappings (sources, targets, translations) for a fixed pair of languages.
+
     Parameters
     ----------
-        TODO
-        dataset: detection.data.factory.BinaryDataset
+        dataset: BinaryDataset
+            Default source dataset which is processed with factory.
         dataset_name: str
+            Possible options: ['tatoeba'].
+        src_lang: Optional[str]
+            Source language (default is 'de').
+        trg_lang: Optional[str]
+            Target language (default is 'en').
         size: Optional[int]
+            Size of binary/generated dataset.
         device: Optional[str]
-        ext: str
+            Where to put torch-like datasets.
+        batch_size: Optional[int]
+            Batch size for EasyNMT.
 
     Returns
     -------
-        datasets: TrainEvalDatasets
-            A tuple containing train and eval datasets.
+        dataset: TextDetectionDataset
+            Torch dataset.
     """
+    if dataset_name not in ['tatoeba']:
+        raise ValueError('Wrong dataset name')
+
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
-    # TODO: add the support of languages
-    model = TranslationModel()
+    # TODO-EasyNMT: add the support of another EasyNMT
+    model = TranslationModel(src_lang=src_lang, trg_lang=trg_lang, batch_size=batch_size)
     translations = translate_dataset(
         dataset=dataset,
         translate=model,
-        dataset_name=dataset_name,
+        src_lang=src_lang
     )
-    src_lang, trg_lang = DatasetFactory.get_languages(dataset_name)
     sources = [sample[src_lang] for sample in dataset]
     targets = [sample[trg_lang] for sample in dataset]
-    save_translations_texts(sources, targets, translations, dataset_name)
-    return save_translations(targets, translations, dataset_name, device, ext)
+    save_translations_texts(
+        sources,
+        targets,
+        translations,
+        dataset_name=dataset_name,
+        src_lang=src_lang,
+        trg_lang=trg_lang
+    )
+    return translations_to_torch_dataset(targets, translations, device=device)
 
 
 if __name__ == '__main__':
-    # TODO: (для DVC) должен взаимодействовать с модулем collect()
+    # TODO-DVC: interact with factory.py
     main_args = form_args()
-    binary_dataset_path = get_dataset_path(main_args.dataset_name, 'bin')
-    if not path.exists(binary_dataset_path):
-        datasets = collect(chosen_dataset_name=main_args.dataset_name, save=True, size=main_args.size, ext='bin')
-    else:
-        binary_dataset = load_binary_dataset(main_args.dataset_name)
-        # TODO: improve for other languages
-        datasets = [binary_dataset]
+    languages = DatasetFactory.get_languages(main_args.dataset_name)
+    default_binary_dataset_path = get_dataset_path(main_args.dataset_name, langs=languages[0], ext='bin')
 
-    for binary_ind, binary_dataset in enumerate(datasets):
-        # TODO: add logs with languages
-        print(f'Handling a binary dataset = {binary_ind + 1}')
-        train_dataset, eval_dataset = generate(
+    # Retrieving datasets
+    if not path.exists(default_binary_dataset_path):
+        datasets = collect(
+            chosen_dataset_name=main_args.dataset_name,
+            save=True,
+            size=main_args.size,
+            ext=main_args.ext
+        )
+    else:
+        datasets = [load_binary_dataset(main_args.dataset_name, langs=lang_pair, ext=main_args.ext)
+                    for lang_pair in languages]
+
+    # Generating translations and saving torch datasets
+    for binary_ind, (binary_dataset, lang_pair) in enumerate(list(zip(datasets, languages))):
+        print(f'[{binary_ind + 1}/{len(datasets)}] Handling dataset with a name = {main_args.dataset_name}')
+        torch_dataset = generate(
             dataset=binary_dataset,
             dataset_name=main_args.dataset_name,
             device=main_args.device,
             size=main_args.size,
-            ext=main_args.ds_ext
+            batch_size=main_args.easy_nmt_batch_size
         )
-        train_gen_path = get_dataset_path(f'{main_args.dataset_name}.train.{binary_ind + 1}.gen', 'pth')
+        train_dataset, eval_dataset = torch_dataset.split()
+
+        SRC_LANG, TRG_LANG = lang_pair
+        train_gen_path = get_dataset_path(f'{main_args.dataset_name}.train.{SRC_LANG}-{TRG_LANG}', ext=main_args.ds_ext)
         train_dataset.save(train_gen_path)
-        eval_gen_path = get_dataset_path(f'{main_args.dataset_name}.eval.{binary_ind + 1}.gen', 'pth')
+        eval_gen_path = get_dataset_path(f'{main_args.dataset_name}.eval.{SRC_LANG}-{TRG_LANG}', ext=main_args.ds_ext)
         eval_dataset.save(eval_gen_path)

@@ -8,9 +8,9 @@ from transformers import DistilBertForSequenceClassification, Trainer, TrainingA
 
 from detection.models.validate import compute_metrics
 from detection.arguments import form_args, get_dataset_path
-from detection.data.factory import BinaryDataset, collect, save_binary_dataset
+from detection.data.factory import DatasetFactory, collect
 from detection.data.generate import generate
-from detection.utils import TrainEvalDatasets
+from detection.utils import BinaryDataset, save_binary_dataset
 from detection.data.wrapper import TextDetectionDataset
 
 
@@ -45,10 +45,10 @@ def create_binary_datasets(args) -> List[BinaryDataset]:
 
 def translate_binary_datasets(datasets: List[BinaryDataset],
                               datasets_names: List[str],
-                              args) -> TrainEvalDatasets:
+                              args) -> List[TextDetectionDataset]:
     """
     A pipeline wrapper for generate method.
-    TODO
+    TODO-Doc
 
     Parameters
     ----------
@@ -58,31 +58,38 @@ def translate_binary_datasets(datasets: List[BinaryDataset],
 
     Returns
     -------
-        train_dataset, eval_dataset: TrainEvalDatasets
+        dataset: TextDetectionDataset
 
     """
-    # TODO: дописать функционал с разными языками
-    dataset, dataset_name = datasets[0], datasets_names[0]
-    train_path = get_dataset_path(args.dataset_name, f'train.{args.ds_ext}')
-    eval_path = get_dataset_path(args.dataset_name, f'eval.{args.ds_ext}')
-    if not (path.exists(train_path) and path.exists(eval_path)):
-        train_dataset, eval_dataset = generate(dataset,
-                                               dataset_name,
-                                               device=args.device,
-                                               size=args.size,
-                                               ext=args.ds_ext)
-    else:
-        print('Datasets have already been processed. Paths: '
-              f'train path = {train_path}; eval path: {eval_path}')
-        train_dataset = TextDetectionDataset.load(train_path, device=args.device)
-        eval_dataset = TextDetectionDataset.load(eval_path, device=args.device)
-    return train_dataset, eval_dataset
+    # TODO-WikiMatrix: improve for multiple datasets
+    dataset_name = datasets_names[0]
+    languages = DatasetFactory.get_languages(dataset_name)
+
+    translated_datasets = []
+    for i, lang_pair in enumerate(languages):
+        dataset = datasets[i]
+        src_lang, trg_lang = lang_pair
+        csv_path = get_dataset_path(f'{dataset_name}.{src_lang}-{trg_lang}', ext='csv')
+        if not path.exists(csv_path):
+            generated_dataset = generate(dataset,
+                                         dataset_name,
+                                         src_lang=src_lang,
+                                         trg_lang=trg_lang,
+                                         size=args.size,
+                                         device=args.device,
+                                         batch_size=args.easy_nmt_batch_size)
+        else:
+            print(f'This dataset has already been processed. CSV Path = {csv_path}')
+            generated_dataset = TextDetectionDataset.load_csv(csv_path, device=args.device)
+        translated_datasets.append(generated_dataset)
+    return translated_datasets
 
 
 def train_text_detection_model(
-        train_dataset: TextDetectionDataset,
-        eval_dataset: TextDetectionDataset,
+        dataset: TextDetectionDataset,
         args) -> Trainer:
+    train_dataset, eval_dataset = dataset.split()
+
     training_args = TrainingArguments(
         evaluation_strategy='epoch',
         output_dir='./results',
@@ -115,21 +122,24 @@ def train_text_detection_model(
     return trainer
 
 
-def pipeline(args) -> Trainer:
+def pipeline(args) -> List[Trainer]:
     """
-    TODO
+    TODO-Doc
     """
-    setup_experiment_tracking(args)
 
     datasets = create_binary_datasets(args)
-    # TODO: extend for multiple dataset names
-    datasets_names = [args.dataset_name]
+    # TODO-WikiMatrix: extend for multiple dataset names
+    datasets_names = [args.dataset_name] * len(datasets)
 
-    train_dataset, eval_dataset = translate_binary_datasets(datasets, datasets_names, args)
+    dataset_with_langs = translate_binary_datasets(datasets, datasets_names, args)
 
-    trainer = train_text_detection_model(train_dataset, eval_dataset, args)
-    stop_experiment_tracking()
-    return trainer
+    trainers = []
+    for dataset in dataset_with_langs:
+        setup_experiment_tracking(args)
+        trainer = train_text_detection_model(dataset, args)
+        trainers.append(trainer)
+        stop_experiment_tracking()
+    return trainers
 
 
 if __name__ == '__main__':
