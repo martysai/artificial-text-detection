@@ -70,10 +70,8 @@ class DatasetFactory:
     @staticmethod
     def get(dataset_name: str, langs: List[str]) -> Any:
         config = CONFIGS[dataset_name]
-        if dataset_name == 'tatoeba':
+        if (dataset_name == 'tatoeba') or (dataset_name == 'wikimatrix'):
             config['lang1'], config['lang2'] = langs
-        elif dataset_name == 'wikimatrix':
-            pass
         entrypoint = ENTRYPOINTS[dataset_name]
         source_dataset = entrypoint(**config)
         source_dataset.dataset_name = dataset_name

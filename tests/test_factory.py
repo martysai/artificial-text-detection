@@ -9,7 +9,7 @@ from detection.utils import MockDataset, translations_to_torch_dataset
 
 
 class TestFactory(TestCase):
-    def test_collect(self):
+    def test_collect_tatoeba(self):
         dataset_name, ext = 'tatoeba', 'bin'
         datasets = collect(dataset_name, save=True, ext=ext)
         assert_that(len(datasets), equal_to(6))
@@ -18,7 +18,8 @@ class TestFactory(TestCase):
         dataset_path = get_dataset_path(dataset_name, langs=['fr', 'ru'], ext=ext)
         assert_that(path.exists(dataset_path), equal_to(True))
 
-    def test_wikimatrix(self):
+    def test_collect_wikimatrix(self):
+        # TODO-WikiMatrix
         pass
 
 
