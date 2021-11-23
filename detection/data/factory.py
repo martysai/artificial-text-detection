@@ -49,6 +49,11 @@ LANGS = {
     ],
     'wikimatrix': [
         DEFAULT_LANGS,
+        ['bn', 'en'],
+        ['en', 'ko'],
+        ['no', 'sv'],
+        ['en', 'eo'],
+        ['el', 'en'],
     ]
 }
 LANGS = defaultdict(list, LANGS)
