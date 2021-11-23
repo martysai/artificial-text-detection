@@ -4,7 +4,7 @@ from unittest import TestCase
 from hamcrest import assert_that, equal_to
 
 from detection.arguments import get_dataset_path
-from detection.data.factory import collect
+from detection.data.factory import collect, load_wikimatrix
 from detection.utils import MockDataset, translations_to_torch_dataset
 
 
@@ -19,8 +19,10 @@ class TestFactory(TestCase):
         assert_that(path.exists(dataset_path), equal_to(True))
 
     def test_collect_wikimatrix(self):
-        # TODO-WikiMatrix
-        pass
+        dataset = load_wikimatrix(lang1='de', lang2='en', size=10)
+        assert_that(len(dataset), equal_to(10))
+        assert_that(dataset[0]['de'], equal_to('Gott ist nicht nur der Allmächtige, sondern auch der Erbarmende.'))
+        assert_that(dataset[0]['en'], equal_to('And He is The Almighty, The Compassionate."'))
 
 
 class TestUtils(TestCase):

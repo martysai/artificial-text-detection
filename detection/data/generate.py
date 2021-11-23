@@ -75,7 +75,7 @@ def generate(dataset: BinaryDataset,
         dataset: TextDetectionDataset
             Torch dataset.
     """
-    if dataset_name not in ['tatoeba']:
+    if dataset_name not in ['tatoeba', 'wikimatrix']:
         raise ValueError('Wrong dataset name')
 
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
@@ -119,22 +119,23 @@ if __name__ == '__main__':
 
     # Generating translations and saving torch datasets
     for dataset_ind, (binary_dataset, lang_pair) in enumerate(list(zip(datasets, languages))):
-        src_lang, trg_lang = languages[dataset_ind]
+        gl_src_lang, gl_trg_lang = lang_pair
         print(f'[{dataset_ind + 1}/{len(datasets)}] Handling dataset = {main_args.dataset_name}, '
-              f'src lang = {src_lang} trg_lang = {trg_lang}')
+              f'src lang = {gl_src_lang} trg_lang = {gl_trg_lang}')
         torch_dataset = generate(
             dataset=binary_dataset,
             dataset_name=main_args.dataset_name,
-            src_lang=src_lang,
-            trg_lang=trg_lang,
+            src_lang=gl_src_lang,
+            trg_lang=gl_trg_lang,
             device=main_args.device,
             size=main_args.size,
             batch_size=main_args.easy_nmt_batch_size
         )
         train_dataset, eval_dataset = torch_dataset.split()
 
-        SRC_LANG, TRG_LANG = lang_pair
-        train_gen_path = get_dataset_path(f'{main_args.dataset_name}.train.{SRC_LANG}-{TRG_LANG}', ext=main_args.ds_ext)
+        train_gen_path = get_dataset_path(f'{main_args.dataset_name}.train.{gl_src_lang}-{gl_trg_lang}',
+                                          ext=main_args.ds_ext)
         train_dataset.save(train_gen_path)
-        eval_gen_path = get_dataset_path(f'{main_args.dataset_name}.eval.{SRC_LANG}-{TRG_LANG}', ext=main_args.ds_ext)
+        eval_gen_path = get_dataset_path(f'{main_args.dataset_name}.eval.{gl_src_lang}-{gl_trg_lang}',
+                                         ext=main_args.ds_ext)
         eval_dataset.save(eval_gen_path)
