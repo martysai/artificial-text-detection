@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+import pytest
 import torch
 from hamcrest import assert_that, equal_to
 
@@ -9,6 +10,7 @@ from tests import skip_github
 
 
 class TestPipeline(TestCase):
+    @pytest.mark.timeout(30)
     @skip_github
     def test_run(self):
         args = form_args()

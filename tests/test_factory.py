@@ -19,8 +19,8 @@ class TestFactory(TestCase):
         assert_that(path.exists(dataset_path), equal_to(True))
 
     def test_collect_wikimatrix(self):
-        dataset = load_wikimatrix(lang1='de', lang2='en', size=10)
-        assert_that(len(dataset), equal_to(10))
+        dataset = load_wikimatrix(lang1='de', lang2='en')
+        assert_that(len(dataset), equal_to(1573437))
         assert_that(dataset[0]['de'], equal_to('Gott ist nicht nur der Allmächtige, sondern auch der Erbarmende.'))
         assert_that(dataset[0]['en'], equal_to('And He is The Almighty, The Compassionate."'))
 
