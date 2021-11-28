@@ -12,17 +12,20 @@ class TestFactory(TestCase):
     def test_collect_tatoeba(self):
         dataset_name, ext = 'tatoeba', 'bin'
         datasets = collect(dataset_name, save=True, ext=ext)
-        assert_that(len(datasets), equal_to(6))
-        dataset_path = get_dataset_path(dataset_name, langs=['de', 'en'], ext=ext)
+        assert_that(len(datasets), equal_to(4))
+        dataset_path = get_dataset_path(dataset_name, langs=['en', 'ru'], ext=ext)
         assert_that(path.exists(dataset_path), equal_to(True))
         dataset_path = get_dataset_path(dataset_name, langs=['fr', 'ru'], ext=ext)
         assert_that(path.exists(dataset_path), equal_to(True))
 
     def test_collect_wikimatrix(self):
-        dataset = load_wikimatrix(lang1='de', lang2='en')
-        assert_that(len(dataset), equal_to(1573437))
-        assert_that(dataset[0]['de'], equal_to('Gott ist nicht nur der Allmächtige, sondern auch der Erbarmende.'))
+        dataset = load_wikimatrix(lang1='en', lang2='ru')
+        assert_that(len(dataset), equal_to(1661908))
+        assert_that(dataset[0]['ru'], equal_to('The glory of the Lord has risen upon thee".'))
         assert_that(dataset[0]['en'], equal_to('And He is The Almighty, The Compassionate."'))
+
+    def test_languages(self):
+        pass
 
 
 class TestUtils(TestCase):

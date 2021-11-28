@@ -47,22 +47,21 @@ ENTRYPOINTS = {
 # Every dataset has a default language pair (it should be put first).
 # Then, generate.py should not support iterating through several languages.
 # This logic is put directly into scripts.
+# The third argument can take two possible values: ['straight', 'reversed'].
 
-DEFAULT_LANGS = ['de', 'en']
+DEFAULT_LANGS = ['en', 'ru', 'reversed']
 LANGS = {
     'tatoeba': [
         DEFAULT_LANGS,
-        ['en', 'nl'],
-        ['en', 'es'],
-        ['en', 'he'],
-        ['en', 'fi'],
-        ['fr', 'ru'],
+        ['es', 'ru', 'reversed'],
+        ['fi', 'ru', 'reversed'],
+        ['fr', 'ru', 'reversed'],
     ],
     'wikimatrix': [
         DEFAULT_LANGS,
-        ['bn', 'en'],
-        ['en', 'es'],
-        ['en', 'fi'],
+        ['es', 'ru', 'reversed'],
+        ['fi', 'ru', 'reversed'],
+        ['fr', 'ru', 'reversed'],
     ]
 }
 LANGS = defaultdict(list, LANGS)
@@ -85,7 +84,7 @@ class DatasetFactory:
     def get(dataset_name: str, langs: List[str]) -> Any:
         config = CONFIGS[dataset_name]
         if (dataset_name == 'tatoeba') or (dataset_name == 'wikimatrix'):
-            config['lang1'], config['lang2'] = langs
+            config['lang1'], config['lang2'] = langs[0], langs[1]
         entrypoint = ENTRYPOINTS[dataset_name]
         source_dataset = entrypoint(**config)
         return source_dataset

@@ -12,13 +12,11 @@ from detection.utils import (
 )
 from detection.data.wrapper import TextDetectionDataset
 
-SRC_LANG = 'de'
-
 
 def translate_dataset(
         dataset: Collection[Dict[str, str]],
         translate: Callable[[Union[str, List[str]]], Union[str, List[str]]],
-        src_lang: str = SRC_LANG,
+        src_lang: str,
 ) -> List[str]:
     sources = [sample[src_lang] for sample in dataset]
     translated = translate(sources)
@@ -60,7 +58,7 @@ def generate(dataset: BinaryDataset,
         dataset_name: str
             Possible options: ['tatoeba'].
         src_lang: Optional[str]
-            Source language (default is 'de').
+            Source language (default is 'ru').
         trg_lang: Optional[str]
             Target language (default is 'en').
         size: Optional[int]
@@ -119,7 +117,12 @@ if __name__ == '__main__':
 
     # Generating translations and saving torch datasets
     for dataset_ind, (binary_dataset, lang_pair) in enumerate(list(zip(datasets, languages))):
-        gl_src_lang, gl_trg_lang = lang_pair
+        gl_src_lang, gl_trg_lang, direction = lang_pair
+        if direction == 'reversed':
+            gl_src_lang, gl_trg_lang = gl_trg_lang, gl_src_lang
+        elif direction != 'straight':
+            raise ValueError('Wrong direction passed to language pairs')
+
         print(f'[{dataset_ind + 1}/{len(datasets)}] Handling dataset = {main_args.dataset_name}, '
               f'src lang = {gl_src_lang} trg_lang = {gl_trg_lang}')
         torch_dataset = generate(
