@@ -49,13 +49,13 @@ ENTRYPOINTS = {
 # This logic is put directly into scripts.
 # The third argument can take two possible values: ['straight', 'reversed'].
 
-DEFAULT_LANGS = ['en', 'ru', 'reversed']
+DEFAULT_LANGS = ['en', 'ru', 'straight']
 LANGS = {
     'tatoeba': [
         DEFAULT_LANGS,
-        ['es', 'ru', 'reversed'],
-        ['fi', 'ru', 'reversed'],
-        ['fr', 'ru', 'reversed'],
+        ['es', 'ru', 'straight'],
+        ['fi', 'ru', 'straight'],
+        ['fr', 'ru', 'straight'],
     ],
     'wikimatrix': [
         DEFAULT_LANGS,
