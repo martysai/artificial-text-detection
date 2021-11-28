@@ -21,8 +21,8 @@ class TestFactory(TestCase):
     def test_collect_wikimatrix(self):
         dataset = load_wikimatrix(lang1='en', lang2='ru')
         assert_that(len(dataset), equal_to(1661908))
-        assert_that(dataset[0]['ru'], equal_to('The glory of the Lord has risen upon thee".'))
-        assert_that(dataset[0]['en'], equal_to('And He is The Almighty, The Compassionate."'))
+        assert_that(dataset[0]['ru'], equal_to('Какую же из милостей вашего Господа вы считаете ложью?».'))
+        assert_that(dataset[0]['en'], equal_to('The glory of the Lord has risen upon thee".'))
 
     def test_languages(self):
         pass
