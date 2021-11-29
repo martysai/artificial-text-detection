@@ -49,7 +49,7 @@ ENTRYPOINTS = {
 # This logic is put directly into scripts.
 # The third argument can take two possible values: ['straight', 'reversed'].
 
-DEFAULT_LANGS = ['en', 'ru', 'straight']
+DEFAULT_LANGS = ['en', 'ru', 'reversed']
 LANGS = {
     'tatoeba': [
         DEFAULT_LANGS,
