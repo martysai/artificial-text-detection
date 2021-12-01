@@ -58,8 +58,6 @@ LANGS = {
         ['fr', 'ru', 'straight'],
     ],
     'wikimatrix': [
-        DEFAULT_LANGS,
-        ['es', 'ru', 'straight'],
         ['fi', 'ru', 'straight'],
         ['fr', 'ru', 'straight'],
     ]
