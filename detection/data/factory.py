@@ -58,7 +58,6 @@ LANGS = {
         ['fr', 'ru', 'straight'],
     ],
     'wikimatrix': [
-        ['fi', 'ru', 'straight'],
         ['fr', 'ru', 'straight'],
     ]
 }
