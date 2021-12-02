@@ -39,7 +39,7 @@ def create_binary_datasets(args) -> List[BinaryDataset]:
     """
     source_datasets = collect(args.dataset_name, save=True, size=args.size, ext=args.bin_ext)
     for binary_dataset in source_datasets:
-        save_binary_dataset(binary_dataset, ext=args.bin_ext)
+        save_binary_dataset(binary_dataset, args.dataset_name, ext=args.bin_ext)
     return source_datasets
 
 
@@ -68,7 +68,11 @@ def translate_binary_datasets(datasets: List[BinaryDataset],
     translated_datasets = []
     for i, lang_pair in enumerate(languages):
         dataset = datasets[i]
-        src_lang, trg_lang = lang_pair
+        src_lang, trg_lang, direction = lang_pair
+        if direction == 'reversed':
+            src_lang, trg_lang = trg_lang, src_lang
+        elif direction != 'straight':
+            raise ValueError('Wrong direction passed to language pairs')
         csv_path = get_dataset_path(f'{dataset_name}.{src_lang}-{trg_lang}', ext='csv')
         if not path.exists(csv_path):
             generated_dataset = generate(dataset,

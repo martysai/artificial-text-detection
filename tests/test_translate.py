@@ -16,20 +16,20 @@ class TestTranslate(TestCase):
     """
     @classmethod
     def setUpClass(cls) -> None:
-        model = TranslationModel(src_lang='de', trg_lang='en')
+        model = TranslationModel(src_lang='ru', trg_lang='en')
         sources = [
-            'Muiriel ist jetzt 20.',
-            'Was ist das?',
-            'Das wird nichts ändern.',
-            'Muiriel ist jetzt 20.',
-            'Ich finde keine Worte.'
+            'Один раз в жизни я делаю хорошее дело... И оно бесполезно.',
+            'Давайте что-нибудь попробуем!',
+            'Давайте что-нибудь попробуем.',
+            'Мне пора идти спать.',
+            'Мне нужно идти спать.'
         ]
         targets = [
-            'Muiriel is 20 now.',
-            "What's that?",
-            'That will change nothing.',
-            'Muiriel has turned twenty.',
-            "I don't know what to say."
+            "For once in my life I'm doing a good deed... And it is useless.",
+            "Let's try something.",
+            "Let's try something.",
+            'I have to go to sleep.',
+            'I have to go to sleep.'
         ]
         cls.model = model
         cls.sources = sources
@@ -37,12 +37,12 @@ class TestTranslate(TestCase):
         cls.translations = model(sources)
 
     def test_translate(self) -> None:
-        source = 'Guten Tag.'
+        source = 'Добрый день.'
         target = self.model(source)
-        assert_that(target, equal_to('Hello.'))
+        assert_that(target, equal_to('Good afternoon.'))
 
     def test_translation_size(self) -> None:
-        assert_that(self.translations[0], equal_to('Muiriel is now 20.'))
+        assert_that(self.translations[0], equal_to("Once in my life, I do a good thing... and it's useless."))
         assert_that(len(self.translations), equal_to(5))
 
     def test_save_to_csv(self) -> None:
@@ -52,10 +52,10 @@ class TestTranslate(TestCase):
             self.targets,
             self.translations,
             dataset_name=dataset_name,
-            src_lang='de',
+            src_lang='ru',
             trg_lang='en'
         )
-        dataset_path = get_dataset_path(f'{dataset_name}.de-en', ext='csv')
+        dataset_path = get_dataset_path(f'{dataset_name}.ru-en', ext='csv')
         df_sample = pd.read_csv(dataset_path)
         assert_that(df_sample.columns.tolist(), has_items(*['sources', 'targets', 'translations']))
         assert_that(len(df_sample), equal_to(5))

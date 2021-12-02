@@ -55,8 +55,11 @@ def load_binary_dataset(dataset_name: str, langs: Optional[List[str]] = None, ex
     return dataset
 
 
-def save_binary_dataset(dataset: BinaryDataset, langs: Optional[List[str]] = None, ext: str = 'bin') -> None:
-    dataset_path = get_dataset_path(dataset.dataset_name, langs=langs, ext=ext)
+def save_binary_dataset(dataset: BinaryDataset,
+                        dataset_name: str,
+                        langs: Optional[List[str]] = None,
+                        ext: str = 'bin') -> None:
+    dataset_path = get_dataset_path(dataset_name, langs=langs, ext=ext)
     with open(dataset_path, 'wb') as file:
         dumped_dataset = pickle.dumps(dataset, protocol=pickle.HIGHEST_PROTOCOL)
         compressed_dataset = zlib.compress(dumped_dataset)

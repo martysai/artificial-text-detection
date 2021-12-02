@@ -1,6 +1,5 @@
-import os.path as path
 from collections import defaultdict
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 from datasets import load_dataset
 
@@ -22,13 +21,25 @@ CONFIGS = defaultdict(dict, CONFIGS)
 
 # --- Datasets sources description ---
 
-def _empty_function(*args, **kwargs) -> None:
-    pass
+def process_source_wikimatrix(path: str) -> List[str]:
+    with open(path) as file:
+        lines = file.readlines()
+        lines = [line.rstrip() for line in lines]
+    return lines
+
+
+def load_wikimatrix(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path(f'wikimatrix/WikiMatrix.{lang1}-{lang2}.txt', ext=lang1)
+    sources = process_source_wikimatrix(sources_path)
+    targets_path = get_dataset_path(f'wikimatrix/WikiMatrix.{lang1}-{lang2}.txt', ext=lang2)
+    targets = process_source_wikimatrix(targets_path)
+    dataset = [{lang1: sources[i], lang2: targets[i]} for i in list(range(len(sources)))]
+    return dataset
 
 
 ENTRYPOINTS = {
     'tatoeba': load_dataset,
-    'wikimatrix': _empty_function
+    'wikimatrix': load_wikimatrix
 }
 
 # --- Using languages description ---
@@ -36,19 +47,18 @@ ENTRYPOINTS = {
 # Every dataset has a default language pair (it should be put first).
 # Then, generate.py should not support iterating through several languages.
 # This logic is put directly into scripts.
+# The third argument can take two possible values: ['straight', 'reversed'].
 
-DEFAULT_LANGS = ['de', 'en']
+DEFAULT_LANGS = ['en', 'ru', 'straight']
 LANGS = {
     'tatoeba': [
         DEFAULT_LANGS,
-        ['en', 'nl'],
-        ['en', 'es'],
-        ['en', 'he'],
-        ['en', 'fi'],
-        ['fr', 'ru'],
+        ['es', 'ru', 'straight'],
+        ['fi', 'ru', 'straight'],
+        ['fr', 'ru', 'straight'],
     ],
     'wikimatrix': [
-        DEFAULT_LANGS,
+        ['fr', 'ru', 'straight'],
     ]
 }
 LANGS = defaultdict(list, LANGS)
@@ -64,19 +74,16 @@ class DatasetFactory:
             # dataset['train']['translation'] = dataset['train']['translation'][:size]
             pass
         elif dataset_name == 'wikimatrix':
-            pass
+            dataset = dataset[:size]
         return dataset
 
     @staticmethod
     def get(dataset_name: str, langs: List[str]) -> Any:
         config = CONFIGS[dataset_name]
-        if dataset_name == 'tatoeba':
-            config['lang1'], config['lang2'] = langs
-        elif dataset_name == 'wikimatrix':
-            pass
+        if (dataset_name == 'tatoeba') or (dataset_name == 'wikimatrix'):
+            config['lang1'], config['lang2'] = langs[0], langs[1]
         entrypoint = ENTRYPOINTS[dataset_name]
         source_dataset = entrypoint(**config)
-        source_dataset.dataset_name = dataset_name
         return source_dataset
 
     @staticmethod
@@ -117,7 +124,7 @@ def collect(chosen_dataset_name: str,
         source_dataset = DatasetFactory.get(chosen_dataset_name, langs_pair)
         source_dataset = DatasetFactory.crop(source_dataset, chosen_dataset_name, size)
         if save:
-            save_binary_dataset(source_dataset, langs=langs_pair, ext=ext)
+            save_binary_dataset(source_dataset, chosen_dataset_name, langs=langs_pair, ext=ext)
         if source_dataset:
             collection.append(source_dataset)
     return collection
