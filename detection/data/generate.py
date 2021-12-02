@@ -3,7 +3,12 @@ from typing import Callable, Collection, Dict, List, Optional, Union
 
 from detection.models.translation import TranslationModel
 from detection.arguments import form_args, get_dataset_path
-from detection.data.factory import DatasetFactory, BinaryDataset, collect
+from detection.data.factory import (
+    DatasetFactory,
+    BinaryDataset,
+    collect,
+    SUPPORTED_DATASETS
+)
 from detection.utils import (
     MockDataset,
     load_binary_dataset,
@@ -73,7 +78,7 @@ def generate(dataset: BinaryDataset,
         dataset: TextDetectionDataset
             Torch dataset.
     """
-    if dataset_name not in ['tatoeba', 'wikimatrix']:
+    if dataset_name not in SUPPORTED_DATASETS:
         raise ValueError('Wrong dataset name')
 
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)

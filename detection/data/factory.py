@@ -6,7 +6,7 @@ from datasets import load_dataset
 from detection.arguments import form_args, get_dataset_path
 from detection.utils import BinaryDataset, save_binary_dataset
 
-SUPPORTED_DATASETS = ['mock', 'tatoeba', 'wikimatrix']
+SUPPORTED_DATASETS = ['mock', 'tatoeba', 'wikimatrix', 'rnc']
 
 # --- Datasets configs description ---
 
@@ -37,9 +37,19 @@ def load_wikimatrix(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_rnc(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('rnc/rnc', langs=[lang1, lang2], ext='txt')
+    with open(sources_path) as file:
+        lines = file.readlines()
+        sources = [line.rstrip() for line in lines]
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     'tatoeba': load_dataset,
-    'wikimatrix': load_wikimatrix
+    'wikimatrix': load_wikimatrix,
+    'rnc': load_rnc,
 }
 
 # --- Using languages description ---
@@ -58,8 +68,14 @@ LANGS = {
         ['fr', 'ru', 'straight'],
     ],
     'wikimatrix': [
+        DEFAULT_LANGS,
+        ['es', 'ru', 'straight'],
+        ['fi', 'ru', 'straight'],
         ['fr', 'ru', 'straight'],
-    ]
+    ],
+    'rnc': [
+        ['ru', 'en', 'straight'],
+    ],
 }
 LANGS = defaultdict(list, LANGS)
 
@@ -73,14 +89,14 @@ class DatasetFactory:
             # TODO-Extra: Figure out how to crop better
             # dataset['train']['translation'] = dataset['train']['translation'][:size]
             pass
-        elif dataset_name == 'wikimatrix':
+        elif dataset_name == 'wikimatrix' or dataset_name == 'rnc':
             dataset = dataset[:size]
         return dataset
 
     @staticmethod
     def get(dataset_name: str, langs: List[str]) -> Any:
         config = CONFIGS[dataset_name]
-        if (dataset_name == 'tatoeba') or (dataset_name == 'wikimatrix'):
+        if dataset_name in SUPPORTED_DATASETS:
             config['lang1'], config['lang2'] = langs[0], langs[1]
         entrypoint = ENTRYPOINTS[dataset_name]
         source_dataset = entrypoint(**config)
