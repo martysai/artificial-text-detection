@@ -1,6 +1,8 @@
 import os.path as path
 from typing import Callable, Collection, Dict, List, Optional, Union
 
+from easynmt import EasyNMT, models
+
 from detection.models.translation import TranslationModel
 from detection.arguments import form_args, get_dataset_path
 from detection.data.factory import (
@@ -52,7 +54,10 @@ def generate(dataset: BinaryDataset,
              trg_lang: Optional[str] = None,
              size: Optional[int] = None,
              device: Optional[str] = None,
-             batch_size: Optional[int] = None) -> TextDetectionDataset:
+             batch_size: Optional[int] = None,
+             easy_nmt_offline: Optional[bool] = None,
+             offline_prefix: Optional[str] = None,
+             offline_cache_prefix: Optional[str] = None) -> TextDetectionDataset:
     """
     Generating mappings (sources, targets, translations) for a fixed pair of languages.
 
@@ -72,6 +77,13 @@ def generate(dataset: BinaryDataset,
             Where to put torch-like datasets.
         batch_size: Optional[int]
             Batch size for EasyNMT.
+        easy_nmt_offline: Optional[bool]
+            Flag showing should we use online or offline mode for machine translation.
+            See https://github.com/UKPLab/EasyNMT/issues/52
+        offline_prefix: Optional[str]
+            Where the model is stored (download it with huggingface and git lfs).
+        offline_cache_prefix: Optional[str]
+            Where the cache is put.
 
     Returns
     -------
@@ -83,7 +95,16 @@ def generate(dataset: BinaryDataset,
 
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
     # TODO-EasyNMT: add the support of another EasyNMT
-    model = TranslationModel(src_lang=src_lang, trg_lang=trg_lang, batch_size=batch_size)
+
+    model_config = EasyNMT(translator=models.AutoModel(offline_prefix),
+                           cache_folder=offline_cache_prefix) \
+        if easy_nmt_offline else None
+    model = TranslationModel(
+        model=model_config,
+        src_lang=src_lang,
+        trg_lang=trg_lang,
+        batch_size=batch_size
+    )
     translations = translate_dataset(
         dataset=dataset,
         translate=model,
@@ -137,7 +158,10 @@ if __name__ == '__main__':
             trg_lang=gl_trg_lang,
             device=main_args.device,
             size=main_args.size,
-            batch_size=main_args.easy_nmt_batch_size
+            batch_size=main_args.easy_nmt_batch_size,
+            easy_nmt_offline=main_args.easy_nmt_offline,
+            offline_prefix=main_args.offline_prefix,
+            offline_cache_prefix=main_args.offline_cache_prefix
         )
         train_dataset, eval_dataset = torch_dataset.split()
 

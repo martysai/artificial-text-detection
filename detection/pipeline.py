@@ -81,7 +81,11 @@ def translate_binary_datasets(datasets: List[BinaryDataset],
                                          trg_lang=trg_lang,
                                          size=args.size,
                                          device=args.device,
-                                         batch_size=args.easy_nmt_batch_size)
+                                         batch_size=args.easy_nmt_batch_size,
+                                         easy_nmt_offline=args.easy_nmt_offline,
+                                         offline_prefix=args.offline_prefix,
+                                         offline_cache_prefix=args.offline_cache_prefix
+                                         )
         else:
             print(f'This dataset has already been processed. CSV Path = {csv_path}')
             generated_dataset = TextDetectionDataset.load_csv(csv_path, device=args.device)
