@@ -62,19 +62,22 @@ ENTRYPOINTS = {
 DEFAULT_LANGS = ['en', 'ru', 'straight']
 LANGS = {
     'tatoeba': [
-        DEFAULT_LANGS,
+        ['en', 'ru', 'straight'],
         ['es', 'ru', 'straight'],
         ['fi', 'ru', 'straight'],
         ['fr', 'ru', 'straight'],
     ],
     'wikimatrix': [
-        DEFAULT_LANGS,
+        ['en', 'ru', 'straight'],
         ['es', 'ru', 'straight'],
         ['fi', 'ru', 'straight'],
         ['fr', 'ru', 'straight'],
     ],
     'rnc': [
-        ['ru', 'en', 'straight'],
+        # ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
     ],
 }
 LANGS = defaultdict(list, LANGS)
