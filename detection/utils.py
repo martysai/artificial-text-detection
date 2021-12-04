@@ -69,10 +69,14 @@ def save_binary_dataset(dataset: BinaryDataset,
 def translations_to_torch_dataset(
         targets: List[str],
         translations: List[str],
+        easy_nmt_offline: Optional[bool] = None,
         device: Optional[str] = None) -> TextDetectionDataset:
     corpus = TextDetectionDataset.get_corpus(targets, translations)
     labels = torch.FloatTensor([0, 1] * len(targets))
-    tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
+
+    tokenizer_path = 'resources/data/tokenizer' if easy_nmt_offline else 'distilbert-base-uncased'
+    tokenizer = DistilBertTokenizerFast.from_pretrained(tokenizer_path)
+
     encodings = tokenizer(corpus, truncation=True, padding=True)
 
     encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)

@@ -1,4 +1,5 @@
 import argparse
+import os
 import os.path as path
 from typing import List, Optional
 
@@ -22,8 +23,18 @@ def set_args(parser: argparse.ArgumentParser):
     checkpoints.add_argument('--bin_ext', default='bin')
     checkpoints.add_argument('--ds_ext', default='pth')
 
+    prefix = path.dirname(os.getcwd())
+
     train_args = parser.add_argument_group('Training arguments')
     train_args.add_argument('--easy_nmt_batch_size', type=int, default=16)
+    train_args.add_argument('--easy_nmt_offline', type=bool, default=False)
+    # TODO-EasyNMT: improve for many models
+    train_args.add_argument('--offline_prefix', type=str,
+                            default=f"{prefix}/resources/data/opus-mt",
+                            help="Define the absolute path where the model is stored")
+    train_args.add_argument('--offline_cache_prefix', type=str,
+                            default=f"{prefix}/resources/data/",
+                            help="Define he path to the directory where to store cache")
     train_args.add_argument('--dataset_name', type=str, default='tatoeba',
                             help='dataset name which will be loaded.')
     train_args.add_argument('--epochs', type=int, default=50,

@@ -1,12 +1,11 @@
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
+import pandas as pd
 from datasets import load_dataset
 
 from detection.arguments import form_args, get_dataset_path
 from detection.utils import BinaryDataset, save_binary_dataset
-
-SUPPORTED_DATASETS = ['mock', 'tatoeba', 'wikimatrix']
 
 # --- Datasets configs description ---
 
@@ -14,7 +13,6 @@ CONFIGS = {
     'tatoeba': {
         'path': 'tatoeba',
     },
-    'wikimatrix': {}
 }
 CONFIGS = defaultdict(dict, CONFIGS)
 
@@ -37,10 +35,57 @@ def load_wikimatrix(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_rnc(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('rnc/rnc', langs=[lang1, lang2], ext='txt')
+    with open(sources_path) as file:
+        lines = file.readlines()
+        sources = [line.rstrip() for line in lines]
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
+def load_prozhito(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('prozhito/prozhito', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["sent"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
+def load_med(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('med/med', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["sentence"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
+def load_wiki(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('wiki/wiki', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["sents"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
+def load_news(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('news/news', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["text"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     'tatoeba': load_dataset,
-    'wikimatrix': load_wikimatrix
+    'wikimatrix': load_wikimatrix,
+    'rnc': load_rnc,
+    'prozhito': load_prozhito,
+    'med': load_med,
+    'wiki': load_wiki,
+    'news': load_news,
 }
+SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 
 # --- Using languages description ---
 # We suppose that languages follow the order: [source language, target language]
@@ -52,13 +97,46 @@ ENTRYPOINTS = {
 DEFAULT_LANGS = ['en', 'ru', 'straight']
 LANGS = {
     'tatoeba': [
-        DEFAULT_LANGS,
+        ['en', 'ru', 'straight'],
         ['es', 'ru', 'straight'],
         ['fi', 'ru', 'straight'],
         ['fr', 'ru', 'straight'],
     ],
     'wikimatrix': [
+        ['en', 'ru', 'straight'],
+        ['es', 'ru', 'straight'],
+        ['fi', 'ru', 'straight'],
         ['fr', 'ru', 'straight'],
+    ],
+    'rnc': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
+    ],
+    'prozhito': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
+    ],
+    'med': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
+    ],
+    'wiki': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
+    ],
+    'news': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
     ]
 }
 LANGS = defaultdict(list, LANGS)
@@ -73,14 +151,14 @@ class DatasetFactory:
             # TODO-Extra: Figure out how to crop better
             # dataset['train']['translation'] = dataset['train']['translation'][:size]
             pass
-        elif dataset_name == 'wikimatrix':
+        if dataset_name != 'tatoeba':
             dataset = dataset[:size]
         return dataset
 
     @staticmethod
     def get(dataset_name: str, langs: List[str]) -> Any:
         config = CONFIGS[dataset_name]
-        if (dataset_name == 'tatoeba') or (dataset_name == 'wikimatrix'):
+        if dataset_name in SUPPORTED_DATASETS:
             config['lang1'], config['lang2'] = langs[0], langs[1]
         entrypoint = ENTRYPOINTS[dataset_name]
         source_dataset = entrypoint(**config)
