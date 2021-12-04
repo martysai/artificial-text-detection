@@ -68,13 +68,22 @@ def load_wiki(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_news(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('news/news', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["text"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     'tatoeba': load_dataset,
     'wikimatrix': load_wikimatrix,
     'rnc': load_rnc,
     'prozhito': load_prozhito,
     'med': load_med,
-    'wiki': load_wiki
+    'wiki': load_wiki,
+    'news': load_news,
 }
 SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 
@@ -118,6 +127,12 @@ LANGS = {
         ['ru', 'fr', 'straight'],
     ],
     'wiki': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
+    ],
+    'news': [
         ['ru', 'en', 'straight'],
         ['ru', 'es', 'straight'],
         ['ru', 'fi', 'straight'],
