@@ -3,3 +3,5 @@
 # https://dvc.org/doc/user-guide/dvcignore
 
 resources/data/opus-mt-*
+resources/data/*.bin
+resources/data/*.pth

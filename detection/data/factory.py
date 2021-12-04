@@ -7,8 +7,6 @@ from datasets import load_dataset
 from detection.arguments import form_args, get_dataset_path
 from detection.utils import BinaryDataset, save_binary_dataset
 
-SUPPORTED_DATASETS = ['mock', 'tatoeba', 'wikimatrix', 'rnc', 'prozhito']
-
 # --- Datasets configs description ---
 
 CONFIGS = {
@@ -54,12 +52,22 @@ def load_prozhito(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_med(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('med/med', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["sentence"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     'tatoeba': load_dataset,
     'wikimatrix': load_wikimatrix,
     'rnc': load_rnc,
-    'prozhito': load_prozhito
+    'prozhito': load_prozhito,
+    'med': load_med
 }
+SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 
 # --- Using languages description ---
 # We suppose that languages follow the order: [source language, target language]
@@ -83,12 +91,18 @@ LANGS = {
         ['fr', 'ru', 'straight'],
     ],
     'rnc': [
-        # ['ru', 'en', 'straight'],
+        ['ru', 'en', 'straight'],
         ['ru', 'es', 'straight'],
         ['ru', 'fi', 'straight'],
         ['ru', 'fr', 'straight'],
     ],
     'prozhito': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
+    ],
+    'med': [
         ['ru', 'en', 'straight'],
         ['ru', 'es', 'straight'],
         ['ru', 'fi', 'straight'],
