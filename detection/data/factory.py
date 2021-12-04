@@ -1,12 +1,13 @@
 from collections import defaultdict
 from typing import Any, Dict, List, Optional
 
+import pandas as pd
 from datasets import load_dataset
 
 from detection.arguments import form_args, get_dataset_path
 from detection.utils import BinaryDataset, save_binary_dataset
 
-SUPPORTED_DATASETS = ['mock', 'tatoeba', 'wikimatrix', 'rnc']
+SUPPORTED_DATASETS = ['mock', 'tatoeba', 'wikimatrix', 'rnc', 'prozhito']
 
 # --- Datasets configs description ---
 
@@ -14,7 +15,6 @@ CONFIGS = {
     'tatoeba': {
         'path': 'tatoeba',
     },
-    'wikimatrix': {}
 }
 CONFIGS = defaultdict(dict, CONFIGS)
 
@@ -46,10 +46,19 @@ def load_rnc(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_prozhito(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('prozhito/prozhito', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["sent"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     'tatoeba': load_dataset,
     'wikimatrix': load_wikimatrix,
     'rnc': load_rnc,
+    'prozhito': load_prozhito
 }
 
 # --- Using languages description ---
@@ -79,6 +88,9 @@ LANGS = {
         ['ru', 'fi', 'straight'],
         ['ru', 'fr', 'straight'],
     ],
+    'prozhito': [
+        ['ru', 'en', 'straight'],
+    ]
 }
 LANGS = defaultdict(list, LANGS)
 
@@ -92,7 +104,7 @@ class DatasetFactory:
             # TODO-Extra: Figure out how to crop better
             # dataset['train']['translation'] = dataset['train']['translation'][:size]
             pass
-        elif dataset_name == 'wikimatrix' or dataset_name == 'rnc':
+        if dataset_name != 'tatoeba':
             dataset = dataset[:size]
         return dataset
 
