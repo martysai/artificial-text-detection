@@ -60,12 +60,21 @@ def load_med(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_wiki(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path('wiki/wiki', langs=[lang1, lang2], ext='csv')
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["sents"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     'tatoeba': load_dataset,
     'wikimatrix': load_wikimatrix,
     'rnc': load_rnc,
     'prozhito': load_prozhito,
-    'med': load_med
+    'med': load_med,
+    'wiki': load_wiki
 }
 SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 
@@ -103,6 +112,12 @@ LANGS = {
         ['ru', 'fr', 'straight'],
     ],
     'med': [
+        ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
+    ],
+    'wiki': [
         ['ru', 'en', 'straight'],
         ['ru', 'es', 'straight'],
         ['ru', 'fi', 'straight'],
