@@ -121,7 +121,7 @@ def generate(dataset: BinaryDataset,
         src_lang=src_lang,
         trg_lang=trg_lang
     )
-    return translations_to_torch_dataset(targets, translations, device=device)
+    return translations_to_torch_dataset(targets, translations, device=device, easy_nmt_offline=easy_nmt_offline)
 
 
 if __name__ == '__main__':
