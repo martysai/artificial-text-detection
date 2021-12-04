@@ -96,7 +96,8 @@ def generate(dataset: BinaryDataset,
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
     # TODO-EasyNMT: add the support of another EasyNMT
 
-    model_config = EasyNMT(translator=models.AutoModel(offline_prefix),
+    offline_prefix_with_langs = f"{offline_prefix}-{src_lang}-{trg_lang}"
+    model_config = EasyNMT(translator=models.AutoModel(offline_prefix_with_langs),
                            cache_folder=offline_cache_prefix) \
         if easy_nmt_offline else None
     model = TranslationModel(

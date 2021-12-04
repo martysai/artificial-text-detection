@@ -28,8 +28,9 @@ def set_args(parser: argparse.ArgumentParser):
     train_args = parser.add_argument_group('Training arguments')
     train_args.add_argument('--easy_nmt_batch_size', type=int, default=16)
     train_args.add_argument('--easy_nmt_offline', type=bool, default=False)
+    # TODO-EasyNMT: improve for many models
     train_args.add_argument('--offline_prefix', type=str,
-                            default=f"{prefix}/resources/data/opus-mt-ru-es",
+                            default=f"{prefix}/resources/data/opus-mt",
                             help="Define the absolute path where the model is stored")
     train_args.add_argument('--offline_cache_prefix', type=str,
                             default=f"{prefix}/resources/data/",

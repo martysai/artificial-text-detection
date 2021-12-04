@@ -90,6 +90,9 @@ LANGS = {
     ],
     'prozhito': [
         ['ru', 'en', 'straight'],
+        ['ru', 'es', 'straight'],
+        ['ru', 'fi', 'straight'],
+        ['ru', 'fr', 'straight'],
     ]
 }
 LANGS = defaultdict(list, LANGS)
