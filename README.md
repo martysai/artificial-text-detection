@@ -9,7 +9,7 @@
 
 # Artificial Text Detection
 
-<img src="https://raw.githubusercontent.com/MaratSaidov/artificial-text-detection/code-formatting/.github/images/atd.png" width="250" height="250">
+<img src="https://raw.githubusercontent.com/MaratSaidov/artificial-text-detection/main/.github/images/atd.png" width="250" height="250">
 
 </div>
 
