@@ -1,7 +1,9 @@
 [![Build Status][build_status_badge]](build_status_link)
 [![codecov](https://codecov.io/gh/MaratSaidov/artificial-text-detection/branch/main/graph/badge.svg?token=HF8IQEADRU)](https://codecov.io/gh/MaratSaidov/artificial-text-detection)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/MaratSaidov/artificial-text-detection/-/blob/master/.pre-commit-config.yaml)
 [![DVC](https://img.shields.io/badge/-Data_Version_Control-white.svg?logo=data-version-control&style=social)](https://dvc.org/?utm_campaign=badge)
-[![license](https://img.shields.io/github/license/maratsaidov/artificial-text-detection.svg)](https://github.com/maratsaidov/artificial-text-detection/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/maratsaidov/artificial-text-detection.svg)](https://github.com/maratsaidov/artificial-text-detection/blob/master/LICENSE)
 
 <div align="center">
 
