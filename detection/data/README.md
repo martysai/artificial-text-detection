@@ -1,4 +1,4 @@
-# Data generation
+# Data generation description
 
 Some additional information about datasets.
 
@@ -27,6 +27,7 @@ This dataset consists of 3 columns: `sources`, `targets`, `translations`.
 ```bash
 python factory.py
 dvc add ../../resources/data
+dvc push
 ```
 
 Do not forget to commit `data.dvc` file in order to pull processed datasets later.

@@ -1,0 +1,65 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "detection"
+version = "0.1.0"
+description = "Python framework for artificial text detection with NLP approaches."
+authors = ["Marat Saidov <msaidov1@yandex.ru>"]
+license = "MIT License"
+homepage = "https://github.com/MaratSaidov/artificial-text-detection"
+
+[tool.poetry.dependencies]
+python = ">=3.7.1,<3.10"
+datasets = "1.15.1"
+huggingface = "^0.0.1"
+EasyNMT = "2.0.1"
+wandb = "0.12.6"
+torch = "^1.10.0"
+sklearn = "0.0"
+transformers = "4.12.3"
+numpy = "1.21.4"
+requests = "^2.26.0"
+packaging = "^21.3"
+filelock = "^3.4.0"
+pandas = "1.3.4"
+scikit-learn = "1.0.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+pytest-timeout = "2.0.1"
+pre-commit = "2.16.0"
+PyHamcrest = "^2.0.2"
+pytest-cov = "^3.0.0"
+
+[tool.black]
+color = true
+line-length = 120
+target-version = ["py38"]
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | env
+    | venv
+)/
+'''
+
+[tool.isort]
+py_version = 38
+line_length = 120
+known_typing = ["typing", "types", "typing_extensions", "mypy", "mypy_extensions"]
+sections = ["FUTURE", "TYPING", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+profile = "black"
+include_trailing_comma = true
+multi_line_output = 3
+indent = 4
+color_output = true

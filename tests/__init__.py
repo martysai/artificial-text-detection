@@ -7,7 +7,7 @@ import torch.cuda as cuda
 def skip_github(test_func: Callable[..., None]) -> Callable[..., None]:
     def wrapper(*args, **kwargs):
         if environ.get('GITHUB_ACTIONS'):
-            pass
+            return
         test_func(*args, **kwargs)
     return wrapper
 
@@ -15,6 +15,6 @@ def skip_github(test_func: Callable[..., None]) -> Callable[..., None]:
 def skip_non_gpu(test_func: Callable[..., None]) -> Callable[..., None]:
     def wrapper(*args, **kwargs):
         if not cuda.is_available():
-            pass
+            return
         test_func(*args, **kwargs)
     return wrapper

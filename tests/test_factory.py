@@ -5,6 +5,7 @@ from hamcrest import assert_that, equal_to
 
 from detection.arguments import get_dataset_path
 from detection.data.factory import collect, load_wikimatrix
+from tests import skip_github
 from detection.utils import MockDataset, translations_to_torch_dataset
 
 
@@ -18,6 +19,7 @@ class TestFactory(TestCase):
         dataset_path = get_dataset_path(dataset_name, langs=['fr', 'ru'], ext=ext)
         assert_that(path.exists(dataset_path), equal_to(True))
 
+    @skip_github
     def test_collect_wikimatrix(self):
         dataset = load_wikimatrix(lang1='en', lang2='ru')
         assert_that(len(dataset), equal_to(1661908))
