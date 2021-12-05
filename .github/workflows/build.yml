@@ -28,6 +28,7 @@ jobs:
     - name: "Test with pytest"
       run: |
         mkdir resources/data
+        make poetry-download
         poetry shell && poetry install
         poetry run pytest --cov=./ --cov-report=xml
     - name: "Upload the coverage to Codecov"
