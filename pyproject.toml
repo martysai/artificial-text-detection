@@ -1,3 +1,16 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "detection"
+version = "0.1.0"
+description = "Python framework for artificial text detection with NLP approaches."
+authors = ["Marat Saidov <msaidov1@yandex.ru>"]
+license = "MIT License"
+homepage = "https://github.com/MaratSaidov/artificial-text-detection"
+
+
 [tool.black]
 color = true
 line-length = 120
