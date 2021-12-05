@@ -7,7 +7,7 @@
 
 # Artificial Text Detection
 
-[![ATD Logo](https://raw.githubusercontent.com/MaratSaidov/artificial-text-detection/code-formatting/.github/images/atd.png)](https://github.com/MaratSaidov/artificial-text-detection)
+<img src="https://raw.githubusercontent.com/MaratSaidov/artificial-text-detection/code-formatting/.github/images/atd.png" width="250" height="250">
 
 </div>
 
