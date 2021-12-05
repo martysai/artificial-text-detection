@@ -12,12 +12,6 @@ poetry-download:
 poetry-remove:
 	curl --silent --show-error --location https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | $(PYTHON) - --uninstall
 
-#* Installation
-.PHONY: install
-install:
-	poetry lock --no-interaction && poetry export --without-hashes > requirements.txt
-	poetry install --no-interaction
-
 #* Formatters
 .PHONY: codestyle
 codestyle:

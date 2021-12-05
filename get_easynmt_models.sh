@@ -1,6 +1,6 @@
-BOOKS=('opus-mt-ru-en' 'opus-mt-ru-es' 'opus-mt-ru-fi' 'opus-mt-ru-fr')
+MODELS=('opus-mt-ru-en' 'opus-mt-ru-es' 'opus-mt-ru-fi' 'opus-mt-ru-fr')
 
 cd resources/data
-for book in "${BOOKS[@]}"; do
-  git lfs clone "https://huggingface.co/Helsinki-NLP/${book}"
+for model in "${MODELS[@]}"; do
+  git lfs clone "https://huggingface.co/Helsinki-NLP/${model}"
 done
