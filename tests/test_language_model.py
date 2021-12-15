@@ -1,6 +1,7 @@
 from unittest import TestCase
 from hamcrest import assert_that, equal_to
 
+
 from detection.data.generate_LM import retrieve_prefix, super_maximal_repeat
 from detection.models.language_model import LanguageModel
 from detection.models.smr.core import SuffixArray
