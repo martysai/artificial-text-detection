@@ -32,19 +32,17 @@ class UnsupervisedBaseline:
             TODO
         """
         unsupervised_data = []
-        for i, row in df.iterrows():
-            paragraph = row["text"]
-            if not check_paragraph(paragraph):
-                continue
-            # TODO-LM: делать через батч
-            generated_paragraph = generate_language_model([paragraph], lm_params=lm_params)
+        paragraphs = df.values.reshape(-1,).tolist()
+        paragraphs = list(filter(check_paragraph, paragraphs))
+        generated_paragraphs = generate_language_model(paragraphs, lm_params=lm_params)
+        for i, generated_paragraph in enumerate(generated_paragraphs):
             unsupervised_data.extend([
                 {
                     "text": generated_paragraph,
                     "target": "machine"
                 },
                 {
-                    "text": paragraph,
+                    "text": paragraphs[i],
                     "target": "human"
                 }
             ])

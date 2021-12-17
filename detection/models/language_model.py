@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from transformers import pipeline
 
@@ -22,22 +22,21 @@ class LanguageModel:
 
     def __call__(
         self,
-        prefix: str,
+        prefixes: List[str],
         max_length: int = 100,
         num_return_sequences: str = 1,
         do_sample: bool = True,
         top_k: int = 50
-    ) -> str:
+    ) -> List[str]:
         """
         TODO-Doc
         """
         # TODO: сделать top-k и nucl
         generated_struct = generator(
-            prefix,
+            prefixes,
             max_length=max_length,
             num_return_sequences=num_return_sequences,
             do_sample=do_sample,
             top_k=top_k,
         )
-        # TODO: вот здесь тоже расширить до батчей
-        return generated_struct[0]['generated_text']
+        return [generated_struct[i][0]['generated_text'] for i in range(len(prefixes))]

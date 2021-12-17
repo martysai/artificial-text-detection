@@ -8,7 +8,7 @@ def check_paragraph(paragraph: str) -> bool:
     """
     TODO: понять, где вызывать предикат
     """
-    return not len(paragraph) < 100
+    return len(paragraph) >= 100
 
 
 def retrieve_prefix(paragraph: str, sentence_num: int = 2) -> str:
@@ -35,12 +35,9 @@ def generate_language_model(
     """
     TODO-Doc
     """
-    generated_paragraphs = []
     language_model = LanguageModel()
-
-    # TODO: вот здесь сейчас длины всех параграфов равны 1
-    size = size if size else len(paragraphs)
-    for paragraph in paragraphs[:size]:
-        prefix = retrieve_prefix(paragraph, sentence_num=sentence_num)
-        generated_paragraphs.append(language_model(prefix, **(lm_params or {})))
-    return generated_paragraphs
+    prefixes = [
+        retrieve_prefix(paragraph, sentence_num=sentence_num)
+        for paragraph in paragraphs
+    ]
+    return language_model(prefixes, **(lm_params or {}))
