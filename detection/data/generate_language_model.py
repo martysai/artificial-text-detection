@@ -26,10 +26,11 @@ def super_maximal_repeat(paragraph: str) -> str:
     return suffix_array.longest_repeated_substring()
 
 
-def generate_LM(
+def generate_language_model(
     paragraphs: List[str],
     sentence_num: int = 2,
-    lm_params: Optional[Dict[str, Any]] = None
+    lm_params: Optional[Dict[str, Any]] = None,
+    size: Optional[int] = None
 ) -> List[str]:
     """
     TODO-Doc
@@ -37,7 +38,9 @@ def generate_LM(
     generated_paragraphs = []
     language_model = LanguageModel()
 
-    for paragraph in paragraphs:
+    # TODO: вот здесь сейчас длины всех параграфов равны 1
+    size = size if size else len(paragraphs)
+    for paragraph in paragraphs[:size]:
         prefix = retrieve_prefix(paragraph, sentence_num=sentence_num)
-        generated_paragraphs.append(language_model(prefix, **lm_params))
+        generated_paragraphs.append(language_model(prefix, **(lm_params or {})))
     return generated_paragraphs

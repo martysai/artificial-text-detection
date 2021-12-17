@@ -15,7 +15,7 @@ class LanguageModel:
         Parameters
         ----------
             model_name : str
-                TODO-Doc
+                One of possible model names.
         """
         self.model_name = model_name or "sberbank-ai/rugpt3small_based_on_gpt2"
         self.language_model = pipeline("text-generation", model=self.model_name)
@@ -31,6 +31,7 @@ class LanguageModel:
         """
         TODO-Doc
         """
+        # TODO: сделать top-k и nucl
         generated_struct = generator(
             prefix,
             max_length=max_length,
@@ -38,4 +39,5 @@ class LanguageModel:
             do_sample=do_sample,
             top_k=top_k,
         )
+        # TODO: вот здесь тоже расширить до батчей
         return generated_struct[0]['generated_text']

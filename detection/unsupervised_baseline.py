@@ -2,7 +2,7 @@ from typing import Any, Dict, Optional
 
 import pandas as pd
 
-from detection.data.generate_LM import check_paragraph, generate_LM, retrieve_prefix
+from detection.data.generate_language_model import check_paragraph, generate_language_model, retrieve_prefix
 from detection.models.detectors import SimpleDetector
 
 
@@ -37,7 +37,7 @@ class UnsupervisedBaseline:
             if not check_paragraph(paragraph):
                 continue
             # TODO-LM: делать через батч
-            generated_paragraph = generate_LM([paragraph], lm_params=lm_params)
+            generated_paragraph = generate_language_model([paragraph], lm_params=lm_params)
             unsupervised_data.extend([
                 {
                     "text": generated_paragraph,
@@ -48,7 +48,7 @@ class UnsupervisedBaseline:
                     "target": "human"
                 }
             ])
-        unsupervised_df = pd.DataFrame(data=unsupervised_data, columns=["paragraph", "target"])
+        unsupervised_df = pd.DataFrame(data=unsupervised_data, columns=["text", "target"])
         return unsupervised_df
 
     def fit(self, df: pd.DataFrame, force: bool = False):
