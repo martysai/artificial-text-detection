@@ -6,7 +6,7 @@ from detection.data.generate_language_model import (
     check_input_paragraph, check_output_paragraph, generate_language_model, retrieve_prefix,
     super_maximal_repeat, trim_output_paragraph
 )
-from detection.models.const import SEMI_SUPERVISED_HUMAN_RATE
+from detection.models.const import SEMI_SUPERVISED_HUMAN_RATE, SMR_REPEAT_RATE
 from detection.models.detectors import SimpleDetector
 
 
@@ -58,7 +58,19 @@ class UnsupervisedBaseline:
         supervised_sample = df.head(SEMI_SUPERVISED_HUMAN_RATE * len(df))
         supervised_sample = supervised_sample[supervised_sample["target"] == "human"]
         semi_supervised_df = df.tail((1.0 - SEMI_SUPERVISED_HUMAN_RATE) * len(df))
-        semi_supervised_df["repeats"] = semi_supervised_df["text"].apply(super_maximal_repeat)
+        semi_supervised_df["repeat"] = semi_supervised_df["text"].apply(super_maximal_repeat)
+        positive_repeats = semi_supervised_df["repeat"].sample(SMR_REPEAT_RATE * len(semi_supervised_df))
+        smr_labels = []
+        for i, semi_row in semi_supervised_df.iterrows():
+            paragraph = semi_row["text"]
+            is_positive = False
+            for j, repeat_row in positive_repeats:
+                if repeat_row["repeat"] in paragraph:
+                    is_positive = True
+                    break
+            smr_labels.append("machine" if is_positive else "human")
+        semi_supervised_df["target"] = np.array(smr_labels)
+        # TODO: неверно: нужно смотреть на super-maximal repeats по коллекции документов
         # TODO: сэмплируем, выбираем таргеты
         # TODO: написать тест, что разметка проходит корректно
         return semi_supervised_df
