@@ -1,6 +1,7 @@
 from typing import Any, Dict, Optional
 
 import pandas as pd
+import numpy as np
 
 from detection.data.generate_language_model import (
     check_input_paragraph, check_output_paragraph, generate_language_model, retrieve_prefix,

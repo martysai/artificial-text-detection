@@ -1,10 +1,13 @@
+import os.path as path
 from unittest import TestCase
 
 import pandas as pd
 from hamcrest import assert_that, equal_to
 
 
-from detection.data.generate_language_model import generate_language_model, retrieve_prefix, super_maximal_repeat
+from detection.data.generate_language_model import (
+    generate_language_model, retrieve_prefix, parse_collection_on_repeats, super_maximal_repeat
+)
 from detection.models.language_model import LanguageModel
 from detection.models.smr.core import SuffixArray
 from detection.unsupervised_baseline import UnsupervisedBaseline
@@ -46,10 +49,17 @@ class TestUnsupervisedBaselineTools(TestCase):
             }
         ], columns=["text"])
         cls.unsupervised_baseline = UnsupervisedBaseline()
+        dir_path = path.dirname(path.dirname(path.realpath(__file__)))
+        dvc_path = path.join(dir_path, "resources/data")
+        cls.news_df = pd.read_csv(path.join(dvc_path, "lenta/lenta_sample.csv"))
 
     def test_super_maximal_repeat(self) -> None:
         for paragraph, repeat in zip(self.paragraphs, self.smr_targets):
             assert_that(super_maximal_repeat(paragraph), equal_to(repeat))
+
+    def test_super_maximal_repeat_real_data(self) -> None:
+        for i, row in self.news_df.iterrows():
+            super_maximal_repeat(row["text"])
 
     def test_retrieve_prefix(self) -> None:
         for paragraph, prefix in zip(self.paragraphs, self.prefixes):
@@ -61,6 +71,13 @@ class TestUnsupervisedBaselineTools(TestCase):
         assert_that(len(generated_df), equal_to(4))
         assert_that(generated_df["target"].iloc[0], equal_to("machine"))
         assert_that(generated_df["target"].iloc[1], equal_to("human"))
+
+    def test_parse_collection_on_repeats(self) -> None:
+        dir_path = path.dirname(path.dirname(path.realpath(__file__)))
+        dvc_path = path.join(dir_path, "resources/data")
+        lenta_df = pd.read_csv(path.join(dvc_path, "lenta/lenta_sample.csv"))
+        repeats = parse_collection_on_repeats(lenta_df["text"].values.tolist())
+        assert_that(len(repeats), equal_to(6))
 
 
 class TestLanguageModels(TestCase):

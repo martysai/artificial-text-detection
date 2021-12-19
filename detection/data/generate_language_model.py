@@ -1,8 +1,10 @@
 from typing import Any, Dict, List, Optional
 
 from detection.models.const import (
+    COLLECTION_CONCAT_SYMBOL,
     LM_LENGTH_LOWER_BOUND,
-    LM_LENGTH_UPPER_BOUND
+    LM_LENGTH_UPPER_BOUND,
+    SMR_LENGTH_LOWER_BOUND
 )
 from detection.models.language_model import LanguageModel
 from detection.models.smr.core import SuffixArray
@@ -36,6 +38,17 @@ def retrieve_prefix(paragraph: str, sentence_num: int = 2) -> str:
 def super_maximal_repeat(paragraph: str) -> str:
     suffix_array = SuffixArray(paragraph)
     return suffix_array.longest_repeated_substring()
+
+
+def parse_collection_on_repeats(collection: List[str]) -> List[str]:
+    collection_concat = COLLECTION_CONCAT_SYMBOL.join(collection)
+    current_repeat = collection_concat
+    repeats = []
+    while len(current_repeat) > SMR_LENGTH_LOWER_BOUND and len(collection_concat) > LM_LENGTH_LOWER_BOUND:
+        current_repeat = super_maximal_repeat(collection_concat)
+        collection_concat = collection_concat.replace(current_repeat, "").replace("  ", " ").strip()
+        repeats.append(current_repeat)
+    return repeats
 
 
 def generate_language_model(
