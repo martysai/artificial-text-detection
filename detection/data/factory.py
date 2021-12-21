@@ -111,7 +111,7 @@ LANGS = {
         ["fr", "ru", "straight"],
     ],
     "rnc": [
-        ["ru", "en", "straight"],
+        # ["ru", "en", "straight"],
         ["ru", "es", "straight"],
         ["ru", "fi", "straight"],
         ["ru", "fr", "straight"],

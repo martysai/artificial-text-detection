@@ -1,9 +1,8 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from easynmt import EasyNMT
 
 BATCH_SIZE = 128
-EASY_NMT_MODEL_NAME = "opus-mt"
 SRC_LANG = "ru"
 TRG_LANG = "en"
 
@@ -11,10 +10,10 @@ TRG_LANG = "en"
 class TranslationModel:
     def __init__(
         self,
-        model=None,
-        src_lang=None,
-        trg_lang=None,
-        batch_size=None,
+        model: Optional[str] = None,
+        src_lang: str = None,
+        trg_lang: str = None,
+        batch_size: int = None,
     ) -> None:
         self.model = model if model else EasyNMT(EASY_NMT_MODEL_NAME)
         self.src_lang = src_lang or SRC_LANG
