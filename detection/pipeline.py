@@ -87,6 +87,7 @@ def translate_binary_datasets(
                 easy_nmt_offline=args.easy_nmt_offline,
                 offline_prefix=args.offline_prefix,
                 offline_cache_prefix=args.offline_cache_prefix,
+                multilingual=args.multilingual
             )
         else:
             print(f"This dataset has already been processed. CSV Path = {csv_path}")

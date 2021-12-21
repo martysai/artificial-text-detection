@@ -50,6 +50,7 @@ def generate(
     easy_nmt_offline: Optional[bool] = None,
     offline_prefix: Optional[str] = None,
     offline_cache_prefix: Optional[str] = None,
+    multilingual: bool = False
 ) -> TextDetectionDataset:
     """
     Generating mappings (sources, targets, translations) for a fixed pair of languages.
@@ -77,6 +78,8 @@ def generate(
             Where the model is stored (download it with huggingface and git lfs).
         offline_cache_prefix: Optional[str]
             Where the cache is put.
+        multilingual: bool
+            If True, suppose that model is multilingual.
 
     Returns
     -------
@@ -89,9 +92,10 @@ def generate(
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
     # TODO-EasyNMT: add the support of another EasyNMT
 
-    offline_prefix_with_langs = f"{offline_prefix}-{src_lang}-{trg_lang}"
+    if not multilingual:
+        offline_prefix = f"{offline_prefix}-{src_lang}-{trg_lang}"
     model_config = (
-        EasyNMT(translator=models.AutoModel(offline_prefix_with_langs), cache_folder=offline_cache_prefix)
+        EasyNMT(translator=models.AutoModel(offline_prefix), cache_folder=offline_cache_prefix)
         if easy_nmt_offline
         else None
     )
@@ -145,6 +149,7 @@ if __name__ == "__main__":
             easy_nmt_offline=main_args.easy_nmt_offline,
             offline_prefix=main_args.offline_prefix,
             offline_cache_prefix=main_args.offline_cache_prefix,
+            multilingual=main_args.multilingual
         )
         train_dataset, eval_dataset = torch_dataset.split()
 
