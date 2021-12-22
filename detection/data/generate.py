@@ -50,7 +50,8 @@ def generate(
     easy_nmt_offline: Optional[bool] = None,
     offline_prefix: Optional[str] = None,
     offline_cache_prefix: Optional[str] = None,
-    multilingual: bool = False
+    multilingual: bool = False,
+    is_bart: bool = False
 ) -> TextDetectionDataset:
     """
     Generating mappings (sources, targets, translations) for a fixed pair of languages.
@@ -80,6 +81,8 @@ def generate(
             Where the cache is put.
         multilingual: bool
             If True, suppose that model is multilingual.
+        is_bart: bool
+            If True, suppose that we use BART.
 
     Returns
     -------
@@ -99,7 +102,13 @@ def generate(
         if easy_nmt_offline
         else None
     )
-    model = TranslationModel(model=model_config, src_lang=src_lang, trg_lang=trg_lang, batch_size=batch_size)
+    model = TranslationModel(
+        model=model_config,
+        src_lang=src_lang,
+        trg_lang=trg_lang,
+        batch_size=batch_size,
+        is_bart=is_bart
+    )
     translations = translate_dataset(dataset=dataset, translate=model, src_lang=src_lang)
     sources = [sample[src_lang] for sample in dataset]
     targets = [sample[trg_lang] for sample in dataset]
@@ -149,7 +158,8 @@ if __name__ == "__main__":
             easy_nmt_offline=main_args.easy_nmt_offline,
             offline_prefix=main_args.offline_prefix,
             offline_cache_prefix=main_args.offline_cache_prefix,
-            multilingual=main_args.multilingual
+            multilingual=main_args.multilingual,
+            is_bart=main_args.is_bart
         )
         train_dataset, eval_dataset = torch_dataset.split()
 

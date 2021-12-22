@@ -99,10 +99,10 @@ SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 DEFAULT_LANGS = ["en", "ru", "straight"]
 LANGS = {
     "tatoeba": [
-        ["en", "ru", "straight"],
-        # ["es", "ru", "straight"],
-        ["fi", "ru", "straight"],
-        ["fr", "ru", "straight"],
+        # ["en", "ru", "straight"],
+        ["es", "ru", "straight"],
+        # ["fi", "ru", "straight"],
+        # ["fr", "ru", "straight"],
     ],
     "wikimatrix": [
         # ["en", "ru", "straight"],
