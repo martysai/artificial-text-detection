@@ -105,16 +105,16 @@ LANGS = {
         ["fr", "ru", "straight"],
     ],
     "wikimatrix": [
-        # ["en", "ru", "straight"],
-        # ["es", "ru", "straight"],
-        # ["fi", "ru", "straight"],
+        ["en", "ru", "straight"],
+        ["es", "ru", "straight"],
+        ["fi", "ru", "straight"],
         ["fr", "ru", "straight"],
     ],
     "rnc": [
-        # ["ru", "en", "straight"],
+        ["ru", "en", "straight"],
         ["ru", "es", "straight"],
-        # ["ru", "fi", "straight"],
-        # ["ru", "fr", "straight"],
+        ["ru", "fi", "straight"],
+        ["ru", "fr", "straight"],
     ],
     "prozhito": [
         ["ru", "en", "straight"],
