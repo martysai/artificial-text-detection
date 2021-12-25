@@ -5,6 +5,8 @@ from easynmt import EasyNMT
 BATCH_SIZE = 128
 SRC_LANG = "ru"
 TRG_LANG = "en"
+EASY_NMT_MODEL_NAME = "opus-mt"
+# TODO: add device to EasyNMT constructor
 
 
 class TranslationModel:
