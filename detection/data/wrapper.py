@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 import copy
 
@@ -33,11 +33,19 @@ class TextDetectionDataset(torch_data.Dataset):
         return TextDetectionDataset(**dataset_settings)
 
     @staticmethod
-    def load_csv(csv_path: str, device: Optional[str] = "cpu") -> torch_data.Dataset:
-        df = pd.read_csv(csv_path)
-        corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
-        labels = torch.FloatTensor([0, 1] * (len(corpus) // 2))
-        tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
+    def load_csv(data: Union[pd.DataFrame, str], tokenizer, device: Optional[str] = "cpu", new: Optional[bool] = False):
+        if isinstance(data, str):
+            df = pd.read_csv(data)
+        else:
+            df = data
+        if new:
+            corpus = df["text"].values.tolist()
+            labels = torch.FloatTensor(
+                df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values.tolist()
+            )
+        else:
+            corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
+            labels = torch.FloatTensor([0, 1] * (len(corpus) // 2))
         encodings = tokenizer(corpus, truncation=True, padding=True)
         encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
         dataset = TextDetectionDataset(encodings, labels, device=device)
@@ -61,7 +69,7 @@ class TextDetectionDataset(torch_data.Dataset):
             new_encodings[key] = np.array(val)[objects_range].tolist()
         return new_encodings
 
-    def split(self) -> Tuple[torch_data.Dataset, torch_data.Dataset]:
+    def split(self):
         # TODO-Extra: написать на GPU получше
         if hasattr(self.encodings, "detach"):
             encodings = self.encodings.detach().cpu().numpy()

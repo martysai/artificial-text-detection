@@ -25,6 +25,7 @@ packaging = "^21.3"
 filelock = "^3.4.0"
 pandas = "1.3.4"
 scikit-learn = "1.0.1"
+pymystem = "0.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"

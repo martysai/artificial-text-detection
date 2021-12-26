@@ -5,12 +5,13 @@ import os.path as path
 
 import transformers
 import wandb
-from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
+from transformers import AutoModelForSequenceClassification, BertTokenizerFast, Trainer, TrainingArguments
 
 from detection.arguments import form_args, get_dataset_path
 from detection.data.factory import DatasetFactory, collect
 from detection.data.generate import generate
 from detection.data.wrapper import TextDetectionDataset
+from detection.models.const import HF_MODEL_NAME
 from detection.models.validate import compute_metrics
 from detection.utils import BinaryDataset, save_binary_dataset
 
@@ -91,7 +92,8 @@ def translate_binary_datasets(
             )
         else:
             print(f"This dataset has already been processed. CSV Path = {csv_path}")
-            generated_dataset = TextDetectionDataset.load_csv(csv_path, device=args.device)
+            tokenizer = BertTokenizerFast.from_pretrained(HF_MODEL_NAME)
+            generated_dataset = TextDetectionDataset.load_csv(csv_path, tokenizer, device=args.device)
         translated_datasets.append(generated_dataset)
     return translated_datasets
 
@@ -114,7 +116,7 @@ def train_text_detection_model(dataset: TextDetectionDataset, args) -> Trainer:
     )
 
     if not os.path.exists(args.model_path):
-        model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=1)
+        model = AutoModelForSequenceClassification.from_pretrained(HF_MODEL_NAME, num_labels=1)
     else:
         model = transformers.PreTrainedModel.from_pretrained(args.model_path)
     model = model.to(args.device)

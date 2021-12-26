@@ -90,3 +90,11 @@ def save_translations_texts(
     df = pd.DataFrame(data=df_data, columns=["sources", "targets", "translations"])
     csv_path = get_dataset_path(f"{dataset_name}.{src_lang}-{trg_lang}", ext="csv")
     df.to_csv(csv_path, index=False)
+
+
+def ord_cyrillic(c: str) -> int:
+    if 'а' <= c <= 'я':
+        return ord(c) - ord('а') + ord('a')  # - cyrillic + latinic
+    if 'А' <= c <= 'Я':
+        return ord(c) - ord('А') + ord('A')
+    return ord(c)

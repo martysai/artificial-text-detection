@@ -1,5 +1,7 @@
 import random
-from .sais import construct_suffix_array
+from detection.models.smr.sais import construct_suffix_array
+from detection.models.const import ORD_UPPER_BOUND
+from detection.utils import ord_cyrillic
 
 
 class SuffixArray:
@@ -83,7 +85,7 @@ class SuffixArray:
         """Constructs suffix array in O(nlogn) time by sorting ranking pairs of suffixes."""
         string_len = len(string)
         suffix_array = list(range(string_len))
-        rank_array = [ord(c) for c in string]
+        rank_array = [ord_cyrillic(c) for c in string]
 
         k = 1
         # This sorting process will be repeated at most log(n) times.
@@ -102,7 +104,7 @@ class SuffixArray:
         """Sorts suffixes by count-sorting rank array.
         Offset k is defined such that the value used when sorting suffix i corresponds to rank_array[i + k].
         """
-        max_length = max(2**7 - 1, string_len)
+        max_length = max(2**8 - 1, string_len)
         count = [0] * max_length
 
         for i in range(len(rank_array)):
