@@ -96,7 +96,7 @@ def parse_collection_on_repeats(
 
 def generate_language_model(
         paragraphs: List[str],
-        sentence_num: int = 2,
+        sentence_num: int = 1,
         lm_params: Optional[Dict[str, Any]] = None,
         size: Optional[int] = None
 ) -> List[str]:
