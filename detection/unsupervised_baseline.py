@@ -2,6 +2,7 @@ import argparse
 from typing import Any, Dict, Optional
 
 import pandas as pd
+import tqdm
 import numpy as np
 
 from detection.arguments import form_args
@@ -33,19 +34,20 @@ class UnsupervisedBaseline:
         Parameters
         ----------
         df: pd.DataFrame
-            TODO
+            DataFrame with human paragraphs.
         lm_params: Optional[Dict[str, Any]], default=None
-            TODO
+            Additional language model parameters.
 
         Returns
         -------
-            TODO
+        pd.DataFrame
+            Processed with GPT-2 dataset consisting of human/machine - continued paragraphs.
         """
         unsupervised_data = []
         paragraphs = df.values.reshape(-1,).tolist()
         paragraphs = list(filter(check_input_paragraph, paragraphs))
         generated_paragraphs = generate_language_model(paragraphs, lm_params=lm_params)
-        for i, generated_paragraph in enumerate(generated_paragraphs):
+        for i, generated_paragraph in tqdm.tqdm(enumerate(generated_paragraphs)):
             if check_output_paragraph(generated_paragraph):
                 unsupervised_data.extend([
                     {
@@ -53,7 +55,7 @@ class UnsupervisedBaseline:
                         "target": "machine"
                     },
                     {
-                        "text": paragraphs[i],
+                        "text": trim_output_paragraph(paragraphs[i]),
                         "target": "human"
                     }
                 ])

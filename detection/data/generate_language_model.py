@@ -6,8 +6,7 @@ from detection.models.const import (
     LM_LENGTH_LOWER_BOUND,
     LM_LENGTH_UPPER_BOUND,
     ORD_UPPER_BOUND,
-    SMR_LENGTH_LOWER_BOUND,
-    STEMMER
+    SMR_LENGTH_LOWER_BOUND
 )
 from detection.models.language_model import LanguageModel
 from detection.models.smr.core import SuffixArray
@@ -27,7 +26,10 @@ def check_output_paragraph(paragraph: str) -> bool:
 
 
 def trim_output_paragraph(paragraph: str) -> str:
-    return paragraph[:LM_LENGTH_UPPER_BOUND]
+    trimmed = paragraph[:LM_LENGTH_UPPER_BOUND]
+    if trimmed.rfind(".") > LM_LENGTH_LOWER_BOUND:
+        return trimmed[:trimmed.rfind(".") + 1]
+    return trimmed
 
 
 def retrieve_prefix(paragraph: str, sentence_num: int = 2) -> str:
@@ -46,7 +48,6 @@ def super_maximal_repeat(paragraph: str) -> str:
 
 
 def preprocess_text(text: str) -> str:
-    # tokens = STEMMER.lemmatize(text.lower())
     tokens = text.lower().replace("$", "").split()
     tokens = [
         token for token in tokens if token != " " and token.strip() not in punctuation
