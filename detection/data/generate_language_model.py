@@ -32,7 +32,7 @@ def trim_output_paragraph(paragraph: str) -> str:
     return trimmed
 
 
-def retrieve_prefix(paragraph: str, sentence_num: int = 2) -> str:
+def retrieve_prefix(paragraph: str, sentence_num: int = 1) -> str:
     """
     TODO-Doc
     """
