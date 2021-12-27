@@ -107,6 +107,7 @@ def generate(
         src_lang=src_lang,
         trg_lang=trg_lang,
         batch_size=batch_size,
+        device=device,
         is_bart=is_bart
     )
     translations = translate_dataset(dataset=dataset, translate=model, src_lang=src_lang)

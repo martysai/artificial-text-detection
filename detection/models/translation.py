@@ -16,9 +16,10 @@ class TranslationModel:
         src_lang: str = None,
         trg_lang: str = None,
         batch_size: int = None,
+        device: str = "cpu",
         is_bart: bool = False,
     ) -> None:
-        self.model = model if model else EasyNMT(EASY_NMT_MODEL_NAME)
+        self.model = model if model else EasyNMT(EASY_NMT_MODEL_NAME, device=device)
         self.is_bart = is_bart
         if self.is_bart:
             if (not src_lang) or (not trg_lang):

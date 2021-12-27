@@ -78,6 +78,14 @@ def load_news(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_back(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path("back/back", langs=[lang1, lang2], ext="csv")
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["forward_translations"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     "tatoeba": load_dataset,
     "wikimatrix": load_wikimatrix,
@@ -86,6 +94,7 @@ ENTRYPOINTS = {
     "med": load_med,
     "wiki": load_wiki,
     "news": load_news,
+    "back": load_back,
 }
 SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 
@@ -140,6 +149,12 @@ LANGS = {
         ["ru", "fi", "straight"],
         ["ru", "fr", "straight"],
     ],
+    "back": [
+        ["en", "ru", "straight"],
+        ["es", "ru", "straight"],
+        ["fi", "ru", "straight"],
+        ["fr", "ru", "straight"],
+    ]
 }
 LANGS = defaultdict(list, LANGS)
 
