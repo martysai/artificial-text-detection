@@ -65,6 +65,6 @@ def form_args():
     set_args(arg_parser)
     known_args, _ = arg_parser.parse_known_args()
     known_args.cuda = torch.cuda.is_available()
-    # known_args.device = torch.device(f"cuda:{torch.cuda.current_device()}" if torch.cuda.is_available() else "cpu")
-    known_args.device = "cpu"
+    known_args.device = torch.device(f"cuda:{torch.cuda.current_device()}" if torch.cuda.is_available() else "cpu")
+    # known_args.device = "cpu"
     return known_args
