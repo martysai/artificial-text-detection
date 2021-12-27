@@ -98,7 +98,7 @@ def generate(
     if not multilingual:
         offline_prefix = f"{offline_prefix}-{src_lang}-{trg_lang}"
     model_config = (
-        EasyNMT(translator=models.AutoModel(offline_prefix), cache_folder=offline_cache_prefix)
+        EasyNMT(translator=models.AutoModel(offline_prefix), cache_folder=offline_cache_prefix, device=device)
         if easy_nmt_offline
         else None
     )
