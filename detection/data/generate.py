@@ -95,13 +95,21 @@ def generate(
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
     # TODO-EasyNMT: add the support of another EasyNMT
 
-    if not multilingual:
-        offline_prefix = f"{offline_prefix}-{src_lang}-{trg_lang}"
-    model_config = (
-        EasyNMT(translator=models.AutoModel(offline_prefix), cache_folder=offline_cache_prefix)
-        if easy_nmt_offline
-        else None
-    )
+    model_config = None
+    if easy_nmt_offline:
+        if multilingual:
+            model_config = EasyNMT(translator=models.AutoModel(offline_prefix), cache_folder=offline_cache_prefix)
+        else:
+            try:
+                model_config = EasyNMT(
+                    translator=models.AutoModel(f"{offline_prefix}-{src_lang}-{trg_lang}"),
+                    cache_folder=offline_cache_prefix
+                )
+            except OSError:
+                model_config = EasyNMT(
+                    translator=models.AutoModel(f"{offline_prefix}-{trg_lang}-{src_lang}"),
+                    cache_folder=offline_cache_prefix
+                )
     model = TranslationModel(
         model=model_config,
         src_lang=src_lang,
