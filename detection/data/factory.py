@@ -114,10 +114,10 @@ LANGS = {
         ["fr", "ru", "reversed"],
     ],
     "wikimatrix": [
-        ["en", "ru", "straight"],
-        ["es", "ru", "straight"],
-        ["fi", "ru", "straight"],
-        ["fr", "ru", "straight"],
+        # ["ru", "en", "straight"],
+        ["ru", "es", "straight"],
+        ["ru", "fi", "straight"],
+        ["ru", "fr", "straight"],
     ],
     "rnc": [
         # ["ru", "en", "straight"],
