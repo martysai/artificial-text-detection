@@ -51,6 +51,7 @@ def load_prozhito(lang1: str, lang2: str) -> List[Dict[str, str]]:
     sources_df = pd.read_csv(sources_path)
     sources = sources_df["sources"].values.tolist()
     dataset = [{lang2: sources[i], lang1: ""} for i in list(range(len(sources)))]
+    print("dataset[0]:", dataset[0])
     return dataset
 
 
