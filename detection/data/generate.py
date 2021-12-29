@@ -16,7 +16,7 @@ def translate_dataset(
     translate: Callable[[Union[str, List[str]]], Union[str, List[str]]],
     src_lang: str,
 ) -> List[str]:
-    sources = [sample[src_lang] for sample in dataset]
+    sources = [sample[src_lang] if isinstance(sample[src_lang], str) else "" for sample in dataset]
     translated = translate(sources)
     return translated
 
