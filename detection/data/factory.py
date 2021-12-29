@@ -126,10 +126,10 @@ LANGS = {
         ["ru", "fr", "straight"],
     ],
     "prozhito": [
-        ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
+        ["en", "ru", "straight"],
+        ["es", "ru", "straight"],
+        ["fi", "ru", "straight"],
+        ["fr", "ru", "straight"],
     ],
     "med": [
         ["ru", "en", "straight"],
