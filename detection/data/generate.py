@@ -17,6 +17,8 @@ def translate_dataset(
     src_lang: str,
 ) -> List[str]:
     sources = [sample[src_lang] if isinstance(sample[src_lang], str) else "" for sample in dataset]
+    print("len(sources):", len(sources))
+    print("sources[:3]:", sources[:3])
     translated = translate(sources)
     return translated
 
