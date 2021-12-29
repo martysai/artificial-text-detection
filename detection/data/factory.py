@@ -49,7 +49,7 @@ def load_rnc(lang1: str, lang2: str) -> List[Dict[str, str]]:
 def load_prozhito(lang1: str, lang2: str) -> List[Dict[str, str]]:
     sources_path = get_dataset_path("prozhito/prozhito", langs=[lang1, lang2], ext="csv")
     sources_df = pd.read_csv(sources_path)
-    sources = sources_df["sources"].values.tolist()
+    sources = sources_df["sent"].values.tolist()
     dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
     return dataset
 
@@ -126,10 +126,10 @@ LANGS = {
         ["ru", "fr", "straight"],
     ],
     "prozhito": [
-        ["en", "ru", "straight"],
-        ["es", "ru", "straight"],
-        ["fi", "ru", "straight"],
-        ["fr", "ru", "straight"],
+        ["en", "ru", "reversed"],
+        ["es", "ru", "reversed"],
+        ["fi", "ru", "reversed"],
+        ["fr", "ru", "reversed"],
     ],
     "med": [
         ["ru", "en", "straight"],
