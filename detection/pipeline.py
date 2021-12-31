@@ -10,9 +10,9 @@ from transformers import DistilBertForSequenceClassification, Trainer, TrainingA
 from detection.arguments import form_args, get_dataset_path
 from detection.data.factory import DatasetFactory, collect
 from detection.data.generate import generate
-from detection.data.wrapper import TextDetectionDataset
+from detection.data.datasets import BinaryDataset, TextDetectionDataset
 from detection.models.validate import compute_metrics
-from detection.utils import BinaryDataset, save_binary_dataset
+from detection.utils import translations_to_torch_dataset, save_binary_dataset
 
 
 def setup_experiment_tracking(args) -> None:
@@ -82,16 +82,23 @@ def translate_binary_datasets(
                 src_lang=src_lang,
                 trg_lang=trg_lang,
                 size=args.size,
+                model_name=args.model_name,
                 device=args.device,
                 batch_size=args.easy_nmt_batch_size,
                 easy_nmt_offline=args.easy_nmt_offline,
                 offline_prefix=args.offline_prefix,
-                offline_cache_prefix=args.offline_cache_prefix,
+                offline_cache_prefix=args.offline_cache_prefix
+            )
+            text_detection_dataset = translations_to_torch_dataset(
+                generated_dataset.targets,
+                generated_dataset.translations,
+                device=args.device,
+                easy_nmt_offline=args.easy_nmt_offline
             )
         else:
             print(f"This dataset has already been processed. CSV Path = {csv_path}")
-            generated_dataset = TextDetectionDataset.load_csv(csv_path, device=args.device)
-        translated_datasets.append(generated_dataset)
+            text_detection_dataset = TextDetectionDataset.load_csv(csv_path, device=args.device)
+        translated_datasets.append(text_detection_dataset)
     return translated_datasets
 
 

@@ -5,16 +5,13 @@ import zlib
 
 import pandas as pd
 import torch
-from datasets import dataset_dict
 from transformers import DistilBertTokenizerFast
 
 from detection.arguments import get_dataset_path
-from detection.data.wrapper import TextDetectionDataset
+from detection.data.datasets import BinaryDataset, TextDetectionDataset
 
 SRC_LANG = "de"
 TRG_LANG = "en"
-
-BinaryDataset = Union[Any, dataset_dict.DatasetDict]
 
 
 class MockDataset:
@@ -85,6 +82,9 @@ def translations_to_torch_dataset(
 def save_translations_texts(
     sources: List[str], targets: List[str], translations: List[str], dataset_name: str, src_lang: str, trg_lang: str
 ) -> None:
+    """
+    Saves data to csv.
+    """
     print("Saving sources/translations in csv...")
     df_data = list(zip(sources, targets, translations))
     df = pd.DataFrame(data=df_data, columns=["sources", "targets", "translations"])

@@ -6,7 +6,8 @@ import pandas as pd
 from datasets import load_dataset
 
 from detection.arguments import form_args, get_dataset_path
-from detection.utils import BinaryDataset, save_binary_dataset
+from detection.data.datasets import BinaryDataset
+from detection.utils import save_binary_dataset
 
 # --- Datasets configs description ---
 
@@ -49,8 +50,9 @@ def load_rnc(lang1: str, lang2: str) -> List[Dict[str, str]]:
 def load_prozhito(lang1: str, lang2: str) -> List[Dict[str, str]]:
     sources_path = get_dataset_path("prozhito/prozhito", langs=[lang1, lang2], ext="csv")
     sources_df = pd.read_csv(sources_path)
-    sources = sources_df["sent"].values.tolist()
-    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    sources = sources_df["sources"].values.tolist()
+    dataset = [{lang2: sources[i], lang1: ""} for i in list(range(len(sources)))]
+    print("dataset[0]:", dataset[0])
     return dataset
 
 
@@ -78,6 +80,14 @@ def load_news(lang1: str, lang2: str) -> List[Dict[str, str]]:
     return dataset
 
 
+def load_back(lang1: str, lang2: str) -> List[Dict[str, str]]:
+    sources_path = get_dataset_path("back/back", langs=[lang1, lang2], ext="csv")
+    sources_df = pd.read_csv(sources_path)
+    sources = sources_df["forward_translations"].values.tolist()
+    dataset = [{lang1: sources[i], lang2: ""} for i in list(range(len(sources)))]
+    return dataset
+
+
 ENTRYPOINTS = {
     "tatoeba": load_dataset,
     "wikimatrix": load_wikimatrix,
@@ -86,6 +96,7 @@ ENTRYPOINTS = {
     "med": load_med,
     "wiki": load_wiki,
     "news": load_news,
+    "back": load_back,
 }
 SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 
@@ -99,16 +110,16 @@ SUPPORTED_DATASETS = list(ENTRYPOINTS.keys())
 DEFAULT_LANGS = ["en", "ru", "straight"]
 LANGS = {
     "tatoeba": [
-        ["en", "ru", "straight"],
-        ["es", "ru", "straight"],
-        ["fi", "ru", "straight"],
-        ["fr", "ru", "straight"],
+        ["en", "ru", "reversed"],
+        ["es", "ru", "reversed"],
+        ["fi", "ru", "reversed"],
+        ["fr", "ru", "reversed"],
     ],
     "wikimatrix": [
-        ["en", "ru", "straight"],
-        ["es", "ru", "straight"],
-        ["fi", "ru", "straight"],
-        ["fr", "ru", "straight"],
+        ["ru", "en", "straight"],
+        ["es", "ru", "reversed"],
+        ["fi", "ru", "reversed"],
+        ["fr", "ru", "reversed"],
     ],
     "rnc": [
         ["ru", "en", "straight"],
@@ -117,10 +128,10 @@ LANGS = {
         ["ru", "fr", "straight"],
     ],
     "prozhito": [
-        ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
+        ["en", "ru", "reversed"],
+        ["es", "ru", "reversed"],
+        ["fi", "ru", "reversed"],
+        ["fr", "ru", "reversed"],
     ],
     "med": [
         ["ru", "en", "straight"],
@@ -140,6 +151,12 @@ LANGS = {
         ["ru", "fi", "straight"],
         ["ru", "fr", "straight"],
     ],
+    "back": [
+        ["en", "ru", "straight"],
+        ["es", "ru", "straight"],
+        ["fi", "ru", "straight"],
+        ["fr", "ru", "straight"],
+    ]
 }
 LANGS = defaultdict(list, LANGS)
 
