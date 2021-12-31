@@ -1,4 +1,5 @@
-from typing import Any, List, Optional, Tuple, Union
+from dataclasses import dataclass, field
+from typing import Any, List, Optional, Union, Tuple
 
 import copy
 
@@ -6,10 +7,36 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.utils.data as torch_data
+from datasets import dataset_dict
 from sklearn.model_selection import train_test_split
 from transformers import DistilBertTokenizerFast
 
-TEST_SIZE = 0.2
+from detection.data.const import TEST_SIZE
+
+
+BinaryDataset = Union[Any, dataset_dict.DatasetDict]
+
+
+@dataclass
+class GeneratedDataset:
+    """
+    A dataclass for collected translations during generate.
+
+    Attributes
+    ----------
+    sources : list of str
+        Source language texts.
+    targets : list of str
+        Target language texts.
+    translations : list of str
+        Translated texts.
+    model_name: str
+        EasyNMT model name which is used for translation.
+    """
+    sources: List[str] = field(repr=False)
+    targets: List[str] = field(repr=False)
+    translations: List[str] = field(repr=False)
+    model_name: Optional[str] = field(default_factory=str)
 
 
 class TextDetectionDataset(torch_data.Dataset):

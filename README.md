@@ -4,6 +4,8 @@
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/MaratSaidov/artificial-text-detection/-/blob/master/.pre-commit-config.yaml)
 [![DVC](https://img.shields.io/badge/-Data_Version_Control-white.svg?logo=data-version-control&style=social)](https://dvc.org/?utm_campaign=badge)
 [![License](https://img.shields.io/github/license/maratsaidov/artificial-text-detection.svg)](https://github.com/maratsaidov/artificial-text-detection/blob/master/LICENSE)
+<br>
+[![W&B](https://raw.githubusercontent.com/wandb/assets/main/wandb-github-badge-gradient.svg)](https://wandb.ai/MaratSaidov/artificial-text-detection)
 
 <div align="center">
 

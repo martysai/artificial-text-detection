@@ -22,4 +22,4 @@ class TestPipeline(TestCase):
         args.device = torch.device(f'cuda:{torch.cuda.current_device()}' if torch.
                                    cuda.is_available() else 'cpu')
         trainers = pipeline(args)
-        assert_that(len(trainers), equal_to(2))
+        assert_that(len(trainers), equal_to(4))
