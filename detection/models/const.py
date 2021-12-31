@@ -1,0 +1,4 @@
+BATCH_SIZE = 128
+EASY_NMT_MODEL_NAME = "opus-mt"
+SRC_LANG = "ru"
+TRG_LANG = "en"

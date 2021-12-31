@@ -6,7 +6,8 @@ import pandas as pd
 from datasets import load_dataset
 
 from detection.arguments import form_args, get_dataset_path
-from detection.utils import BinaryDataset, save_binary_dataset
+from detection.data.datasets import BinaryDataset
+from detection.utils import save_binary_dataset
 
 # --- Datasets configs description ---
 
@@ -115,19 +116,19 @@ LANGS = {
         ["fr", "ru", "reversed"],
     ],
     "wikimatrix": [
-        # ["ru", "en", "straight"],
-        # ["es", "ru", "reversed"],
+        ["ru", "en", "straight"],
+        ["es", "ru", "reversed"],
         ["fi", "ru", "reversed"],
         ["fr", "ru", "reversed"],
     ],
     "rnc": [
-        # ["ru", "en", "straight"],
+        ["ru", "en", "straight"],
         ["ru", "es", "straight"],
         ["ru", "fi", "straight"],
         ["ru", "fr", "straight"],
     ],
     "prozhito": [
-        # ["en", "ru", "reversed"],
+        ["en", "ru", "reversed"],
         ["es", "ru", "reversed"],
         ["fi", "ru", "reversed"],
         ["fr", "ru", "reversed"],
@@ -151,10 +152,10 @@ LANGS = {
         ["ru", "fr", "straight"],
     ],
     "back": [
-        # ["en", "ru", "straight"],
-        # ["es", "ru", "straight"],
+        ["en", "ru", "straight"],
+        ["es", "ru", "straight"],
         ["fi", "ru", "straight"],
-        # ["fr", "ru", "straight"],
+        ["fr", "ru", "straight"],
     ]
 }
 LANGS = defaultdict(list, LANGS)

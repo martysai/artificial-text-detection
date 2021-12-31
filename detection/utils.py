@@ -5,16 +5,13 @@ import zlib
 
 import pandas as pd
 import torch
-from datasets import dataset_dict
 from transformers import DistilBertTokenizerFast
 
 from detection.arguments import get_dataset_path
-from detection.data.wrapper import TextDetectionDataset
+from detection.data.datasets import BinaryDataset, TextDetectionDataset
 
 SRC_LANG = "de"
 TRG_LANG = "en"
-
-BinaryDataset = Union[Any, dataset_dict.DatasetDict]
 
 
 class MockDataset:

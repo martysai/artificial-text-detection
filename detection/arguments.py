@@ -20,6 +20,7 @@ def get_dataset_path(dataset_name: str, langs: Optional[List[str]] = None, ext: 
 def set_args(parser: argparse.ArgumentParser):
     checkpoints = parser.add_argument_group("Checkpoints")
     checkpoints.add_argument("--model_path", type=str, default="model.pth", help="Model checkpoint path")
+    checkpoints.add_argument("--save_bin", action="store_true", help="if passed, saving .bin")
     checkpoints.add_argument("--bin_ext", default="bin")
     checkpoints.add_argument("--ds_ext", default="pth")
 
@@ -29,8 +30,6 @@ def set_args(parser: argparse.ArgumentParser):
     train_args.add_argument("--easy_nmt_batch_size", type=int, default=16)
     train_args.add_argument("--easy_nmt_model_name", type=str, default="opus-mt")
     train_args.add_argument("--easy_nmt_offline", type=bool, default=False)
-    train_args.add_argument("--multilingual", type=bool, default=False)
-    train_args.add_argument("--is_bart", type=bool, default=False)
     train_args.add_argument(
         "--offline_prefix",
         type=str,
@@ -66,5 +65,18 @@ def form_args():
     known_args, _ = arg_parser.parse_known_args()
     known_args.cuda = torch.cuda.is_available()
     known_args.device = torch.device(f"cuda:{torch.cuda.current_device()}" if torch.cuda.is_available() else "cpu")
-    # known_args.device = "cpu"
+
+    if known_args.easy_nmt_offline:
+        prefix_name = known_args.offline_prefix[known_args.offline_prefix.rfind("/") + 1:]
+        if prefix_name.startswith("opus"):
+            known_args.model_name = "opus-mt"
+        elif prefix_name.startswith("m2m100"):
+            known_args.model_name = "m2m100"
+        elif prefix_name.startswith("mbart"):
+            known_args.model_name = "mbart"
+        else:
+            raise AttributeError("Wrong EasyNMT offlne prefix name")
+    else:
+        known_args.model_name = known_args.easy_nmt_model_name
+
     return known_args
