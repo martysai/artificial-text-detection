@@ -66,4 +66,4 @@ class TestFunctionality(TestCase):
         sized_dataset = get_generation_dataset(dataset, dataset_name, size=10)
         assert_that(len(sized_dataset), equal_to(10))
         unsized_dataset = get_generation_dataset(dataset, dataset_name)
-        assert_that(len(unsized_dataset), equal_to(523656))
+        assert_that(len(unsized_dataset), equal_to(514195))
