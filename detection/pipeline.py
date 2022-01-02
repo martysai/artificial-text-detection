@@ -10,7 +10,7 @@ from transformers import DistilBertForSequenceClassification, Trainer, TrainingA
 from detection.arguments import form_args, get_dataset_path
 from detection.data.factory import DatasetFactory, collect
 from detection.data.generate import generate
-from detection.data.datasets import BinaryDataset, TextDetectionDataset
+from detection.data.data import BinaryDataset, TextDetectionDataset
 from detection.models.validate import compute_metrics
 from detection.utils import translations_to_torch_dataset, save_binary_dataset
 

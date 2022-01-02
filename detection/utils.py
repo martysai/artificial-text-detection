@@ -8,7 +8,7 @@ import torch
 from transformers import DistilBertTokenizerFast
 
 from detection.arguments import get_dataset_path
-from detection.data.datasets import BinaryDataset, TextDetectionDataset
+from detection.data.data import BinaryDataset, TextDetectionDataset
 
 SRC_LANG = "de"
 TRG_LANG = "en"
