@@ -15,9 +15,6 @@ from string import punctuation
 
 
 def check_input_paragraph(paragraph: str) -> bool:
-    """
-    TODO: понять, где вызывать предикат
-    """
     return len(paragraph) >= LM_LENGTH_LOWER_BOUND
 
 
@@ -34,8 +31,25 @@ def trim_output_paragraph(paragraph: str) -> str:
 
 def retrieve_prefix(paragraph: str, sentence_num: int = 1) -> str:
     """
-    TODO-Doc
+    Get a prefix from the input paragraph.
+
+    Parameters
+    ----------
+    paragraph: str
+        Input paragraph.
+    sentence_num: int
+        Number of sentences to retrieve from the text (default is 1).
+
+    Example
+    -------
+    Simple use case.
+    .. code-block:: python
+        >>> paragraph = "Good evening. I'm from Russia."
+        >>> prefix = retrieve_prefix(paragraph, sentence_num=1)
+        >>> print(prefix)
+        "Good evening."
     """
+    # TODO: Improve for ? and !
     sentences = paragraph.strip().split('.')
     sentences = [sent.strip() + '.' for sent in sentences if len(sent)]
     prefix = " ".join(sentences[:sentence_num])

@@ -74,7 +74,7 @@ class TestUnsupervisedBaselineTools(TestCase):
 
     def test_retrieve_prefix(self) -> None:
         for paragraph, prefix in zip(self.paragraphs, self.prefixes):
-            assert_that(retrieve_prefix(paragraph), equal_to(prefix))
+            assert_that(retrieve_prefix(paragraph, sentence_num=2), equal_to(prefix))
 
     def test_process(self) -> None:
         # TODO: добавить в тест сами значения, когда появится детерминированность в моделях

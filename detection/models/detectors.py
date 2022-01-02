@@ -11,7 +11,7 @@ from transformers import (
     BertTokenizerFast, AutoModelForSequenceClassification
 )
 from detection.models.const import CLASSIFICATION_THRESHOLD, HF_MODEL_NAME
-from detection.data.wrapper import TextDetectionDataset
+from detection.data.datasets import TextDetectionDataset
 from detection.models.validate import compute_metrics
 
 
