@@ -141,9 +141,9 @@ LANGS = {
     ],
     "wiki": [
         ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
+        # ["ru", "es", "straight"],
+        # ["ru", "fi", "straight"],
+        # ["ru", "fr", "straight"],
     ],
     "news": [
         # ["ru", "en", "straight"],
