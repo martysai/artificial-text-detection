@@ -16,6 +16,8 @@ def handle_bart_langs(src_lang: str, trg_lang: str) -> Tuple[str, str]:
 
 
 def is_bart(model: Any, model_name: Optional[str] = None) -> bool:
+    if model_name:
+        return model_name == "mbart"
     if isinstance(model, str):
         return model == "mbart"
     # TODO: improve for EasyNMT object
