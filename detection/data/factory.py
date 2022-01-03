@@ -122,8 +122,8 @@ LANGS = {
         # ["fr", "ru", "reversed"],
     ],
     "rnc": [
-        ["ru", "en", "straight"],
-        # ["ru", "es", "straight"],
+        # ["ru", "en", "straight"],
+        ["ru", "es", "straight"],
         # ["ru", "fi", "straight"],
         # ["ru", "fr", "straight"],
     ],
