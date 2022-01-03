@@ -93,7 +93,7 @@ def generate(
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
 
     print("model_name:", model_name)
-    if model_name in MULTILINGUAL_MODELS:
+    if model_name not in MULTILINGUAL_MODELS:
         offline_prefix = f"{offline_prefix}-{src_lang}-{trg_lang}"
     print("offline_prefix:", offline_prefix)
     model_config = (
