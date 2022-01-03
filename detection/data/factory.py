@@ -147,9 +147,9 @@ LANGS = {
     ],
     "news": [
         # ["ru", "en", "straight"],
-        # ["ru", "es", "straight"],
+        ["ru", "es", "straight"],
         # ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
+        # ["ru", "fr", "straight"],
     ],
     "back": [
         ["en", "ru", "straight"],
