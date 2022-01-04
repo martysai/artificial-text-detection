@@ -134,9 +134,9 @@ LANGS = {
         ["fr", "ru", "reversed"],
     ],
     "med": [
-        ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
+        # ["ru", "en", "straight"],
+        # ["ru", "es", "straight"],
+        # ["ru", "fi", "straight"],
         ["ru", "fr", "straight"],
     ],
     "wiki": [
