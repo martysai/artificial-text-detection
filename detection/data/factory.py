@@ -154,8 +154,8 @@ LANGS = {
     "back": [
         # ["en", "ru", "straight"],
         # ["es", "ru", "straight"],
-        ["fi", "ru", "straight"],
-        # ["fr", "ru", "straight"],
+        # ["fi", "ru", "straight"],
+        ["fr", "ru", "straight"],
     ]
 }
 LANGS = defaultdict(list, LANGS)
