@@ -64,7 +64,6 @@ class TranslationModel:
         self.model = retrieve_model(model, device)
         self.model_name = model_name
         if is_bart(model, model_name):
-            print("handling bart languages")
             src_lang, trg_lang = handle_bart_langs(src_lang, trg_lang)
         self.src_lang = src_lang or SRC_LANG
         self.trg_lang = trg_lang or TRG_LANG

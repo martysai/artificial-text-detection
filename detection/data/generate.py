@@ -92,10 +92,8 @@ def generate(
 
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
 
-    print("model_name:", model_name)
     if model_name not in MULTILINGUAL_MODELS:
         offline_prefix = f"{offline_prefix}-{src_lang}-{trg_lang}"
-    print("offline_prefix:", offline_prefix)
     model_config = (
         EasyNMT(translator=models.AutoModel(offline_prefix), cache_folder=offline_cache_prefix, device=device)
         if easy_nmt_offline
