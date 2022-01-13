@@ -6,7 +6,7 @@ from easynmt import EasyNMT, models
 
 from detection.arguments import form_args, get_dataset_path
 from detection.data.const import MULTILINGUAL_MODELS
-from detection.data.datasets import BinaryDataset, GeneratedDataset, TextDetectionDataset
+from detection.data.data import BinaryDataset, GeneratedDataset, TextDetectionDataset
 from detection.data.factory import SUPPORTED_DATASETS, DatasetFactory, collect
 from detection.models.translation import TranslationModel
 from detection.utils import MockDataset, load_binary_dataset, save_translations_texts, translations_to_torch_dataset
@@ -92,7 +92,7 @@ def generate(
 
     dataset = get_generation_dataset(dataset, dataset_name=dataset_name, size=size)
 
-    if model_name in MULTILINGUAL_MODELS:
+    if model_name not in MULTILINGUAL_MODELS:
         offline_prefix = f"{offline_prefix}-{src_lang}-{trg_lang}"
     model_config = (
         EasyNMT(translator=models.AutoModel(offline_prefix), cache_folder=offline_cache_prefix, device=device)
@@ -101,6 +101,7 @@ def generate(
     )
     model = TranslationModel(
         model=model_config,
+        model_name=model_name,
         src_lang=src_lang,
         trg_lang=trg_lang,
         batch_size=batch_size,

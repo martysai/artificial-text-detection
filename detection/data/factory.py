@@ -6,7 +6,7 @@ import pandas as pd
 from datasets import load_dataset
 
 from detection.arguments import form_args, get_dataset_path
-from detection.data.datasets import BinaryDataset
+from detection.data.data import BinaryDataset
 from detection.utils import save_binary_dataset
 
 # --- Datasets configs description ---

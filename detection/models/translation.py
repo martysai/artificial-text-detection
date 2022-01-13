@@ -15,9 +15,11 @@ def handle_bart_langs(src_lang: str, trg_lang: str) -> Tuple[str, str]:
     return src_lang, trg_lang
 
 
-def is_bart(model: Any) -> bool:
+def is_bart(model: Any, model_name: Optional[str] = None) -> bool:
+    if model_name:
+        return model_name == "mbart"
     if isinstance(model, str):
-        return model == "bart"
+        return model == "mbart"
     # TODO: improve for EasyNMT object
     return False
 
@@ -53,13 +55,15 @@ class TranslationModel:
     def __init__(
         self,
         model: Optional[Any] = None,
+        model_name: Optional[str] = None,
         src_lang: Optional[str] = None,
         trg_lang: Optional[str] = None,
         batch_size: Optional[int] = None,
         device: Optional[str] = "cpu",
     ) -> None:
         self.model = retrieve_model(model, device)
-        if is_bart(model):
+        self.model_name = model_name
+        if is_bart(model, model_name):
             src_lang, trg_lang = handle_bart_langs(src_lang, trg_lang)
         self.src_lang = src_lang or SRC_LANG
         self.trg_lang = trg_lang or TRG_LANG
