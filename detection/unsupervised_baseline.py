@@ -151,6 +151,7 @@ class UnsupervisedBaseline:
             df = self.process(df)
             self.labeled_df = UnsupervisedBaseline.semi_supervise(df, target_name=target_name)
         X, y = self.semi_supervised_df["text"], self.semi_supervised_df[target_name]
+        print("fitting the detector")
         self.detector.fit(X, y)
 
     def predict(self, X_test: pd.DataFrame):
