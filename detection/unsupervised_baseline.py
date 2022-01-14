@@ -150,7 +150,7 @@ class UnsupervisedBaseline:
             # Here is target_name is set to default in order to distinguish labeled target and the ground truth one.
             df = self.process(df)
             self.labeled_df = UnsupervisedBaseline.semi_supervise(df, target_name=target_name)
-        X, y = self.semi_supervised_df["text"], self.semi_supervised_df[target_name]
+        X, y = self.labeled_df["text"], self.labeled_df[target_name]
         print("fitting the detector")
         self.detector.fit(X, y)
 
