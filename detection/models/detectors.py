@@ -7,12 +7,19 @@ import pandas as pd
 import torch
 import transformers
 from transformers import (
-    DistilBertForSequenceClassification, DistilBertTokenizerFast, IntervalStrategy, Trainer, TrainingArguments,
-    BertTokenizerFast, AutoModelForSequenceClassification
+    AutoModelForSequenceClassification,
+    BertTokenizerFast,
+    DistilBertForSequenceClassification,
+    DistilBertTokenizerFast,
+    IntervalStrategy,
+    Trainer,
+    TrainingArguments,
 )
-from detection.models.const import CLASSIFICATION_THRESHOLD, HF_MODEL_NAME
+
 from detection.data.datasets import TextDetectionDataset
+from detection.models.const import CLASSIFICATION_THRESHOLD, HF_MODEL_NAME
 from detection.models.validate import compute_metrics
+from detection.utils import setup_experiment_tracking, stop_experiment_tracking
 
 
 class Detector:
@@ -34,10 +41,7 @@ class Detector:
         )
 
     def convert_dataframe_to_dataset(
-        self,
-        X: pd.DataFrame,
-        y: Optional[pd.DataFrame] = None,
-        device: Optional[str] = "cpu"
+        self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None, device: Optional[str] = "cpu"
     ) -> TextDetectionDataset:
         data = X.copy()
         data["target"] = y if y is not None else ["human"] * len(data)
@@ -66,10 +70,11 @@ class SimpleDetector(Detector):
         model: Optional[Any] = None,
         training_args: Optional[TrainingArguments] = None,
         args: Optional[argparse.Namespace] = None,
-        use_wandb: Optional[bool] = False
+        use_wandb: Optional[bool] = False,
     ):
         if (not model or not training_args) and (not args):
             raise AttributeError("Wrong parameters passed to SimpleDetector. Fill args")
+        self.run_name = args.run_name
         self.use_wandb = use_wandb
         args.report_to = ["wandb"] if self.use_wandb else []
         self.model = model or self.load_model(args)
@@ -81,10 +86,7 @@ class SimpleDetector(Detector):
         if hasattr(args, "model_path") and os.path.exists(args.model_path):
             model = transformers.PreTrainedModel.from_pretrained(args.model_path)
         else:
-            model = AutoModelForSequenceClassification.from_pretrained(
-                HF_MODEL_NAME,
-                num_labels=1
-            )
+            model = AutoModelForSequenceClassification.from_pretrained(HF_MODEL_NAME, num_labels=1)
         if hasattr(args, "device"):
             model = model.to(args.device)
         return model
@@ -101,8 +103,10 @@ class SimpleDetector(Detector):
     def fit(self, X: pd.DataFrame, y: pd.DataFrame):
         dataset = self.convert_dataframe_to_dataset(X, y)
         train_dataset, eval_dataset = dataset.split()
+        setup_experiment_tracking(self.run_name)
         self.trainer = self.load_trainer(train_dataset, eval_dataset)
         self.trainer.train()
+        stop_experiment_tracking()
         self.trainer.save_model()
 
     def get_logit(self, sample: Dict[str, Any]) -> float:

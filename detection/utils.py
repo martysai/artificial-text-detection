@@ -1,12 +1,13 @@
-from typing import Any, List, Optional, Union
-
+import os
 import pickle
 import zlib
+from typing import Any, List, Optional, Union
 
 import pandas as pd
 import torch
 from transformers import DistilBertTokenizerFast
 
+import wandb
 from detection.arguments import get_dataset_path
 from detection.data.datasets import BinaryDataset, TextDetectionDataset
 
@@ -16,14 +17,8 @@ TRG_LANG = "en"
 
 class MockDataset:
     dataset = [
-        {
-            SRC_LANG: "guten tag",
-            TRG_LANG: "good evening",
-        },
-        {
-            SRC_LANG: "es tut mir leid",
-            TRG_LANG: "i am sorry",
-        },
+        {SRC_LANG: "guten tag", TRG_LANG: "good evening",},
+        {SRC_LANG: "es tut mir leid", TRG_LANG: "i am sorry",},
     ]
     _translations = ["good evening", "i am sorry"]
     dataset_name = "mock"
@@ -93,8 +88,18 @@ def save_translations_texts(
 
 
 def ord_cyrillic(c: str) -> int:
-    if 'а' <= c <= 'я':
-        return ord(c) - ord('а') + ord('a')  # - cyrillic + latinic
-    if 'А' <= c <= 'Я':
-        return ord(c) - ord('А') + ord('A')
+    if "а" <= c <= "я":
+        return ord(c) - ord("а") + ord("a")  # - cyrillic + latinic
+    if "А" <= c <= "Я":
+        return ord(c) - ord("А") + ord("A")
     return ord(c)
+
+
+def setup_experiment_tracking(run_name: str) -> None:
+    token = os.environ.get("WANDB_TOKEN", None)
+    wandb.login(key=token)
+    wandb.init(project="artificial-text-detection", name=run_name)
+
+
+def stop_experiment_tracking() -> None:
+    wandb.finish()

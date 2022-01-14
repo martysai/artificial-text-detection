@@ -14,10 +14,6 @@ repos:
       hooks:
         - id: black
           files: detection
-    - repo: https://github.com/timothycrosley/isort
-      rev: 4.3.21
-      hooks:
-        - id: isort
     - repo: https://gitlab.com/pycqa/flake8
       rev: 3.8.1
       hooks:
