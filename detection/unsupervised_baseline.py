@@ -7,12 +7,19 @@ import numpy as np
 
 from detection.arguments import form_args
 from detection.data.generate_language_model import (
-    check_input_paragraph, check_output_paragraph, generate_language_model, retrieve_prefix,
-    super_maximal_repeat, trim_output_paragraph, parse_collection_on_repeats
+    check_input_paragraph,
+    check_output_paragraph,
+    generate_language_model,
+    retrieve_prefix,
+    super_maximal_repeat,
+    trim_output_paragraph,
+    parse_collection_on_repeats,
 )
 from detection.models.const import (
-    SEMI_SUPERVISED_HUMAN_RATE, SMR_REPEAT_RATE,
-    LM_LENGTH_LOWER_BOUND, SMR_LENGTH_LOWER_BOUND
+    SEMI_SUPERVISED_HUMAN_RATE,
+    SMR_REPEAT_RATE,
+    LM_LENGTH_LOWER_BOUND,
+    SMR_LENGTH_LOWER_BOUND,
 )
 from detection.models.detectors import SimpleDetector
 
@@ -21,8 +28,13 @@ class UnsupervisedBaseline:
     """
     TODO
     """
+
     def __init__(
-            self, args: argparse.Namespace, labeled_df: pd.DataFrame = None, mode: str = "unsupervised", sample: str = "topk"
+        self,
+        args: argparse.Namespace,
+        labeled_df: pd.DataFrame = None,
+        mode: str = "unsupervised",
+        sample: str = "topk",
     ):
         if sample not in ["topk", "nucl"]:
             raise ValueError("Wrong value for sample")
@@ -54,16 +66,12 @@ class UnsupervisedBaseline:
         generated_paragraphs = generate_language_model(paragraphs, lm_params=lm_params)
         for i, generated_paragraph in tqdm.tqdm(enumerate(generated_paragraphs)):
             if check_output_paragraph(generated_paragraph):
-                labeled_data.extend([
-                    {
-                        "text": trim_output_paragraph(generated_paragraph),
-                        "target": "machine"
-                    },
-                    {
-                        "text": trim_output_paragraph(paragraphs[i]),
-                        "target": "human"
-                    }
-                ])
+                labeled_data.extend(
+                    [
+                        {"text": trim_output_paragraph(generated_paragraph), "target": "machine"},
+                        {"text": trim_output_paragraph(paragraphs[i]), "target": "human"},
+                    ]
+                )
         labeled_df = pd.DataFrame(data=labeled_data, columns=["text", "target"])
         return labeled_df
 
@@ -75,7 +83,7 @@ class UnsupervisedBaseline:
         collection_length: int = LM_LENGTH_LOWER_BOUND,
         smr_length: int = SMR_LENGTH_LOWER_BOUND,
         positive_repeat_rate: float = SMR_REPEAT_RATE,
-        seed: int = 42
+        seed: int = 42,
     ) -> pd.DataFrame:
         """
         Label the dataset based on the algorithm provided in https://arxiv.org/abs/2111.02878.
@@ -119,7 +127,7 @@ class UnsupervisedBaseline:
         df: pd.DataFrame,
         target_name: str = "target",
         supervise_rate: float = SEMI_SUPERVISED_HUMAN_RATE,
-        seed: int = 42
+        seed: int = 42,
     ) -> pd.DataFrame:
         """
         TODO-Docs
@@ -127,7 +135,9 @@ class UnsupervisedBaseline:
         supervised_sample = df.head(int(supervise_rate * len(df)))
         supervised_sample = supervised_sample[supervised_sample[target_name] == "human"]
         unsupervised_sample = df.tail(int((1.0 - supervise_rate) * len(df)))
-        unsupervised_sample = UnsupervisedBaseline.label_with_repeats(unsupervised_sample, target_name=target_name, save_repeats=True, seed=seed)
+        unsupervised_sample = UnsupervisedBaseline.label_with_repeats(
+            unsupervised_sample, target_name=target_name, save_repeats=True, seed=seed
+        )
         return supervised_sample.append(unsupervised_sample)
 
     def fit(self, df: pd.DataFrame, target_name: str = "target", force: bool = False):
@@ -135,7 +145,7 @@ class UnsupervisedBaseline:
         TODO-Docs
         """
         # TODO: обобщить до двух опций: unsupervised и semi_supervised
-        if (not self.labeled_df) or (self.labeled_df and force):
+        if (not self.labeled_df) or force:
             # Here is target_name is set to default in order to distinguish labeled target and the ground truth one.
             df = self.process(df)
             self.labeled_df = UnsupervisedBaseline.semi_supervise(df, target_name=target_name)
@@ -147,12 +157,10 @@ class UnsupervisedBaseline:
 
 
 if __name__ == "__main__":
-    # TODO: дописать запуск на настоящих данных
-    dir_path = path.dirname(path.dirname(path.realpath(__file__)))
-    dvc_path = path.join(dir_path, "resources/data")
-    news_df = pd.read_csv(path.join(dvc_path, "lenta/lenta_sample.csv"), nrows=20)
-
     main_args = form_args()
-    baseline = UnsupervisedBaseline(args=main_args)
-    baseline.fit(news_df)
-    pass
+
+    labeled_df = pd.read_csv(main_args.detector_dataset_path)
+    baseline = UnsupervisedBaseline(args=main_args, labeled_df=labeled_df)
+    baseline.fit(labeled_df, target_name=main_args.target_name)
+    y_pred = baseline.predict(labeled_df)
+    print(y_pred.shape)

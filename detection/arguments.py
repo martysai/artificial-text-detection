@@ -52,8 +52,10 @@ def set_args(parser: argparse.ArgumentParser):
     train_args.add_argument("--weight_decay", type=int, default=1e-4)
     train_args.add_argument("--is_mock_data", type=bool, default=False)
 
-    libraries = parser.add_argument_group("Libraries")
-    libraries.add_argument("--run_name", type=str, default="default", help="A name of run to be used in wandb")
+    experiments = parser.add_argument_group("Experiments")
+    experiments.add_argument("--detector_dataset_path", type=str, default="", help="dataset where labeling is stored")
+    experiments.add_argument("--run_name", type=str, default="default", help="A name of run to be used in wandb")
+    experiments.add_argument("--target_name", type=str, default="target")
     return parser
 
 
@@ -67,7 +69,7 @@ def form_args():
     known_args.device = torch.device(f"cuda:{torch.cuda.current_device()}" if torch.cuda.is_available() else "cpu")
 
     if known_args.easy_nmt_offline:
-        prefix_name = known_args.offline_prefix[known_args.offline_prefix.rfind("/") + 1:]
+        prefix_name = known_args.offline_prefix[known_args.offline_prefix.rfind("/") + 1 :]
         if prefix_name.startswith("opus"):
             known_args.model_name = "opus-mt"
         elif prefix_name.startswith("m2m100"):
