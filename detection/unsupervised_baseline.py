@@ -147,6 +147,7 @@ class UnsupervisedBaseline:
         """
         # TODO: обобщить до двух опций: unsupervised и semi_supervised
         if (not self.labeled_df) or force:
+            print("here in process and semi supervise")
             # Here is target_name is set to default in order to distinguish labeled target and the ground truth one.
             df = self.process(df)
             self.labeled_df = UnsupervisedBaseline.semi_supervise(df, target_name=target_name)
