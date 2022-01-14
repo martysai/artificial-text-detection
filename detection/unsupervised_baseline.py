@@ -34,11 +34,12 @@ class UnsupervisedBaseline:
         args: argparse.Namespace,
         labeled_df: pd.DataFrame = None,
         mode: str = "unsupervised",
+        use_wandb: bool = False,
         sample: str = "topk",
     ):
         if sample not in ["topk", "nucl"]:
             raise ValueError("Wrong value for sample")
-        self.detector = SimpleDetector(args=args)
+        self.detector = SimpleDetector(args=args, use_wandb=use_wandb)
         self.labeled_df = labeled_df
         if mode not in ["semi-supervised", "unsupervised"]:
             raise ValueError("Possible mode options are 'semi-supervised' and 'unsupervised'")
@@ -159,8 +160,8 @@ class UnsupervisedBaseline:
 if __name__ == "__main__":
     main_args = form_args()
 
-    labeled_df = pd.read_csv(main_args.detector_dataset_path)
-    baseline = UnsupervisedBaseline(args=main_args, labeled_df=labeled_df)
-    baseline.fit(labeled_df, target_name=main_args.target_name)
-    y_pred = baseline.predict(labeled_df)
+    supervised_df = pd.read_csv(main_args.detector_dataset_path)
+    baseline = UnsupervisedBaseline(args=main_args, use_wandb=True, labeled_df=supervised_df)
+    baseline.fit(supervised_df, target_name=main_args.target_name)
+    y_pred = baseline.predict(supervised_df)
     print(y_pred.shape)
