@@ -4,6 +4,9 @@ from typing import Any, Dict, Optional
 import pandas as pd
 import tqdm
 import numpy as np
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
+from sklearn.preprocessing import LabelEncoder
+from scipy.stats import pearsonr
 
 from detection.arguments import form_args
 from detection.data.generate_language_model import (
@@ -39,7 +42,6 @@ class UnsupervisedBaseline:
     ):
         if sample not in ["topk", "nucl"]:
             raise ValueError("Wrong value for sample")
-        print("initializing detector")
         self.detector = SimpleDetector(args=args, use_wandb=use_wandb)
         self.labeled_df = labeled_df
         if mode not in ["semi-supervised", "unsupervised"]:
@@ -142,30 +144,42 @@ class UnsupervisedBaseline:
         )
         return supervised_sample.append(unsupervised_sample)
 
-    def fit(self, df: pd.DataFrame, target_name: str = "target", force: bool = False):
+    def fit(self, df: Optional[pd.DataFrame] = None, target_name: str = "target", force: bool = False):
         """
         TODO-Docs
         """
         # TODO: обобщить до двух опций: unsupervised и semi_supervised
-        if (not self.labeled_df) or force:
-            print("here in process and semi supervisem")
+        if isinstance(df, pd.DataFrame) and (not isinstance(self.labeled_df, pd.DataFrame)) or force:
             # Here is target_name is set to default in order to distinguish labeled target and the ground truth one.
             df = self.process(df)
             self.labeled_df = UnsupervisedBaseline.semi_supervise(df, target_name=target_name)
-        X, y = self.labeled_df["text"], self.labeled_df[target_name]
-        print("fitting the detector")
+        X, y = self.labeled_df["text"].to_frame(), self.labeled_df[target_name].to_frame()
         self.detector.fit(X, y)
 
     def predict(self, X_test: pd.DataFrame):
         return self.detector.predict(X_test)
 
+    def predict_proba(self, X_test: pd.DataFrame):
+        return self.detector.predict_proba(X_test)
+
 
 if __name__ == "__main__":
     main_args = form_args()
-
     supervised_df = pd.read_csv(main_args.detector_dataset_path)
     baseline = UnsupervisedBaseline(args=main_args, use_wandb=True, labeled_df=supervised_df)
-    print("starting fitting")
     baseline.fit(supervised_df, target_name=main_args.target_name)
-    y_pred = baseline.predict(supervised_df)
-    print(y_pred.shape)
+
+    test_df = pd.read_csv(
+        main_args.detector_dataset_path.replace("unsupervised_lenta_700.csv", "unsupervised_lenta_test.csv")
+    )
+    y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]))
+    lec = LabelEncoder()
+    y_pred = lec.fit_transform(y_pred)
+    y_true = lec.transform(test_df[main_args.target_name])
+
+    print("TEST VALUES")
+    print("pearson corr:", pearsonr(y_true, y_pred))
+    print("f1_score:", f1_score(y_true, y_pred))
+    print("accuracy_score:", accuracy_score(y_true, y_pred))
+    print("precision_score:", precision_score(y_true, y_pred))
+    print("recall_score:", recall_score(y_true, y_pred))

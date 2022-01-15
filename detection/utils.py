@@ -97,7 +97,6 @@ def ord_cyrillic(c: str) -> int:
 
 def setup_experiment_tracking(run_name: str) -> None:
     token = os.environ.get("WANDB_TOKEN", None)
-    print("wandb token:", token)
     wandb.login(key=token)
     wandb.init(project="artificial-text-detection", name=run_name)
 

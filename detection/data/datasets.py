@@ -33,6 +33,7 @@ class GeneratedDataset:
     model_name: str
         EasyNMT model name which is used for translation.
     """
+
     sources: List[str] = field(repr=False)
     targets: List[str] = field(repr=False)
     translations: List[str] = field(repr=False)
@@ -61,15 +62,16 @@ class TextDetectionDataset(torch_data.Dataset):
 
     @staticmethod
     def load_csv(data: Union[pd.DataFrame, str], tokenizer, device: Optional[str] = "cpu", new: Optional[bool] = False):
+        """
+        TODO-Docs
+        """
         if isinstance(data, str):
             df = pd.read_csv(data)
         else:
             df = data
         if new:
             corpus = df["text"].values.tolist()
-            labels = torch.FloatTensor(
-                df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values.tolist()
-            )
+            labels = torch.FloatTensor(df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values.tolist())
         else:
             corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
             labels = torch.FloatTensor([0, 1] * (len(corpus) // 2))

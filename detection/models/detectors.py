@@ -3,9 +3,11 @@ import argparse
 import os
 from typing import Any, Dict, Optional
 
+import numpy as np
 import pandas as pd
 import torch
 import transformers
+from scipy import special
 from transformers import (
     AutoModelForSequenceClassification,
     BertTokenizerFast,
@@ -17,7 +19,7 @@ from transformers import (
 )
 
 from detection.data.datasets import TextDetectionDataset
-from detection.models.const import CLASSIFICATION_THRESHOLD, HF_MODEL_NAME
+from detection.models.const import CLASSIFICATION_THRESHOLD, HF_MODEL_NAME, HF_MODEL_PATH
 from detection.models.validate import compute_metrics
 from detection.utils import setup_experiment_tracking, stop_experiment_tracking
 
@@ -30,6 +32,7 @@ class Detector:
             evaluation_strategy=IntervalStrategy.EPOCH,
             output_dir=f"{path_to_resources}/resources/data/training_results",
             num_train_epochs=args.epochs,
+            learning_rate=args.learning_rate,
             per_device_train_batch_size=args.train_batch,
             per_device_eval_batch_size=args.eval_batch,
             warmup_steps=args.warmup_steps,
@@ -44,7 +47,7 @@ class Detector:
         self, X: pd.DataFrame, y: Optional[pd.DataFrame] = None, device: Optional[str] = "cpu"
     ) -> TextDetectionDataset:
         data = X.copy()
-        data["target"] = y if y is not None else ["human"] * len(data)
+        data["target"] = y if y is not None else ["human"] * len(data)  # TODO: remove this strange part
         return TextDetectionDataset.load_csv(data, tokenizer=self.tokenizer, device=device, new=True)
 
     def load_model(self, args: Optional[argparse.Namespace]) -> Any:
@@ -74,19 +77,18 @@ class SimpleDetector(Detector):
     ):
         if (not model or not training_args) and (not args):
             raise AttributeError("Wrong parameters passed to SimpleDetector. Fill args")
+        self.offline = hasattr(args, "model_path") and os.path.exists(args.model_path)
+        self.model_path = HF_MODEL_PATH if self.offline else HF_MODEL_NAME
         self.run_name = args.run_name
         self.use_wandb = use_wandb
         args.report_to = ["wandb"] if self.use_wandb else []
         self.model = model or self.load_model(args)
         self.training_args = training_args or self.get_training_arguments(args)
         self.trainer = None
-        self.tokenizer = BertTokenizerFast.from_pretrained(HF_MODEL_NAME)
+        self.tokenizer = BertTokenizerFast.from_pretrained(self.model_path)
 
     def load_model(self, args: Optional[argparse.Namespace]) -> Any:
-        if hasattr(args, "model_path") and os.path.exists(args.model_path):
-            model = transformers.PreTrainedModel.from_pretrained(args.model_path)
-        else:
-            model = AutoModelForSequenceClassification.from_pretrained(HF_MODEL_NAME, num_labels=1)
+        model = AutoModelForSequenceClassification.from_pretrained(self.model_path, num_labels=1)
         if hasattr(args, "device"):
             model = model.to(args.device)
         return model
@@ -116,17 +118,19 @@ class SimpleDetector(Detector):
         logit = self.trainer.model(**sample).logits[0][0].detach().cpu().numpy().reshape(-1)[0]
         return logit
 
+    @staticmethod
+    def get_probits(logits: np.ndarray) -> np.ndarray:
+        return special.softmax(logits, axis=0)
+
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         dataset = self.convert_dataframe_to_dataset(X)
-        preds = []
         with torch.no_grad():
-            for sample in dataset:
-                logit = self.get_logit(sample)
-                preds.append("machine" if logit > CLASSIFICATION_THRESHOLD else "human")
+            logits = np.array([self.get_logit(sample) for sample in dataset]).reshape(-1, 1)
+            preds = ["machine" if logit > CLASSIFICATION_THRESHOLD else "human" for logit in logits]
         return pd.DataFrame(preds, columns=["target"])
 
     def predict_proba(self, X: pd.DataFrame) -> pd.DataFrame:
         dataset = self.convert_dataframe_to_dataset(X)
         with torch.no_grad():
-            probas = [self.get_logit(sample) for sample in dataset]
-        return pd.DataFrame(probas, columns=["proba"])
+            logits = np.array([self.get_logit(sample) for sample in dataset]).reshape(-1, 1)
+        return pd.DataFrame(logits, columns=["proba"])

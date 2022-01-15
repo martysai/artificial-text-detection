@@ -1,3 +1,5 @@
+import os
+
 BATCH_SIZE = 128
 EASY_NMT_MODEL_NAME = "opus-mt"
 SRC_LANG = "ru"
@@ -9,5 +11,7 @@ SMR_LENGTH_LOWER_BOUND = 20
 SMR_REPEAT_RATE = 0.5
 COLLECTION_CONCAT_SYMBOL = ". "
 ORD_UPPER_BOUND = 500
+# CLASSIFICATION_THRESHOLD = 0.005
 CLASSIFICATION_THRESHOLD = 0.5
 HF_MODEL_NAME = "cointegrated/rubert-tiny"
+HF_MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "resources/data/rubert-tiny")
