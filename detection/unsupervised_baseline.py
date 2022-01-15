@@ -39,6 +39,7 @@ class UnsupervisedBaseline:
     ):
         if sample not in ["topk", "nucl"]:
             raise ValueError("Wrong value for sample")
+        print("initializing detector")
         self.detector = SimpleDetector(args=args, use_wandb=use_wandb)
         self.labeled_df = labeled_df
         if mode not in ["semi-supervised", "unsupervised"]:
@@ -147,7 +148,7 @@ class UnsupervisedBaseline:
         """
         # TODO: обобщить до двух опций: unsupervised и semi_supervised
         if (not self.labeled_df) or force:
-            print("here in process and semi supervise")
+            print("here in process and semi supervisem")
             # Here is target_name is set to default in order to distinguish labeled target and the ground truth one.
             df = self.process(df)
             self.labeled_df = UnsupervisedBaseline.semi_supervise(df, target_name=target_name)
@@ -164,6 +165,7 @@ if __name__ == "__main__":
 
     supervised_df = pd.read_csv(main_args.detector_dataset_path)
     baseline = UnsupervisedBaseline(args=main_args, use_wandb=True, labeled_df=supervised_df)
+    print("starting fitting")
     baseline.fit(supervised_df, target_name=main_args.target_name)
     y_pred = baseline.predict(supervised_df)
     print(y_pred.shape)

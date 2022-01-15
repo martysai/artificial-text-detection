@@ -12,9 +12,7 @@ from detection.utils import save_binary_dataset
 # --- Datasets configs description ---
 
 CONFIGS = {
-    "tatoeba": {
-        "path": "tatoeba",
-    },
+    "tatoeba": {"path": "tatoeba",},
 }
 CONFIGS = defaultdict(dict, CONFIGS)
 
@@ -52,7 +50,6 @@ def load_prozhito(lang1: str, lang2: str) -> List[Dict[str, str]]:
     sources_df = pd.read_csv(sources_path)
     sources = sources_df["sources"].values.tolist()
     dataset = [{lang2: sources[i], lang1: ""} for i in list(range(len(sources)))]
-    print("dataset[0]:", dataset[0])
     return dataset
 
 
@@ -121,42 +118,17 @@ LANGS = {
         ["fi", "ru", "reversed"],
         ["fr", "ru", "reversed"],
     ],
-    "rnc": [
-        ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
-    ],
+    "rnc": [["ru", "en", "straight"], ["ru", "es", "straight"], ["ru", "fi", "straight"], ["ru", "fr", "straight"],],
     "prozhito": [
         ["en", "ru", "reversed"],
         ["es", "ru", "reversed"],
         ["fi", "ru", "reversed"],
         ["fr", "ru", "reversed"],
     ],
-    "med": [
-        ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
-    ],
-    "wiki": [
-        ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
-    ],
-    "news": [
-        ["ru", "en", "straight"],
-        ["ru", "es", "straight"],
-        ["ru", "fi", "straight"],
-        ["ru", "fr", "straight"],
-    ],
-    "back": [
-        ["en", "ru", "straight"],
-        ["es", "ru", "straight"],
-        ["fi", "ru", "straight"],
-        ["fr", "ru", "straight"],
-    ]
+    "med": [["ru", "en", "straight"], ["ru", "es", "straight"], ["ru", "fi", "straight"], ["ru", "fr", "straight"],],
+    "wiki": [["ru", "en", "straight"], ["ru", "es", "straight"], ["ru", "fi", "straight"], ["ru", "fr", "straight"],],
+    "news": [["ru", "en", "straight"], ["ru", "es", "straight"], ["ru", "fi", "straight"], ["ru", "fr", "straight"],],
+    "back": [["en", "ru", "straight"], ["es", "ru", "straight"], ["fi", "ru", "straight"], ["fr", "ru", "straight"],],
 }
 LANGS = defaultdict(list, LANGS)
 
