@@ -62,8 +62,8 @@ class TestUnsupervisedBaselineTools(TestCase):
         cls.args = form_args()
         cls.unsupervised_baseline = UnsupervisedBaseline(args=cls.args)
         dir_path = path.dirname(path.dirname(path.realpath(__file__)))
-        dvc_path = path.join(dir_path, "resources/data")
-        cls.news_df = pd.read_csv(path.join(dvc_path, "lenta/lenta_sample.csv"), nrows=20)
+        tests_path = path.join(dir_path, "tests/data")
+        cls.news_df = pd.read_csv(path.join(tests_path, "lenta_sample.csv"), nrows=20)
 
         cls.seed = 1206
 
@@ -103,7 +103,7 @@ class TestUnsupervisedBaselineTools(TestCase):
     def test_parse_collection_on_repeats(self) -> None:
         lenta_list = self.news_df["text"].values.tolist()
         repeats = parse_collection_on_repeats(lenta_list)
-        assert_that(len(repeats), equal_to(35))
+        assert_that(len(repeats), equal_to(24))
 
     def test_filter_collection(self) -> None:
         filtered = filter_collection(self.process_df["text"].values.tolist())
