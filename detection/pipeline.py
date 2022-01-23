@@ -1,29 +1,24 @@
-from typing import List
-
+import argparse
 import os
 import os.path as path
+from typing import List
 
 import transformers
-import wandb
 from transformers import AutoModelForSequenceClassification, BertTokenizerFast, Trainer, TrainingArguments
 
-from detection.arguments import form_args, get_dataset_path
+from detection.arguments import form_args
+from detection.data.datasets import BinaryDataset, TextDetectionDataset
 from detection.data.factory import DatasetFactory, collect
 from detection.data.generate import generate
-from detection.data.datasets import BinaryDataset, TextDetectionDataset
 from detection.models.const import HF_MODEL_NAME
 from detection.models.validate import compute_metrics
-from detection.utils import translations_to_torch_dataset, save_binary_dataset
-
-
-def setup_experiment_tracking(args) -> None:
-    token = os.environ.get("WANDB_TOKEN", None)
-    wandb.login(key=token)
-    wandb.init(project="artificial-text-detection", name=args.run_name)
-
-
-def stop_experiment_tracking() -> None:
-    wandb.finish()
+from detection.utils import (
+    get_dataset_path,
+    save_binary_dataset,
+    setup_experiment_tracking,
+    stop_experiment_tracking,
+    translations_to_torch_dataset,
+)
 
 
 def create_binary_datasets(args) -> List[BinaryDataset]:
@@ -139,11 +134,10 @@ def train_text_detection_model(dataset: TextDetectionDataset, args) -> Trainer:
     return trainer
 
 
-def pipeline(args) -> List[Trainer]:
+def pipeline(args: argparse.Namespace) -> List[Trainer]:
     """
     TODO-Doc
     """
-
     datasets = create_binary_datasets(args)
     # TODO-WikiMatrix: extend for multiple dataset names
     datasets_names = [args.dataset_name] * len(datasets)
@@ -152,7 +146,7 @@ def pipeline(args) -> List[Trainer]:
 
     trainers = []
     for dataset in dataset_with_langs:
-        setup_experiment_tracking(args)
+        setup_experiment_tracking(args.run_name)
         trainer = train_text_detection_model(dataset, args)
         trainers.append(trainer)
         stop_experiment_tracking()

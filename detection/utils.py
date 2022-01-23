@@ -1,31 +1,32 @@
 import os
 import pickle
+import random
 import zlib
-from typing import Any, List, Optional, Union
+from os import path
+from typing import List, Optional
 
 import pandas as pd
 import torch
 from transformers import DistilBertTokenizerFast
 
 import wandb
-from detection.arguments import get_dataset_path
 from detection.data.datasets import BinaryDataset, TextDetectionDataset
-
-SRC_LANG = "de"
-TRG_LANG = "en"
 
 
 class MockDataset:
+    """
+    Mock dataset for testing.
+    """
     dataset = [
-        {SRC_LANG: "guten tag", TRG_LANG: "good evening",},
-        {SRC_LANG: "es tut mir leid", TRG_LANG: "i am sorry",},
+        {"ru": "добрый день", "en": "good evening",},
+        {"ru": "извините", "en": "i am sorry",},
     ]
     _translations = ["good evening", "i am sorry"]
     dataset_name = "mock"
 
     @classmethod
     def targets(cls) -> List[str]:
-        return [sample[TRG_LANG] for sample in cls.dataset]
+        return [sample["en"] for sample in cls.dataset]
 
     @classmethod
     def translations(cls) -> List[str]:
@@ -35,8 +36,30 @@ class MockDataset:
     def list(cls) -> List[str]:
         dataset_list = []
         for dct in cls.dataset:
-            dataset_list.extend([dct[SRC_LANG], dct[TRG_LANG]])
+            dataset_list.extend([dct["ru"], dct["en"]])
         return dataset_list
+
+
+def get_dvc_storage_path() -> str:
+    """
+    Get the full path to the DVC storage.
+
+    Returns
+    -------
+    str
+        Path to the DVC Storage.
+    """
+    dir_path = path.dirname(path.dirname(path.realpath(__file__)))
+    return path.join(dir_path, "resources/data")
+
+
+def get_dataset_path(dataset_name: str, langs: Optional[List[str]] = None, ext: str = "bin") -> str:
+    dvc_path = get_dvc_storage_path()
+    if langs:
+        dataset_real_name = f"{dataset_name}.{langs[0]}-{langs[1]}.{ext}"
+    else:
+        dataset_real_name = f"{dataset_name}.{ext}"
+    return path.join(dvc_path, dataset_real_name)
 
 
 def load_binary_dataset(dataset_name: str, langs: Optional[List[str]] = None, ext: str = "bin") -> BinaryDataset:
@@ -96,6 +119,7 @@ def ord_cyrillic(c: str) -> int:
 
 
 def setup_experiment_tracking(run_name: str) -> None:
+    os.environ["WANDB_MODE"] = "offline"
     token = os.environ.get("WANDB_TOKEN", None)
     wandb.login(key=token)
     wandb.init(project="artificial-text-detection", name=run_name)
@@ -103,3 +127,13 @@ def setup_experiment_tracking(run_name: str) -> None:
 
 def stop_experiment_tracking() -> None:
     wandb.finish()
+
+
+def fix_random_seed(seed: int = 42) -> None:
+    """
+    Fixing a random seed.
+    """
+    torch.backends.cudnn.deterministic = True
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    random.seed(seed)

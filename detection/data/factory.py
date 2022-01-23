@@ -1,13 +1,12 @@
-from typing import Any, Dict, List, Optional
-
 from collections import defaultdict
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 from datasets import load_dataset
 
-from detection.arguments import form_args, get_dataset_path
+from detection.arguments import form_args
 from detection.data.datasets import BinaryDataset
-from detection.utils import save_binary_dataset
+from detection.utils import get_dataset_path, save_binary_dataset
 
 # --- Datasets configs description ---
 
@@ -166,19 +165,19 @@ def collect(
     """
     Parameters
     ----------
-        chosen_dataset_name: str
-            One of the following datasets: ['mock', 'tatoeba', 'wikimatrix'].
-        save: bool
-            Flag showing should we save datasets or not.
-        size: Optional[int]
-            Common size of binary datasets.
-        ext: str
-            An extension for datasets dumped files names.
+    chosen_dataset_name: str
+        One of the following datasets: ['mock', 'tatoeba', 'wikimatrix'].
+    save: bool
+        Flag showing should we save datasets or not.
+    size: int
+        Common size of binary datasets.
+    ext: str
+        An extension for datasets dumped files names.
 
     Returns
     -------
-        collection: List[BinaryDataset]
-            List of datasets which are loaded before translations.
+    collection: list of BinaryDataset
+        List of datasets which are loaded before translations.
     """
     if chosen_dataset_name not in SUPPORTED_DATASETS:
         raise ValueError("Wrong chosen dataset name")

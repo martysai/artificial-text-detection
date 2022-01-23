@@ -1,20 +1,8 @@
-from typing import List, Optional
-
 import argparse
 import os
 import os.path as path
 
 import torch
-
-
-def get_dataset_path(dataset_name: str, langs: Optional[List[str]] = None, ext: str = "bin") -> str:
-    dir_path = path.dirname(path.dirname(path.realpath(__file__)))
-    dvc_path = path.join(dir_path, "resources/data")
-    if langs:
-        dataset_real_name = f"{dataset_name}.{langs[0]}-{langs[1]}.{ext}"
-    else:
-        dataset_real_name = f"{dataset_name}.{ext}"
-    return path.join(dvc_path, dataset_real_name)
 
 
 def set_args(parser: argparse.ArgumentParser):
@@ -55,6 +43,9 @@ def set_args(parser: argparse.ArgumentParser):
 
     experiments = parser.add_argument_group("Experiments")
     experiments.add_argument("--detector_dataset_path", type=str, default="", help="dataset where labeling is stored")
+    experiments.add_argument(
+        "--detector_dataset_test_path", type=str, default="", help="dataset where test dataset is stored"
+    )
     experiments.add_argument("--run_name", type=str, default="default", help="A name of run to be used in wandb")
     experiments.add_argument("--target_name", type=str, default="target")
     return parser

@@ -1,35 +1,45 @@
 import argparse
 from typing import Any, Dict, Optional
 
+import numpy as np
 import pandas as pd
 import tqdm
-import numpy as np
-from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
-from sklearn.preprocessing import LabelEncoder
 from scipy.stats import pearsonr
+from sklearn import metrics
+from sklearn.preprocessing import LabelEncoder
 
 from detection.arguments import form_args
 from detection.data.generate_language_model import (
     check_input_paragraph,
     check_output_paragraph,
     generate_language_model,
-    retrieve_prefix,
-    super_maximal_repeat,
-    trim_output_paragraph,
     parse_collection_on_repeats,
+    trim_output_paragraph,
 )
 from detection.models.const import (
-    SEMI_SUPERVISED_HUMAN_RATE,
-    SMR_REPEAT_RATE,
     LM_LENGTH_LOWER_BOUND,
+    METRIC_SKLEARN_NAMES,
+    SEMI_SUPERVISED_HUMAN_RATE,
     SMR_LENGTH_LOWER_BOUND,
+    SMR_REPEAT_RATE,
 )
 from detection.models.detectors import SimpleDetector
 
 
 class UnsupervisedBaseline:
     """
-    TODO
+    The baseline based on suffix trees which is motivated by the unsupervised training of the detector.
+    Paper: https://arxiv.org/abs/2111.02878
+
+    Attributes
+    ----------
+    detector: SimpleDetector
+    labeled_df: pd.DataFrame
+
+    mode: str
+        Set the training option. Possible values: ["semi-supervised", "unsupervised"].
+    sample: str
+        Decoding strategy. Currently supported options: ["topk", "nucleus"].
     """
 
     def __init__(
@@ -50,7 +60,12 @@ class UnsupervisedBaseline:
         self.sample = sample  # TODO: расширить sample: top_k = 10, p = 0.8
 
     @staticmethod
-    def process(df: pd.DataFrame, lm_params: Optional[Dict[str, Any]] = None) -> pd.DataFrame:
+    def process(
+        df: pd.DataFrame,
+        lm_params: Optional[Dict[str, Any]] = None,
+        is_sentence: bool = True,
+        cut_num: int = 1
+    ) -> pd.DataFrame:
         """
         Parameters
         ----------
@@ -58,6 +73,10 @@ class UnsupervisedBaseline:
             DataFrame with human paragraphs.
         lm_params: Optional[Dict[str, Any]], default=None
             Additional language model parameters.
+        is_sentence: bool
+            Flag defining that we split paragraphs by sentences or by tokens. Default is True.
+        cut_num: int
+            Number of sentences/tokens depending on is_sentence for paragraphs prefixes retrieval.
 
         Returns
         -------
@@ -67,7 +86,9 @@ class UnsupervisedBaseline:
         labeled_data = []
         paragraphs = df.values.reshape(-1,).tolist()
         paragraphs = list(filter(check_input_paragraph, paragraphs))
-        generated_paragraphs = generate_language_model(paragraphs, lm_params=lm_params)
+        generated_paragraphs = generate_language_model(
+            paragraphs, is_sentence=is_sentence, cut_num=cut_num, lm_params=lm_params
+        )
         for i, generated_paragraph in tqdm.tqdm(enumerate(generated_paragraphs)):
             if check_output_paragraph(generated_paragraph):
                 labeled_data.extend(
@@ -83,7 +104,6 @@ class UnsupervisedBaseline:
     def label_with_repeats(
         df: pd.DataFrame,
         target_name: str = "target",
-        save_repeats: bool = False,
         collection_length: int = LM_LENGTH_LOWER_BOUND,
         smr_length: int = SMR_LENGTH_LOWER_BOUND,
         positive_repeat_rate: float = SMR_REPEAT_RATE,
@@ -96,10 +116,11 @@ class UnsupervisedBaseline:
         Parameters
         ----------
         df: pd.DataFrame
-            TODO-Docs
+            The training dataset.
         target_name: str
-        save_repeats: bool
+            Name of column in the training dataset to be fed. Default is "target".
         collection_length: int
+            TODO
         smr_length: int
         positive_repeat_rate: float
         seed: int
@@ -110,12 +131,9 @@ class UnsupervisedBaseline:
         pd.DataFrame
             Labeled dataframe for the further unsupervised baseline training process.
         """
-        parapgraphs_list = df["text"].values.tolist()
-        if save_repeats:
-            # TODO: save repeats
-            pass
+        paragraphs_list = df["text"].values.tolist()
         repeats = parse_collection_on_repeats(
-            parapgraphs_list, collection_length=collection_length, smr_length=smr_length
+            paragraphs_list, collection_length=collection_length, smr_length=smr_length
         )
         positive_repeats = np.random.RandomState(seed).choice(repeats, int(positive_repeat_rate * len(repeats)))
         smr_labels = []
@@ -140,18 +158,38 @@ class UnsupervisedBaseline:
         supervised_sample = supervised_sample[supervised_sample[target_name] == "human"]
         unsupervised_sample = df.tail(int((1.0 - supervise_rate) * len(df)))
         unsupervised_sample = UnsupervisedBaseline.label_with_repeats(
-            unsupervised_sample, target_name=target_name, save_repeats=True, seed=seed
+            unsupervised_sample, target_name=target_name, seed=seed
         )
         return supervised_sample.append(unsupervised_sample)
 
-    def fit(self, df: Optional[pd.DataFrame] = None, target_name: str = "target", force: bool = False):
+    def fit(
+        self,
+        df: Optional[pd.DataFrame] = None,
+        target_name: str = "target",
+        force: bool = False,
+        is_sentence: bool = True,
+        cut_num: int = 1
+    ) -> None:
         """
-        TODO-Docs
+        Fit the baseline.
+
+        Parameters
+        ----------
+        df: pd.DataFrame
+            The training dataset. Overrides self.labeled_df if force=True.
+        target_name: str
+            Name of column in the training dataset to be fed. Default is "target".
+        force: bool
+            Replace self.labeled_df. Default is False which means that do not preprocess.
+        is_sentence: bool
+            Flag defining that we split paragraphs by sentences or by tokens. Default is True.
+        cut_num: int
+            Number of sentences/tokens depending on is_sentence for paragraphs prefixes retrieval.
         """
         # TODO: обобщить до двух опций: unsupervised и semi_supervised
         if isinstance(df, pd.DataFrame) and (not isinstance(self.labeled_df, pd.DataFrame)) or force:
             # Here is target_name is set to default in order to distinguish labeled target and the ground truth one.
-            df = self.process(df)
+            df = self.process(df, is_sentence=is_sentence, cut_num=cut_num)
             self.labeled_df = UnsupervisedBaseline.semi_supervise(df, target_name=target_name)
         X, y = self.labeled_df["text"].to_frame(), self.labeled_df[target_name].to_frame()
         self.detector.fit(X, y)
@@ -163,23 +201,38 @@ class UnsupervisedBaseline:
         return self.detector.predict_proba(X_test)
 
 
-if __name__ == "__main__":
-    main_args = form_args()
-    supervised_df = pd.read_csv(main_args.detector_dataset_path)
-    baseline = UnsupervisedBaseline(args=main_args, use_wandb=True, labeled_df=supervised_df)
-    baseline.fit(supervised_df, target_name=main_args.target_name)
+def run_unsupervised_baseline_fit(args: argparse.Namespace, df: pd.DataFrame) -> UnsupervisedBaseline:
+    """
+    For given settings and a dataset fit the unsupervised baseline.
+    """
+    baseline = UnsupervisedBaseline(args=args, use_wandb=True, labeled_df=df)
+    baseline.fit(df, target_name=args.target_name)
+    return baseline
 
-    test_df = pd.read_csv(
-        main_args.detector_dataset_path.replace("unsupervised_lenta_700.csv", "unsupervised_lenta_test.csv")
-    )
-    y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]))
+
+def transform_unsupervised_metrics(test_df: pd.DataFrame, y_pred: pd.DataFrame, target_name: str) -> Dict[str, float]:
+    """
+    Transform test predictions with LabelEncoder.
+    """
     lec = LabelEncoder()
     y_pred = lec.fit_transform(y_pred)
-    y_true = lec.transform(test_df[main_args.target_name])
+    y_true = lec.fit_transform(test_df[target_name])
+    test_metrics = {"pearson": pearsonr(y_true, y_pred)}
+    for metric in METRIC_SKLEARN_NAMES:
+        test_metrics.update({metric: getattr(metrics, metric)(y_true, y_pred)})
+    return test_metrics
 
-    print("TEST VALUES")
-    print("pearson corr:", pearsonr(y_true, y_pred))
-    print("f1_score:", f1_score(y_true, y_pred))
-    print("accuracy_score:", accuracy_score(y_true, y_pred))
-    print("precision_score:", precision_score(y_true, y_pred))
-    print("recall_score:", recall_score(y_true, y_pred))
+
+def main():
+    main_args = form_args()
+    supervised_df = pd.read_csv(main_args.detector_dataset_path)
+    baseline = run_unsupervised_baseline_fit(main_args, supervised_df)
+
+    test_df = pd.read_csv(main_args.detector_dataset_test_path)
+    y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]))
+    metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.target_name)
+    print(metrics_dict)
+
+
+if __name__ == "__main__":
+    main()

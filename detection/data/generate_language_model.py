@@ -1,35 +1,75 @@
-from tqdm import tqdm
+from string import punctuation
 from typing import Any, Dict, List, Optional
+
+from tqdm import tqdm
 
 from detection.models.const import (
     COLLECTION_CONCAT_SYMBOL,
     LM_LENGTH_LOWER_BOUND,
     LM_LENGTH_UPPER_BOUND,
     ORD_UPPER_BOUND,
-    SMR_LENGTH_LOWER_BOUND
+    SMR_LENGTH_LOWER_BOUND,
 )
 from detection.models.language_model import LanguageModel
 from detection.models.smr.core import SuffixArray
 from detection.utils import ord_cyrillic
-from string import punctuation
 
 
 def check_input_paragraph(paragraph: str) -> bool:
+    """
+    Checkint that the paragraph satisfy to its minimal length.
+
+    Parameters
+    ----------
+    paragraph: str
+        Input paragraph.
+
+    Returns
+    -------
+    bool
+        Flag signalizes if the paragraph satisfies to its minimal length.
+    """
     return len(paragraph) >= LM_LENGTH_LOWER_BOUND
 
 
 def check_output_paragraph(paragraph: str) -> bool:
+    """
+    Checkint that the output paragraph satisfy to its (larger) minimal length.
+
+    Parameters
+    ----------
+    paragraph: str
+        Output paragraph.
+
+    Returns
+    -------
+    bool
+        Flag signalizes if the paragraph satisfies to its (larger) minimal length.
+    """
     return len(paragraph) >= LM_LENGTH_UPPER_BOUND
 
 
 def trim_output_paragraph(paragraph: str) -> str:
+    """
+    Trimming the paragraph for common batch sizes during training.
+
+    Parameters
+    ----------
+    paragraph: str
+        Input paragraph.
+
+    Returns
+    -------
+    str
+        Trimmed paragraph.
+    """
     trimmed = paragraph[:LM_LENGTH_UPPER_BOUND]
     if trimmed.rfind(".") > LM_LENGTH_LOWER_BOUND:
         return trimmed[:trimmed.rfind(".") + 1]
     return trimmed
 
 
-def retrieve_prefix(paragraph: str, sentence_num: int = 1) -> str:
+def retrieve_prefix(paragraph: str, is_sentence: bool = True, cut_num: int = 1) -> str:
     """
     Get a prefix from the input paragraph.
 
@@ -37,22 +77,33 @@ def retrieve_prefix(paragraph: str, sentence_num: int = 1) -> str:
     ----------
     paragraph: str
         Input paragraph.
-    sentence_num: int
-        Number of sentences to retrieve from the text (default is 1).
+    is_sentence: bool
+        Retrieving sentences or tokens.
+    cut_num: int
+        Number of sentences/tokens to retrieve from the text (default is 1).
 
     Example
     -------
     Simple use case.
     .. code-block:: python
         >>> paragraph = "Good evening. I'm from Russia."
-        >>> prefix = retrieve_prefix(paragraph, sentence_num=1)
+        >>> prefix = retrieve_prefix(paragraph, is_sentence=True, cut_num=1)
         >>> print(prefix)
         "Good evening."
+
+    Returns
+    -------
+    str
+        Retrieved prefix.
     """
     # TODO: Improve for ? and !
-    sentences = paragraph.strip().split('.')
-    sentences = [sent.strip() + '.' for sent in sentences if len(sent)]
-    prefix = " ".join(sentences[:sentence_num])
+    if is_sentence:
+        sentences = paragraph.strip().split('.')
+        sentences = [sent.strip() + '.' for sent in sentences if len(sent)]
+        prefix = " ".join(sentences[:cut_num])
+    else:
+        tokens = paragraph.strip().split(' ')
+        prefix = " ".join(tokens[:cut_num])
     return prefix
 
 
@@ -88,7 +139,18 @@ def parse_collection_on_repeats(
     Collecting all super maximal repeats from a set of documents.
     Collection is trivially preprocessed with eliminating punctuation.
 
-    # TODO: сохранять repeats
+    Parameters
+    ----------
+    collection: list of str
+        TODO
+    collection_length: int
+        Default is LM_LENGTH_LOWER_BOUND.
+    smr_length: int
+        Default is SMR_LENGTH_LOWER_BOUND.
+
+    Returns
+    -------
+    TODO
     """
     collection = filter_collection(collection)
     collection_concat = COLLECTION_CONCAT_SYMBOL.join(collection)
@@ -110,16 +172,35 @@ def parse_collection_on_repeats(
 
 def generate_language_model(
         paragraphs: List[str],
-        sentence_num: int = 1,
+        model_name: Optional[str] = None,
         lm_params: Optional[Dict[str, Any]] = None,
-        size: Optional[int] = None
+        is_sentence: bool = True,
+        cut_num: int = 1,
 ) -> List[str]:
     """
-    TODO-Doc
+    Generating paragraphs with a language model by a given prompt.
+
+    Parameters
+    ----------
+    paragraphs: list of str
+        Text paragraphs to be processed in the language model.
+    model_name: str
+        Model name for the huggingface pipeline. Default is None which means we load sberbank-ai gpt-2 model.
+    lm_params: dict from str to any
+        Additional language model parameters.
+    is_sentence: bool
+        Flag defining that we split paragraphs by sentences or by tokens. Default is True.
+    cut_num: int
+        Number of sentences/tokens depending on is_sentence for paragraphs prefixes retrieval.
+
+    Returns
+    -------
+    List of str
+        List of machine-written paragraphs for a given prompt.
     """
     language_model = LanguageModel()
     prefixes = [
-        retrieve_prefix(paragraph, sentence_num=sentence_num)
+        retrieve_prefix(paragraph, is_sentence=is_sentence, cut_num=cut_num)
         for paragraph in paragraphs
     ]
     return language_model(prefixes, **(lm_params or {}))

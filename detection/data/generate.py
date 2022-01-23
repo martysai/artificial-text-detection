@@ -1,15 +1,20 @@
-from typing import Callable, Collection, Dict, List, Optional, Union
-
 import os.path as path
+from typing import Callable, Collection, Dict, List, Optional, Union
 
 from easynmt import EasyNMT, models
 
-from detection.arguments import form_args, get_dataset_path
+from detection.arguments import form_args
 from detection.data.const import MULTILINGUAL_MODELS
-from detection.data.datasets import BinaryDataset, GeneratedDataset, TextDetectionDataset
+from detection.data.datasets import BinaryDataset, GeneratedDataset
 from detection.data.factory import SUPPORTED_DATASETS, DatasetFactory, collect
 from detection.models.translation import TranslationModel
-from detection.utils import MockDataset, load_binary_dataset, save_translations_texts, translations_to_torch_dataset
+from detection.utils import (
+    MockDataset,
+    get_dataset_path,
+    load_binary_dataset,
+    save_translations_texts,
+    translations_to_torch_dataset,
+)
 
 
 def translate_dataset(

@@ -4,14 +4,17 @@ from unittest import TestCase
 import pandas as pd
 from hamcrest import assert_that, equal_to
 
-
 from detection.arguments import form_args
 from detection.data.generate_language_model import (
-    generate_language_model, retrieve_prefix, parse_collection_on_repeats, super_maximal_repeat, filter_collection
+    filter_collection,
+    generate_language_model,
+    parse_collection_on_repeats,
+    retrieve_prefix,
+    super_maximal_repeat,
 )
 from detection.models.language_model import LanguageModel
-from detection.models.smr.core import SuffixArray
 from detection.unsupervised_baseline import UnsupervisedBaseline
+from detection.utils import fix_random_seed
 from tests import skip_github
 
 
@@ -24,43 +27,37 @@ class TestUnsupervisedBaselineTools(TestCase):
             "abc xx one. two_three abc abc-three.",
             "kkkkkkk",
             "абв гдеж абв гдеж",
-            "привет я звать привет"
+            "привет я звать привет",
         ]
-        cls.smr_targets = [
-            "",
-            " sent. ",
-            "three",
-            "kkkkkk",
-            "абв гдеж",
-            "привет"
-        ]
-        cls.prefixes = [
+        cls.smr_targets = ["", " sent. ", "three", "kkkkkk", "абв гдеж", "привет"]
+        cls.sentence_prefixes = [
             "",
             "One sent. Two sent.",
             "abc xx one. two_three abc abc-three.",
             "kkkkkkk.",
             "абв гдеж абв гдеж.",
-            "привет я звать привет."
+            "привет я звать привет.",
         ]
+        cls.token_prefixes = ["", "One sent.", "abc xx", "kkkkkkk", "абв гдеж", "привет я"]
 
-        cls.process_df = pd.DataFrame([
-            {
-                "text": "Доусон также подтвердил, что вопрос об использовании средств МВФ будет обязательно "
-                        "рассмотрен во время предстоящего обсуждения итогов работы миссии фонда в Москве, "
-                        "которая представит совету директоров МВФ доклад о результатах своих переговоров с "
-                        "представителями российского правительства.",
-            },
-            {
-                "text": "Местные телекомпании, ведущие прямые репортажи непосредственно с места катастрофы, сообщают, "
-                        "что произошедшая трагедия - крупнейшая в истории гражданской авиации Аргентины.",
-            }
-        ], columns=["text"])
+        cls.process_df = pd.DataFrame(
+            [
+                {
+                    "text": "Доусон также подтвердил, что вопрос об использовании средств МВФ будет обязательно "
+                    "рассмотрен во время предстоящего обсуждения итогов работы миссии фонда в Москве, "
+                    "которая представит совету директоров МВФ доклад о результатах своих переговоров с "
+                    "представителями российского правительства.",
+                },
+                {
+                    "text": "Местные телекомпании, ведущие прямые репортажи "
+                    "непосредственно с места катастрофы, сообщают, "
+                    "что произошедшая трагедия - крупнейшая в истории гражданской авиации Аргентины.",
+                },
+            ],
+            columns=["text"],
+        )
 
-        cls.repeats = [
-            "привет меня зовут.",
-            "привет мне",
-            "как твои дела? привет"
-        ]
+        cls.repeats = ["привет меня зовут.", "привет мне", "как твои дела? привет"]
 
         cls.args = form_args()
         cls.unsupervised_baseline = UnsupervisedBaseline(args=cls.args)
@@ -68,20 +65,29 @@ class TestUnsupervisedBaselineTools(TestCase):
         dvc_path = path.join(dir_path, "resources/data")
         cls.news_df = pd.read_csv(path.join(dvc_path, "lenta/lenta_sample.csv"), nrows=20)
 
+        cls.seed = 1206
+
+    def setUp(self) -> None:
+        fix_random_seed(self.seed)
+
     def test_super_maximal_repeat(self) -> None:
         for paragraph, repeat in zip(self.paragraphs, self.smr_targets):
             assert_that(super_maximal_repeat(paragraph), equal_to(repeat))
 
-    def test_retrieve_prefix(self) -> None:
-        for paragraph, prefix in zip(self.paragraphs, self.prefixes):
-            assert_that(retrieve_prefix(paragraph, sentence_num=2), equal_to(prefix))
+    def test_retrieve_sentence_prefix(self) -> None:
+        for paragraph, prefix in zip(self.paragraphs, self.sentence_prefixes):
+            assert_that(retrieve_prefix(paragraph, is_sentence=True, cut_num=2), equal_to(prefix))
+
+    def test_retrieve_token_prefix(self) -> None:
+        for paragraph, prefix in zip(self.paragraphs, self.token_prefixes):
+            assert_that(retrieve_prefix(paragraph, is_sentence=False, cut_num=2), equal_to(prefix))
 
     def test_process(self) -> None:
-        # TODO: добавить в тест сами значения, когда появится детерминированность в моделях
-        generated_df = UnsupervisedBaseline.process(self.process_df)
+        generated_df = UnsupervisedBaseline.process(self.process_df, is_sentence=False, cut_num=4)
         assert_that(len(generated_df), equal_to(4))
         assert_that(generated_df["target"].iloc[0], equal_to("machine"))
         assert_that(generated_df["target"].iloc[1], equal_to("human"))
+        assert_that(generated_df["text"].iloc[2][-55:-15], equal_to("культуры и истории федерального значения"))
 
     def test_parse_collection_on_repeats_mock(self) -> None:
         mock_list = self.process_df["text"].values.tolist()
@@ -109,11 +115,12 @@ class TestUnsupervisedBaselineTools(TestCase):
         assert_that(df["target"].values.tolist(), equal_to(["human", "human", "machine", "human", "human", "machine"]))
 
     def test_semi_supervise_mock(self) -> None:
-        generated_df = UnsupervisedBaseline.process(self.process_df)
+        generated_df = UnsupervisedBaseline.process(self.process_df, is_sentence=True, cut_num=2)
         generated_df = UnsupervisedBaseline.semi_supervise(generated_df, supervise_rate=0.5, seed=1206)
         assert_that(generated_df["target"].values.tolist(), equal_to(["human", "human", "human"]))
 
-    def test_semi_supervise(self) -> None:
+    def test_force_true(self) -> None:
+        # TODO: add the test to force true
         pass
 
 
@@ -124,15 +131,20 @@ class TestLanguageModels(TestCase):
         cls.paragraphs = [
             "Дайте мне белые крылья. Я утопаю в омуте.",
             "Позитивная мотивация - явно не мой конёк. И мы все умрём.",
-            "Дайте пройти, кидайте в шляпу. Кредитные карты, дукаты, злоты."
+            "Дайте пройти, кидайте в шляпу. Кредитные карты, дукаты, злоты.",
         ]
+        cls.seed = 1206
+
+    def setUp(self) -> None:
+        fix_random_seed(self.seed)
 
     @skip_github
     def test_deterministic_generation(self) -> None:
-        # TODO: сделать предсказания детерминированными.
         generated_texts = self.language_model(self.paragraphs)
-        # assert_that(generated_texts[0][42:92], equal_to("Нет, я не умру от боли. Ну пожалуйста, пожалуйста…"))
+        assert_that(len(generated_texts), equal_to(3))
+        assert_that(generated_texts[0][42:64], equal_to("Но я не утону никогда."))
 
     def test_language_model_dataset(self) -> None:
-        generated_dataset = generate_language_model(self.paragraphs)
+        generated_dataset = generate_language_model(self.paragraphs, is_sentence=False, cut_num=4)
         assert_that(len(generated_dataset), equal_to(3))
+        assert_that(generated_dataset[2][:38], equal_to("Дайте пройти, кидайте в окошко монетку"))

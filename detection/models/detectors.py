@@ -6,13 +6,10 @@ from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 import torch
-import transformers
 from scipy import special
 from transformers import (
     AutoModelForSequenceClassification,
     BertTokenizerFast,
-    DistilBertForSequenceClassification,
-    DistilBertTokenizerFast,
     IntervalStrategy,
     Trainer,
     TrainingArguments,
@@ -67,7 +64,9 @@ class Detector:
 
 
 class SimpleDetector(Detector):
-    # TODO-Unsupervised: Check the article -- which detector to use
+    """
+    TODO
+    """
     def __init__(
         self,
         model: Optional[Any] = None,
