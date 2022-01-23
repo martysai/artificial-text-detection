@@ -64,7 +64,9 @@ class UnsupervisedBaseline:
         df: pd.DataFrame,
         lm_params: Optional[Dict[str, Any]] = None,
         is_sentence: bool = True,
-        cut_num: int = 1
+        cut_num: int = 1,
+        input_lower_bound: int = None,
+        output_lower_bound: int = None
     ) -> pd.DataFrame:
         """
         Parameters
@@ -77,6 +79,10 @@ class UnsupervisedBaseline:
             Flag defining that we split paragraphs by sentences or by tokens. Default is True.
         cut_num: int
             Number of sentences/tokens depending on is_sentence for paragraphs prefixes retrieval.
+        input_lower_bound: int
+            Possible input length for a given prompt.
+        output_lower_bound: int
+            Possible output length for a generated text.
 
         Returns
         -------
@@ -85,12 +91,12 @@ class UnsupervisedBaseline:
         """
         labeled_data = []
         paragraphs = df.values.reshape(-1,).tolist()
-        paragraphs = list(filter(check_input_paragraph, paragraphs))
+        paragraphs = list(filter(lambda p: check_input_paragraph(p, lower_bound=input_lower_bound), paragraphs))
         generated_paragraphs = generate_language_model(
             paragraphs, is_sentence=is_sentence, cut_num=cut_num, lm_params=lm_params
         )
         for i, generated_paragraph in tqdm.tqdm(enumerate(generated_paragraphs)):
-            if check_output_paragraph(generated_paragraph):
+            if check_output_paragraph(generated_paragraph, lower_bound=output_lower_bound):
                 labeled_data.extend(
                     [
                         {"text": trim_output_paragraph(generated_paragraph), "target": "machine"},

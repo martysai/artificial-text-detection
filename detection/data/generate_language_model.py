@@ -15,7 +15,7 @@ from detection.models.smr.core import SuffixArray
 from detection.utils import ord_cyrillic
 
 
-def check_input_paragraph(paragraph: str) -> bool:
+def check_input_paragraph(paragraph: str, lower_bound: int = None) -> bool:
     """
     Checkint that the paragraph satisfy to its minimal length.
 
@@ -23,16 +23,18 @@ def check_input_paragraph(paragraph: str) -> bool:
     ----------
     paragraph: str
         Input paragraph.
+    lower_bound: int
+        Minimal possible length.
 
     Returns
     -------
     bool
         Flag signalizes if the paragraph satisfies to its minimal length.
     """
-    return len(paragraph) >= LM_LENGTH_LOWER_BOUND
+    return len(paragraph) >= (lower_bound or LM_LENGTH_LOWER_BOUND)
 
 
-def check_output_paragraph(paragraph: str) -> bool:
+def check_output_paragraph(paragraph: str, lower_bound: Optional[int] = None) -> bool:
     """
     Checkint that the output paragraph satisfy to its (larger) minimal length.
 
@@ -40,13 +42,15 @@ def check_output_paragraph(paragraph: str) -> bool:
     ----------
     paragraph: str
         Output paragraph.
+    lower_bound: int
+        Minimal possible length.
 
     Returns
     -------
     bool
         Flag signalizes if the paragraph satisfies to its (larger) minimal length.
     """
-    return len(paragraph) >= LM_LENGTH_UPPER_BOUND
+    return len(paragraph) >= (lower_bound or LM_LENGTH_UPPER_BOUND)
 
 
 def trim_output_paragraph(paragraph: str) -> str:

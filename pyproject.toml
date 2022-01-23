@@ -25,6 +25,7 @@ packaging = "21.3"
 filelock = "3.4.2"
 pandas = "1.3.4"
 scikit-learn = "1.0.1"
+dvc = {version = "2.9.3", extras = ["gdrive"]}
 
 [tool.poetry.dev-dependencies]
 pytest = "6.2.5"
