@@ -106,7 +106,7 @@ def retrieve_prefix(paragraph: str, is_sentence: bool = True, cut_num: int = 1) 
         sentences = [sent.strip() + '.' for sent in sentences if len(sent)]
         prefix = " ".join(sentences[:cut_num])
     else:
-        tokens = paragraph.strip().split(' ')
+        tokens = paragraph.strip().split()
         prefix = " ".join(tokens[:cut_num])
     return prefix
 
@@ -158,7 +158,7 @@ def parse_collection_on_repeats(
     """
     collection = filter_collection(collection)
     collection_concat = COLLECTION_CONCAT_SYMBOL.join(collection)
-    pbar = tqdm(total=len(collection_concat) - LM_LENGTH_LOWER_BOUND)
+    pbar = tqdm(total=len(collection_concat) - collection_length)
     prev_concat, current_repeat, repeats = "", collection_concat, []
     while prev_concat != collection_concat and len(collection_concat) > collection_length \
             and len(current_repeat) > smr_length:
