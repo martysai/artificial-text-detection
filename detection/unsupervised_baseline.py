@@ -206,6 +206,7 @@ class UnsupervisedBaseline:
         self.detector.fit(X, y)
 
     def predict(self, X_test: pd.DataFrame, device: Optional[str] = "cpu"):
+        print("IN PREDICT DEVICE:", device)
         return self.detector.predict(X_test, device=device)
 
     def predict_proba(self, X_test: pd.DataFrame):
@@ -238,6 +239,8 @@ def main():
     main_args = form_args()
     supervised_df = pd.read_csv(main_args.detector_dataset_path, sep="\t", lineterminator="\n")
     baseline = run_unsupervised_baseline_fit(main_args, supervised_df)
+
+    print("MAIN ARGS DEVICE:", main_args.device)
 
     test_df = pd.read_csv(main_args.detector_dataset_test_path, sep="\t", lineterminator="\n")
     y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]), device=main_args.device)
