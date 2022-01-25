@@ -121,8 +121,8 @@ class SimpleDetector(Detector):
     def get_probits(logits: np.ndarray) -> np.ndarray:
         return special.softmax(logits, axis=0)
 
-    def predict(self, X: pd.DataFrame) -> pd.DataFrame:
-        dataset = self.convert_dataframe_to_dataset(X)
+    def predict(self, X: pd.DataFrame, device: Optional[str] = "cpu") -> pd.DataFrame:
+        dataset = self.convert_dataframe_to_dataset(X, device=device)
         with torch.no_grad():
             logits = np.array([self.get_logit(sample) for sample in dataset]).reshape(-1, 1)
             preds = ["machine" if logit > CLASSIFICATION_THRESHOLD else "human" for logit in logits]

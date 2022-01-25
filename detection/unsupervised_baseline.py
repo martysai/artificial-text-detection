@@ -205,8 +205,8 @@ class UnsupervisedBaseline:
         X, y = self.labeled_df["text"].to_frame(), self.labeled_df[target_name].to_frame()
         self.detector.fit(X, y)
 
-    def predict(self, X_test: pd.DataFrame):
-        return self.detector.predict(X_test)
+    def predict(self, X_test: pd.DataFrame, device: Optional[str] = "cpu"):
+        return self.detector.predict(X_test, device=device)
 
     def predict_proba(self, X_test: pd.DataFrame):
         return self.detector.predict_proba(X_test)
@@ -240,7 +240,7 @@ def main():
     baseline = run_unsupervised_baseline_fit(main_args, supervised_df)
 
     test_df = pd.read_csv(main_args.detector_dataset_test_path, sep="\t", lineterminator="\n")
-    y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]))
+    y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]), device=main_args.device)
     metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.target_name)
     print(metrics_dict)
 
