@@ -71,12 +71,17 @@ class TextDetectionDataset(torch_data.Dataset):
             df = data
         if new:
             corpus = df["text"].values.tolist()
-            labels = torch.FloatTensor(df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values.tolist())
+            # labels = torch.FloatTensor(df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values.tolist())
+            labels = torch.Tensor(
+                df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values,
+                device=torch.device(device)
+            )
         else:
             corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
             labels = torch.FloatTensor([0, 1] * (len(corpus) // 2))
-        encodings = tokenizer(corpus, truncation=True, padding=True)
-        encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
+        print("ENCODINGS TO DEVICE")
+        encodings = tokenizer(corpus, truncation=True, padding=True).to(device)
+        # encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
         dataset = TextDetectionDataset(encodings, labels, device=device)
         return dataset
 
