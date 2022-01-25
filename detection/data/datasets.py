@@ -85,13 +85,13 @@ class TextDetectionDataset(torch_data.Dataset):
         print("TO DEVICE DEVICE:", device)
         if device:
             # TODO-Extra: написать на GPU получше
-            try:
-                print("IN TRY")
-                encodings = encodings.to(device)
-                labels = labels.to(device)
-            except AttributeError:
-                print("ATTRIBUTE ERROR")
-                pass
+            # try:
+            print("IN TRY")
+            encodings = encodings.to(device)
+            labels = labels.to(device)
+            # except AttributeError:
+            #     print("ATTRIBUTE ERROR")
+            #     pass
         return encodings, labels
 
     @staticmethod
