@@ -217,7 +217,7 @@ def run_unsupervised_baseline_fit(args: argparse.Namespace, df: pd.DataFrame) ->
     For given settings and a dataset fit the unsupervised baseline.
     """
     baseline = UnsupervisedBaseline(args=args, use_wandb=True, labeled_df=df)
-    baseline.fit(df, target_name=args.target_name)
+    baseline.fit(df, target_name=args.unsupervised_target_name)
     return baseline
 
 
@@ -241,7 +241,7 @@ def main():
 
     test_df = pd.read_csv(main_args.detector_dataset_test_path, sep="\t", lineterminator="\n")
     y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]))
-    metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.unsupervised_target_name)
+    metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.target_name)
     print(metrics_dict)
 
 
