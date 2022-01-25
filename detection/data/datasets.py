@@ -82,12 +82,15 @@ class TextDetectionDataset(torch_data.Dataset):
 
     @staticmethod
     def to_device(encodings: torch.FloatTensor, labels: torch.FloatTensor, device: Optional[str] = "cpu"):
+        print("TO DEVICE DEVICE:", device)
         if device:
             # TODO-Extra: написать на GPU получше
             try:
+                print("IN TRY")
                 encodings = encodings.to(device)
                 labels = labels.to(device)
             except AttributeError:
+                print("ATTRIBUTE ERROR")
                 pass
         return encodings, labels
 
