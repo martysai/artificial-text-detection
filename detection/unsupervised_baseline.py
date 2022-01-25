@@ -1,5 +1,5 @@
 import argparse
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -236,12 +236,12 @@ def transform_unsupervised_metrics(test_df: pd.DataFrame, y_pred: pd.DataFrame, 
 
 def main():
     main_args = form_args()
-    supervised_df = pd.read_csv(main_args.detector_dataset_path)
+    supervised_df = pd.read_csv(main_args.detector_dataset_path, sep="\t", lineterminator="\n")
     baseline = run_unsupervised_baseline_fit(main_args, supervised_df)
 
-    test_df = pd.read_csv(main_args.detector_dataset_test_path)
+    test_df = pd.read_csv(main_args.detector_dataset_test_path, sep="\t", lineterminator="\n")
     y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]))
-    metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.target_name)
+    metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.unsupervised_target_name)
     print(metrics_dict)
 
 

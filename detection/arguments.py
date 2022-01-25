@@ -48,6 +48,7 @@ def set_args(parser: argparse.ArgumentParser):
     )
     experiments.add_argument("--run_name", type=str, default="default", help="A name of run to be used in wandb")
     experiments.add_argument("--target_name", type=str, default="target")
+    experiments.add_argument("--unsupervised_target_name", type=str, default="unsupervised_target")
     return parser
 
 
