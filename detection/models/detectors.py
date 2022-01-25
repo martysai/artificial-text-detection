@@ -114,6 +114,8 @@ class SimpleDetector(Detector):
         sample.pop("labels", None)
         sample["input_ids"] = sample["input_ids"].view(1, -1)
         sample["attention_mask"] = sample["attention_mask"].view(1, -1)
+        print("sample device:", sample.device)
+        print("model device:", self.trainer.model.device)
         logit = self.trainer.model(**sample).logits[0][0].detach().cpu().numpy().reshape(-1)[0]
         return logit
 
