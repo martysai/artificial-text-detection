@@ -82,7 +82,7 @@ class TextDetectionDataset(torch_data.Dataset):
             labels = torch.tensor([0, 1] * (len(corpus) // 2))
         print("ENCODINGS TO DEVICE")
         encodings = tokenizer(corpus, truncation=True, padding=True)  # , device=device)
-        # encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
+        encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
         dataset = TextDetectionDataset(encodings, labels, device=device)
         return dataset
 
