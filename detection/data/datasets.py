@@ -72,7 +72,7 @@ class TextDetectionDataset(torch_data.Dataset):
         if new:
             corpus = df["text"].values.tolist()
             # labels = torch.FloatTensor(df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values.tolist())
-            labels = torch.Tensor(
+            labels = torch.tensor(
                 df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values,
                 device=torch.device(device)
             )
