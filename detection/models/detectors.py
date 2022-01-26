@@ -82,7 +82,8 @@ class SimpleDetector(Detector):
         self.use_wandb = use_wandb
         args.report_to = ["wandb"] if self.use_wandb else []
         self.model = model or self.load_model(args)
-        self.device = model.device
+        # self.device = torch.device(args.device)
+        self.device = args.device
         self.training_args = training_args or self.get_training_arguments(args)
         self.trainer = None
         self.tokenizer = BertTokenizerFast.from_pretrained(self.model_path)
