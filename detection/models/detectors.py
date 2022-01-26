@@ -82,6 +82,7 @@ class SimpleDetector(Detector):
         self.use_wandb = use_wandb
         args.report_to = ["wandb"] if self.use_wandb else []
         self.model = model or self.load_model(args)
+        self.device = model.device
         self.training_args = training_args or self.get_training_arguments(args)
         self.trainer = None
         self.tokenizer = BertTokenizerFast.from_pretrained(self.model_path)
@@ -112,8 +113,8 @@ class SimpleDetector(Detector):
 
     def get_logit(self, sample: Dict[str, Any]) -> float:
         sample.pop("labels", None)
-        sample["input_ids"] = sample["input_ids"].view(1, -1)
-        sample["attention_mask"] = sample["attention_mask"].view(1, -1)
+        sample["input_ids"] = sample["input_ids"].view(1, -1).to(self.device)
+        sample["attention_mask"] = sample["attention_mask"].view(1, -1).to(self.device)
         print("sample device:", sample["input_ids"].device)
         print("model device:", self.trainer.model.device)
         logit = self.trainer.model(**sample).logits[0][0].detach().cpu().numpy().reshape(-1)[0]
