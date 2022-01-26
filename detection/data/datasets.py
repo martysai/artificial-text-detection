@@ -78,7 +78,7 @@ class TextDetectionDataset(torch_data.Dataset):
             )
         else:
             corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
-            labels = torch.FloatTensor([0, 1] * (len(corpus) // 2))
+            labels = torch.tensor([0, 1] * (len(corpus) // 2))
         print("ENCODINGS TO DEVICE")
         encodings = tokenizer(corpus, truncation=True, padding=True)  # , device=device)
         # encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
@@ -86,7 +86,7 @@ class TextDetectionDataset(torch_data.Dataset):
         return dataset
 
     @staticmethod
-    def to_device(encodings: torch.FloatTensor, labels: torch.FloatTensor, device: Optional[str] = "cpu"):
+    def to_device(encodings: torch.tensor, labels: torch.tensor, device: Optional[str] = "cpu"):
         print("TO DEVICE DEVICE:", device)
         if device:
             # TODO-Extra: написать на GPU получше
@@ -122,7 +122,7 @@ class TextDetectionDataset(torch_data.Dataset):
         )
         train_encodings = TextDetectionDataset.get_encodings_from_range(encodings, train_range)
         eval_encodings = TextDetectionDataset.get_encodings_from_range(encodings, eval_range)
-        train_labels, eval_labels = torch.FloatTensor(train_labels), torch.FloatTensor(eval_labels)
+        train_labels, eval_labels = torch.tensor(train_labels), torch.tensor(eval_labels)
 
         train_dataset = TextDetectionDataset(train_encodings, train_labels, self.device)
         eval_dataset = TextDetectionDataset(eval_encodings, eval_labels, self.device)
