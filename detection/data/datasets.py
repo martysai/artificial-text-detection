@@ -93,10 +93,11 @@ class TextDetectionDataset(torch_data.Dataset):
             # TODO-Extra: написать на GPU получше
             # try:
             print("IN TRY")
-            print("encodings[0].keys():", encodings[0].keys())
-            for encodings_item in encodings:
-                encodings_item["input_ids"] = encodings_item["input_ids"].to(device)
-                encodings_item["attention_mask"] = encodings_item["attention_mask"].to(device)
+            # print("encodings[0].keys():", encodings[0].keys())
+            for i in range(len(encodings)):
+                # encodings_item["input_ids"] = encodings_item["input_ids"].to(device)
+                # encodings_item["attention_mask"] = encodings_item["attention_mask"].to(device)
+                encodings[i] = encodings[i].to(device)
             encodings = encodings.to(device)
             labels = labels.to(device)
             # except AttributeError:
