@@ -98,8 +98,8 @@ class TextDetectionDataset(torch_data.Dataset):
             # encodings_item["input_ids"] = encodings_item["input_ids"].to(device)
             # encodings_item["attention_mask"] = encodings_item["attention_mask"].to(device)
             # encodings[i] = encodings[i].to(device)
-            encodings = encodings.to(device)
-            labels = labels.to(device)
+            # encodings = encodings.to(device)
+            # labels = labels.to(device)
             # except AttributeError:
             #     print("ATTRIBUTE ERROR")
             #     pass
