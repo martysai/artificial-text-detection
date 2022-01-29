@@ -142,6 +142,8 @@ class SimpleDetector(Detector):
         sample["input_ids"] = sample["input_ids"].view(1, -1).to(self._device)
         sample["attention_mask"] = sample["attention_mask"].view(1, -1).to(self._device)
         print("self.model.device:", self.model.device)
+        self.model.to(self._device)
+        print("self.model.device:", self.model.device)
         logit = self.model(**sample).logits[0][0].detach().cpu().numpy().reshape(-1)[0]
         return logit
 
