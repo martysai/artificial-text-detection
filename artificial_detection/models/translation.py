@@ -2,7 +2,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 from easynmt import EasyNMT
 
-from detection.models.const import BATCH_SIZE, EASY_NMT_MODEL_NAME, SRC_LANG, TRG_LANG
+from artificial_detection.models.const import BATCH_SIZE, EASY_NMT_MODEL_NAME, SRC_LANG, TRG_LANG
 
 
 def handle_bart_langs(src_lang: str, trg_lang: str) -> Tuple[str, str]:

@@ -4,17 +4,17 @@ from unittest import TestCase
 import pandas as pd
 from hamcrest import assert_that, equal_to
 
-from detection.arguments import form_args
-from detection.data.generate_language_model import (
+from artificial_detection.arguments import form_args
+from artificial_detection.data.generate_language_model import (
     filter_collection,
     generate_language_model,
     parse_collection_on_repeats,
     retrieve_prefix,
     super_maximal_repeat,
 )
-from detection.models.language_model import LanguageModel
-from detection.unsupervised_baseline import UnsupervisedBaseline
-from detection.utils import fix_random_seed
+from artificial_detection.models.language_model import LanguageModel
+from artificial_detection.unsupervised_baseline import UnsupervisedBaseline
+from artificial_detection.utils import fix_random_seed
 from tests import skip_github
 
 

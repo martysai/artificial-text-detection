@@ -3,12 +3,12 @@ from typing import Callable, Collection, Dict, List, Optional, Union
 
 from easynmt import EasyNMT, models
 
-from detection.arguments import form_args
-from detection.data.const import MULTILINGUAL_MODELS
-from detection.data.datasets import BinaryDataset, GeneratedDataset
-from detection.data.factory import SUPPORTED_DATASETS, DatasetFactory, collect
-from detection.models.translation import TranslationModel
-from detection.utils import (
+from artificial_detection.arguments import form_args
+from artificial_detection.data.const import MULTILINGUAL_MODELS
+from artificial_detection.data.datasets import BinaryDataset, GeneratedDataset
+from artificial_detection.data.factory import SUPPORTED_DATASETS, DatasetFactory, collect
+from artificial_detection.models.translation import TranslationModel
+from artificial_detection.utils import (
     MockDataset,
     get_dataset_path,
     load_binary_dataset,

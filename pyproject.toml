@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "detection"
+name = "artificial_detection"
 version = "0.1.0"
 description = "Python framework for artificial text detection with NLP approaches."
 authors = ["Marat Saidov <msaidov1@yandex.ru>"]
@@ -26,6 +26,7 @@ filelock = "3.4.2"
 pandas = "1.3.4"
 scikit-learn = "1.0.1"
 dvc = {version = "2.9.3", extras = ["gdrive"]}
+autoflake = "1.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "6.2.5"

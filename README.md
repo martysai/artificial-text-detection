@@ -1,4 +1,6 @@
 [![Build Status][build_status_badge]](build_status_link)
+[![PyPi Versions](https://img.shields.io/pypi/pyversions/artificial-detection)](https://pypi.org/project/artificial-detection/)
+[![Wheel](https://img.shields.io/pypi/wheel/artificial-detection)](https://pypi.org/project/artificial-detection/)
 [![codecov](https://codecov.io/gh/MaratSaidov/artificial-text-detection/branch/main/graph/badge.svg?token=HF8IQEADRU)](https://codecov.io/gh/MaratSaidov/artificial-text-detection)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/MaratSaidov/artificial-text-detection/-/blob/master/.pre-commit-config.yaml)

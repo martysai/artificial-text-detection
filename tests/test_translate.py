@@ -4,8 +4,8 @@ from unittest import TestCase
 import pandas as pd
 from hamcrest import assert_that, equal_to, has_items
 
-from detection.models.translation import TranslationModel
-from detection.utils import get_dataset_path, save_translations_texts
+from artificial_detection.models.translation import TranslationModel
+from artificial_detection.utils import get_dataset_path, save_translations_texts
 from tests import skip_github
 
 

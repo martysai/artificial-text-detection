@@ -4,7 +4,7 @@ import numpy as np
 from datasets import load_metric
 from transformers import EvalPrediction
 
-from detection.models.const import CLASSIFICATION_THRESHOLD, METRIC_NAMES
+from artificial_detection.models.const import CLASSIFICATION_THRESHOLD, METRIC_NAMES
 
 METRICS = {metric_name: load_metric(metric_name) for metric_name in METRIC_NAMES}
 

@@ -5,10 +5,10 @@ import numpy as np
 from hamcrest import assert_that, equal_to, greater_than, has_items
 from transformers import EvalPrediction
 
-from detection.data.factory import collect
-from detection.data.generate import get_generation_dataset, translate_dataset
-from detection.models.validate import compute_metrics
-from detection.utils import MockDataset, translations_to_torch_dataset
+from artificial_detection.data.factory import collect
+from artificial_detection.data.generate import get_generation_dataset, translate_dataset
+from artificial_detection.models.validate import compute_metrics
+from artificial_detection.utils import MockDataset, translations_to_torch_dataset
 
 
 def reverse_transform(s: Union[str, List[str]]) -> Union[str, List[str]]:

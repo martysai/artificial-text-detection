@@ -1,7 +1,7 @@
 import random
-from detection.models.smr.sais import construct_suffix_array
-from detection.models.const import ORD_UPPER_BOUND
-from detection.utils import ord_cyrillic
+from artificial_detection.models.smr.sais import construct_suffix_array
+from artificial_detection.models.const import ORD_UPPER_BOUND
+from artificial_detection.utils import ord_cyrillic
 
 
 class SuffixArray:
