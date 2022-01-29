@@ -217,7 +217,7 @@ def run_unsupervised_baseline_fit(args: argparse.Namespace, df: pd.DataFrame) ->
     For given settings and a dataset fit the unsupervised baseline.
     """
     baseline = UnsupervisedBaseline(args=args, use_wandb=True, labeled_df=df)
-    baseline.fit(df, target_name=args.unsupervised_target_name)
+    # baseline.fit(df, target_name=args.unsupervised_target_name)
     return baseline
 
 
