@@ -64,6 +64,7 @@ class TextDetectionDataset(torch_data.Dataset):
     def load_csv(data: Union[pd.DataFrame, str], tokenizer, device: Optional[str] = "cpu", new: Optional[bool] = False):
         """
         TODO-Docs
+        TODO: распарсить реализации по параметру new
         """
         if isinstance(data, str):
             df = pd.read_csv(data)
@@ -80,7 +81,6 @@ class TextDetectionDataset(torch_data.Dataset):
         else:
             corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
             labels = torch.tensor([0, 1] * (len(corpus) // 2))
-        print("ENCODINGS TO DEVICE")
         encodings = tokenizer(corpus, truncation=True, padding=True)  # , device=device)
         encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
         dataset = TextDetectionDataset(encodings, labels, device=device)
@@ -88,21 +88,9 @@ class TextDetectionDataset(torch_data.Dataset):
 
     @staticmethod
     def to_device(encodings: torch.tensor, labels: torch.tensor, device: Optional[str] = "cpu"):
-        print("TO DEVICE DEVICE:", device)
         if device:
-            # TODO-Extra: написать на GPU получше
-            # try:
-            print("IN TRY")
-            # print("encodings[0].keys():", encodings[0].keys())
-            # for i in range(len(encodings)):
-            # encodings_item["input_ids"] = encodings_item["input_ids"].to(device)
-            # encodings_item["attention_mask"] = encodings_item["attention_mask"].to(device)
-            # encodings[i] = encodings[i].to(device)
-            # encodings = encodings.to(device)
-            # labels = labels.to(device)
-            # except AttributeError:
-            #     print("ATTRIBUTE ERROR")
-            #     pass
+            # TODO-Extra: написать инференс на GPU
+            pass
         return encodings, labels
 
     @staticmethod
@@ -113,7 +101,7 @@ class TextDetectionDataset(torch_data.Dataset):
         return new_encodings
 
     def split(self):
-        # TODO-Extra: написать на GPU получше
+        # TODO-Extra: написать инференс на GPU
         if hasattr(self.encodings, "detach"):
             encodings = self.encodings.detach().cpu().numpy()
             labels = self.labels.detach().cpu().numpy()

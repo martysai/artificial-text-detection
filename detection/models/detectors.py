@@ -1,7 +1,6 @@
-# TODO-Pipeline: put Trainer and Tokenizer for DistillBERT here
 import argparse
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, NoReturn, Optional
 
 import numpy as np
 import pandas as pd
@@ -65,6 +64,11 @@ class Detector:
 
 class SimpleDetector(Detector):
     """
+    Detector which is based on open HF transformers.
+    This implementation usage could be discovered in several baselines such as UnsupervisedBaseline.
+
+    Attributes
+    ----------
     TODO
     """
     def __init__(
@@ -82,11 +86,19 @@ class SimpleDetector(Detector):
         self.use_wandb = use_wandb
         args.report_to = ["wandb"] if self.use_wandb else []
         self.model = model or self.load_model(args)
-        # self.device = torch.device(args.device)
-        self.device = args.device
+        self._device = args.device
         self.training_args = training_args or self.get_training_arguments(args)
         self.trainer = None
         self.tokenizer = BertTokenizerFast.from_pretrained(self.model_path)
+
+    @property
+    def device(self):
+        return self._device
+
+    @device.setter
+    def device(self, value) -> NoReturn:
+        self._device = value
+        self.model.to(self._device)
 
     def load_model(self, args: Optional[argparse.Namespace]) -> Any:
         model = AutoModelForSequenceClassification.from_pretrained(self.model_path, num_labels=1)
@@ -114,10 +126,8 @@ class SimpleDetector(Detector):
 
     def get_logit(self, sample: Dict[str, Any]) -> float:
         sample.pop("labels", None)
-        sample["input_ids"] = sample["input_ids"].view(1, -1).to(self.device)
-        sample["attention_mask"] = sample["attention_mask"].view(1, -1).to(self.device)
-        print("sample device:", sample["input_ids"].device)
-        print("model device:", self.trainer.model.device)
+        sample["input_ids"] = sample["input_ids"].view(1, -1).to(self._device)
+        sample["attention_mask"] = sample["attention_mask"].view(1, -1).to(self._device)
         logit = self.trainer.model(**sample).logits[0][0].detach().cpu().numpy().reshape(-1)[0]
         return logit
 
@@ -126,6 +136,7 @@ class SimpleDetector(Detector):
         return special.softmax(logits, axis=0)
 
     def predict(self, X: pd.DataFrame, device: Optional[str] = "cpu") -> pd.DataFrame:
+        self.device = device
         dataset = self.convert_dataframe_to_dataset(X, device=device)
         with torch.no_grad():
             logits = np.array([self.get_logit(sample) for sample in dataset]).reshape(-1, 1)
