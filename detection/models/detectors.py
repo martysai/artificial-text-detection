@@ -69,7 +69,20 @@ class SimpleDetector(Detector):
 
     Attributes
     ----------
-    TODO
+    offline: bool
+        Determines if the model should be loaded and processed in offline seting.
+    model_path: str
+        If self.offline is True, stores the model path.
+        Otherwise stores the model name from Huggingface Hub.
+    run_name: str
+        Stores the run name for wandb.ai.
+    use_wandb: bool
+        If True, use wandb for logging.
+    model: Model
+        Huggingface detector. By default we use RuBert-Tiny.
+        See also: https://huggingface.co/cointegrated/rubert-tiny
+    tokenizer: Tokenizer
+        Conjugant to the self.model tokenizer.
     """
     def __init__(
         self,
@@ -128,7 +141,7 @@ class SimpleDetector(Detector):
         sample.pop("labels", None)
         sample["input_ids"] = sample["input_ids"].view(1, -1).to(self._device)
         sample["attention_mask"] = sample["attention_mask"].view(1, -1).to(self._device)
-        logit = self.trainer.model(**sample).logits[0][0].detach().cpu().numpy().reshape(-1)[0]
+        logit = self.model(**sample).logits[0][0].detach().cpu().numpy().reshape(-1)[0]
         return logit
 
     @staticmethod
