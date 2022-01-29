@@ -226,8 +226,8 @@ def transform_unsupervised_metrics(test_df: pd.DataFrame, y_pred: pd.DataFrame, 
     Transform test predictions with LabelEncoder.
     """
     lec = LabelEncoder()
-    y_pred = lec.fit_transform(y_pred)
-    y_true = lec.fit_transform(test_df[target_name])
+    y_pred = lec.fit_transform(y_pred.values.ravel())
+    y_true = lec.fit_transform(test_df[target_name].values.ravel())
     test_metrics = {"pearson": pearsonr(y_true, y_pred)}
     for metric in METRIC_SKLEARN_NAMES:
         test_metrics.update({metric: getattr(metrics, metric)(y_true, y_pred)})
