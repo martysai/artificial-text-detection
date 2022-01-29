@@ -106,6 +106,7 @@ def generate(
     )
     model = TranslationModel(
         model=model_config,
+        model_name=model_name,
         src_lang=src_lang,
         trg_lang=trg_lang,
         batch_size=batch_size,
