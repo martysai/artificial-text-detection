@@ -6,13 +6,13 @@ from typing import List
 import transformers
 from transformers import AutoModelForSequenceClassification, BertTokenizerFast, Trainer, TrainingArguments
 
-from detection.arguments import form_args
-from detection.data.datasets import BinaryDataset, TextDetectionDataset
-from detection.data.factory import DatasetFactory, collect
-from detection.data.generate import generate
-from detection.models.const import HF_MODEL_NAME
-from detection.models.validate import compute_metrics
-from detection.utils import (
+from artificial_detection.arguments import form_args
+from artificial_detection.data.datasets import BinaryDataset, TextDetectionDataset
+from artificial_detection.data.factory import DatasetFactory, collect
+from artificial_detection.data.generate import generate
+from artificial_detection.models.const import HF_MODEL_NAME
+from artificial_detection.models.validate import compute_metrics
+from artificial_detection.utils import (
     get_dataset_path,
     save_binary_dataset,
     setup_experiment_tracking,

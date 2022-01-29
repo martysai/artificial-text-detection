@@ -3,8 +3,8 @@ from unittest import TestCase
 
 from hamcrest import assert_that, equal_to
 
-from detection.data.factory import collect, load_wikimatrix
-from detection.utils import MockDataset, get_dataset_path, translations_to_torch_dataset
+from artificial_detection.data.factory import collect, load_wikimatrix
+from artificial_detection.utils import MockDataset, get_dataset_path, translations_to_torch_dataset
 from tests import skip_github
 
 

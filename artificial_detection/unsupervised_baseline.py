@@ -8,22 +8,22 @@ from scipy.stats import pearsonr
 from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
 
-from detection.arguments import form_args
-from detection.data.generate_language_model import (
+from artificial_detection.arguments import form_args
+from artificial_detection.data.generate_language_model import (
     check_input_paragraph,
     check_output_paragraph,
     generate_language_model,
     parse_collection_on_repeats,
     trim_output_paragraph,
 )
-from detection.models.const import (
+from artificial_detection.models.const import (
     LM_LENGTH_LOWER_BOUND,
     METRIC_SKLEARN_NAMES,
     SEMI_SUPERVISED_HUMAN_RATE,
     SMR_LENGTH_LOWER_BOUND,
     SMR_REPEAT_RATE,
 )
-from detection.models.detectors import SimpleDetector
+from artificial_detection.models.detectors import SimpleDetector
 
 
 class UnsupervisedBaseline:

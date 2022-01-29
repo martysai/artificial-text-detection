@@ -3,16 +3,16 @@ from typing import Any, Dict, List, Optional
 
 from tqdm import tqdm
 
-from detection.models.const import (
+from artificial_detection.models.const import (
     COLLECTION_CONCAT_SYMBOL,
     LM_LENGTH_LOWER_BOUND,
     LM_LENGTH_UPPER_BOUND,
     ORD_UPPER_BOUND,
     SMR_LENGTH_LOWER_BOUND,
 )
-from detection.models.language_model import LanguageModel
-from detection.models.smr.core import SuffixArray
-from detection.utils import ord_cyrillic
+from artificial_detection.models.language_model import LanguageModel
+from artificial_detection.models.smr.core import SuffixArray
+from artificial_detection.utils import ord_cyrillic
 
 
 def check_input_paragraph(paragraph: str, lower_bound: int = None) -> bool:

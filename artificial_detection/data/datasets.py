@@ -11,7 +11,7 @@ from datasets import dataset_dict
 from sklearn.model_selection import train_test_split
 from transformers import DistilBertTokenizerFast
 
-from detection.data.const import TEST_SIZE
+from artificial_detection.data.const import TEST_SIZE
 
 
 BinaryDataset = Union[Any, dataset_dict.DatasetDict]

@@ -4,9 +4,9 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from datasets import load_dataset
 
-from detection.arguments import form_args
-from detection.data.datasets import BinaryDataset
-from detection.utils import get_dataset_path, save_binary_dataset
+from artificial_detection.arguments import form_args
+from artificial_detection.data.datasets import BinaryDataset
+from artificial_detection.utils import get_dataset_path, save_binary_dataset
 
 # --- Datasets configs description ---
 

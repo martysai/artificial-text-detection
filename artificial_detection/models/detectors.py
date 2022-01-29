@@ -14,10 +14,10 @@ from transformers import (
     TrainingArguments,
 )
 
-from detection.data.datasets import TextDetectionDataset
-from detection.models.const import CLASSIFICATION_THRESHOLD, HF_MODEL_NAME, HF_MODEL_PATH
-from detection.models.validate import compute_metrics
-from detection.utils import setup_experiment_tracking, stop_experiment_tracking
+from artificial_detection.data.datasets import TextDetectionDataset
+from artificial_detection.models.const import CLASSIFICATION_THRESHOLD, HF_MODEL_NAME, HF_MODEL_PATH
+from artificial_detection.models.validate import compute_metrics
+from artificial_detection.utils import setup_experiment_tracking, stop_experiment_tracking
 
 
 class Detector:

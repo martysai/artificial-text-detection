@@ -4,9 +4,9 @@ import pandas as pd
 from hamcrest import assert_that, close_to, equal_to, instance_of
 from transformers import BertForSequenceClassification, DistilBertTokenizerFast
 
-from detection.arguments import form_args
-from detection.models.const import HF_MODEL_NAME
-from detection.models.detectors import SimpleDetector
+from artificial_detection.arguments import form_args
+from artificial_detection.models.const import HF_MODEL_NAME
+from artificial_detection.models.detectors import SimpleDetector
 
 
 class TestDetectors(TestCase):
