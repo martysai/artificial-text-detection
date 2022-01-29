@@ -239,7 +239,7 @@ def main():
     supervised_df = pd.read_csv(main_args.detector_dataset_path, sep="\t", lineterminator="\n")
     baseline = run_unsupervised_baseline_fit(main_args, supervised_df)
     test_df = pd.read_csv(main_args.detector_dataset_test_path, sep="\t", lineterminator="\n")
-    y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]), device=main_args.device)
+    y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]), device="cpu")
     metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.target_name)
     print(metrics_dict)
 
