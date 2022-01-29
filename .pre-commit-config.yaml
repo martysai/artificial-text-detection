@@ -1,0 +1,55 @@
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.0.1
+      hooks:
+        - id: check-yaml
+        - id: check-json
+        - id: end-of-file-fixer
+        - id: trailing-whitespace
+        - id: check-added-large-files
+        - id: check-merge-conflict
+        - id: detect-private-key
+
+    - repo: local
+      hooks:
+        - id: black
+          files: demandtools|tests
+          name: black
+          entry: poetry run black --config pyproject.toml
+          types: [ python ]
+          language: system
+
+    - repo: local
+      hooks:
+        - id: darglint
+          files: demandtools|tests
+          name: darglint
+          entry: poetry run darglint --verbosity 2 --docstring-style numpy
+          types: [ python ]
+          language: system
+
+    - repo: local
+      hooks:
+        - id: flake8
+          files: demandtools|tests
+          name: flake8
+          entry: poetry run flake8
+          types: [ python ]
+          language: system
+
+    - repo: local
+      hooks:
+        - id: isort
+          name: isort
+          entry: poetry run isort --settings-path pyproject.toml
+          types: [ python ]
+          language: system
+
+    - repo: local
+      hooks:
+      - id: autoflake
+        name: autoflake
+        entry: autoflake -i --remove-all-unused-imports --ignore-init-module-imports
+        language: python
+        types: [ python ]
+        require_serial: true

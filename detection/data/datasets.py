@@ -33,6 +33,7 @@ class GeneratedDataset:
     model_name: str
         EasyNMT model name which is used for translation.
     """
+
     sources: List[str] = field(repr=False)
     targets: List[str] = field(repr=False)
     translations: List[str] = field(repr=False)
@@ -60,25 +61,36 @@ class TextDetectionDataset(torch_data.Dataset):
         return TextDetectionDataset(**dataset_settings)
 
     @staticmethod
-    def load_csv(csv_path: str, device: Optional[str] = "cpu") -> torch_data.Dataset:
-        df = pd.read_csv(csv_path)
-        corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
-        labels = torch.FloatTensor([0, 1] * (len(corpus) // 2))
-        tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
-        encodings = tokenizer(corpus, truncation=True, padding=True)
+    def load_csv(data: Union[pd.DataFrame, str], tokenizer, device: Optional[str] = "cpu", new: Optional[bool] = False):
+        """
+        TODO-Docs
+        TODO: распарсить реализации по параметру new
+        """
+        if isinstance(data, str):
+            df = pd.read_csv(data)
+        else:
+            df = data
+        if new:
+            corpus = df["text"].values.tolist()
+            # labels = torch.FloatTensor(df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values.tolist())
+            labels = torch.tensor(
+                df["target"].apply(lambda trg: 1 if trg == "machine" else 0).values,
+                device=torch.device(device),
+                dtype=torch.float32
+            )
+        else:
+            corpus = TextDetectionDataset.get_corpus(df["targets"].values.tolist(), df["translations"].values.tolist())
+            labels = torch.tensor([0, 1] * (len(corpus) // 2))
+        encodings = tokenizer(corpus, truncation=True, padding=True)  # , device=device)
         encodings, labels = TextDetectionDataset.to_device(encodings, labels, device=device)
         dataset = TextDetectionDataset(encodings, labels, device=device)
         return dataset
 
     @staticmethod
-    def to_device(encodings: torch.FloatTensor, labels: torch.FloatTensor, device: Optional[str] = "cpu"):
+    def to_device(encodings: torch.tensor, labels: torch.tensor, device: Optional[str] = "cpu"):
         if device:
-            # TODO-Extra: написать на GPU получше
-            try:
-                encodings = encodings.to(device)
-                labels = labels.to(device)
-            except AttributeError:
-                pass
+            # TODO-Extra: написать инференс на GPU
+            pass
         return encodings, labels
 
     @staticmethod
@@ -88,8 +100,8 @@ class TextDetectionDataset(torch_data.Dataset):
             new_encodings[key] = np.array(val)[objects_range].tolist()
         return new_encodings
 
-    def split(self) -> Tuple[torch_data.Dataset, torch_data.Dataset]:
-        # TODO-Extra: написать на GPU получше
+    def split(self):
+        # TODO-Extra: написать инференс на GPU
         if hasattr(self.encodings, "detach"):
             encodings = self.encodings.detach().cpu().numpy()
             labels = self.labels.detach().cpu().numpy()
@@ -104,7 +116,7 @@ class TextDetectionDataset(torch_data.Dataset):
         )
         train_encodings = TextDetectionDataset.get_encodings_from_range(encodings, train_range)
         eval_encodings = TextDetectionDataset.get_encodings_from_range(encodings, eval_range)
-        train_labels, eval_labels = torch.FloatTensor(train_labels), torch.FloatTensor(eval_labels)
+        train_labels, eval_labels = train_labels.clone().detach(), eval_labels.clone().detach()
 
         train_dataset = TextDetectionDataset(train_encodings, train_labels, self.device)
         eval_dataset = TextDetectionDataset(eval_encodings, eval_labels, self.device)

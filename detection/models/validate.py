@@ -4,14 +4,14 @@ import numpy as np
 from datasets import load_metric
 from transformers import EvalPrediction
 
-METRIC_NAMES = ["accuracy", "f1", "precision", "recall"]
+from detection.models.const import CLASSIFICATION_THRESHOLD, METRIC_NAMES
+
 METRICS = {metric_name: load_metric(metric_name) for metric_name in METRIC_NAMES}
 
 
 def compute_metrics(eval_pred: EvalPrediction) -> Dict[str, float]:
     logits, labels = eval_pred
-    predictions = np.argmax(logits, axis=-1)
-
+    predictions = np.array([int(logit > CLASSIFICATION_THRESHOLD) for logit in logits])
     metrics_args = {
         "predictions": predictions,
         "references": labels,

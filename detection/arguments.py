@@ -1,20 +1,8 @@
-from typing import List, Optional
-
 import argparse
 import os
 import os.path as path
 
 import torch
-
-
-def get_dataset_path(dataset_name: str, langs: Optional[List[str]] = None, ext: str = "bin") -> str:
-    dir_path = path.dirname(path.dirname(path.realpath(__file__)))
-    dvc_path = path.join(dir_path, "resources/data")
-    if langs:
-        dataset_real_name = f"{dataset_name}.{langs[0]}-{langs[1]}.{ext}"
-    else:
-        dataset_real_name = f"{dataset_name}.{ext}"
-    return path.join(dvc_path, dataset_real_name)
 
 
 def set_args(parser: argparse.ArgumentParser):
@@ -44,16 +32,23 @@ def set_args(parser: argparse.ArgumentParser):
     )
     train_args.add_argument("--dataset_name", type=str, default="tatoeba", help="dataset name which will be loaded.")
     train_args.add_argument("--epochs", type=int, default=50, help="# epochs")
+    train_args.add_argument("--learning_rate", type=float, default=1e-3, help="learning rate")
     train_args.add_argument("--train_batch", type=int, default=16, help="train batch size")
     train_args.add_argument("--eval_batch", type=int, default=16, help="eval batch size")
     train_args.add_argument("--log_steps", type=int, default=10, help="# steps for logging")
     train_args.add_argument("--size", type=int, default=10000, help="# samples in the mock/tatoeba/wikimatrix dataset")
     train_args.add_argument("--warmup_steps", type=int, default=100)
-    train_args.add_argument("--weight_decay", type=int, default=1e-4)
+    train_args.add_argument("--weight_decay", type=int, default=0.0)
     train_args.add_argument("--is_mock_data", type=bool, default=False)
 
-    libraries = parser.add_argument_group("Libraries")
-    libraries.add_argument("--run_name", type=str, default="default", help="A name of run to be used in wandb")
+    experiments = parser.add_argument_group("Experiments")
+    experiments.add_argument("--detector_dataset_path", type=str, default="", help="dataset where labeling is stored")
+    experiments.add_argument(
+        "--detector_dataset_test_path", type=str, default="", help="dataset where test dataset is stored"
+    )
+    experiments.add_argument("--run_name", type=str, default="default", help="A name of run to be used in wandb")
+    experiments.add_argument("--target_name", type=str, default="target")
+    experiments.add_argument("--unsupervised_target_name", type=str, default="unsupervised_target")
     return parser
 
 
@@ -68,7 +63,7 @@ def form_args():
     # known_args.device = "cpu"
 
     if known_args.easy_nmt_offline:
-        prefix_name = known_args.offline_prefix[known_args.offline_prefix.rfind("/") + 1:]
+        prefix_name = known_args.offline_prefix[known_args.offline_prefix.rfind("/") + 1 :]
         if prefix_name.startswith("opus"):
             known_args.model_name = "opus-mt"
         elif prefix_name.startswith("m2m100"):
