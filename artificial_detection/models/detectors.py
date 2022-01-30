@@ -94,7 +94,6 @@ class SimpleDetector(Detector):
         if (not model or not training_args) and (not args):
             raise AttributeError("Wrong parameters passed to SimpleDetector. Fill args")
         self.offline = hasattr(args, "model_path") and os.path.exists(args.model_path)
-        print("self.offline:", self.offline)
         self.model_path = HF_MODEL_PATH if self.offline else HF_MODEL_NAME
         self.run_name = args.run_name
         self.use_wandb = use_wandb
@@ -115,7 +114,6 @@ class SimpleDetector(Detector):
         self.model.to(self._device)
 
     def load_model(self, args: Optional[argparse.Namespace]) -> Any:
-        print("self.model_path:", self.model_path)
         model = AutoModelForSequenceClassification.from_pretrained(self.model_path, num_labels=1)
         if hasattr(args, "device"):
             model = model.to(args.device)
