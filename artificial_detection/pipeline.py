@@ -7,7 +7,7 @@ import transformers
 from transformers import AutoModelForSequenceClassification, BertTokenizerFast, Trainer, TrainingArguments
 
 from artificial_detection.arguments import form_args
-from artificial_detection.data.datasets import BinaryDataset, TextDetectionDataset
+from artificial_detection.data.data import BinaryDataset, TextDetectionDataset
 from artificial_detection.data.factory import DatasetFactory, collect
 from artificial_detection.data.generate import generate
 from artificial_detection.models.const import HF_MODEL_NAME

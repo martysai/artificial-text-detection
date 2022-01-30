@@ -243,8 +243,10 @@ def main():
     y_pred = baseline.predict(pd.DataFrame(test_df["text"], columns=["text"]), device="cpu")
     metrics_dict = transform_unsupervised_metrics(test_df, y_pred, main_args.target_name)
     print(metrics_dict)
-    test_pred_path = Path(main_args.detector_dataset_path).parent / "test_pred.csv"
+    test_pred_path = Path(main_args.detector_dataset_path).parent / "test_pred.tsv"
+    save_model_path = Path(main_args.detector_dataset_path).parent / "unsupervised_baseline.pt"
     y_pred.to_csv(str(test_pred_path), sep="\t", index=False)
+    torch.save(baseline.detector.model.state_dict(), str(save_model_path))
 
 
 if __name__ == "__main__":

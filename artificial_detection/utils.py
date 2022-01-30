@@ -10,7 +10,7 @@ import torch
 from transformers import DistilBertTokenizerFast
 
 import wandb
-from artificial_detection.data.datasets import BinaryDataset, TextDetectionDataset
+from artificial_detection.data.data import BinaryDataset, TextDetectionDataset
 
 
 class MockDataset:
