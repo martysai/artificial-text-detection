@@ -5,7 +5,7 @@ from easynmt import EasyNMT, models
 
 from artificial_detection.arguments import form_args
 from artificial_detection.data.const import MULTILINGUAL_MODELS
-from artificial_detection.data.datasets import BinaryDataset, GeneratedDataset
+from artificial_detection.data.data import BinaryDataset, GeneratedDataset
 from artificial_detection.data.factory import SUPPORTED_DATASETS, DatasetFactory, collect
 from artificial_detection.models.translation import TranslationModel
 from artificial_detection.utils import (
