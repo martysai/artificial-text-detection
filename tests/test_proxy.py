@@ -4,7 +4,10 @@ import pytest
 
 @pytest.fixture
 def mock_dataset() -> pd.DataFrame:
-    pass
+    return pd.DataFrame({
+        "": "",
+        "": ""
+    })
 
 
 def test_bleu() -> None:
