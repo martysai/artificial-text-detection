@@ -1,6 +1,7 @@
 from abc import abstractmethod
-from typing import List
+from typing import Dict, List, Optional
 
+import comet
 import pandas as pd
 from datasets import load_metric
 from sacrebleu import BLEU
@@ -16,7 +17,7 @@ class Metrics:
         metrics_name: str,
         metrics_func: callable = None,
         pred_colname: str = "translations",
-        trg_colname: str = "target"
+        trg_colname: str = "targets"
     ) -> None:
         self.metrics_name = metrics_name
         self.metrics_func = metrics_func
@@ -25,7 +26,7 @@ class Metrics:
 
     def compute(self, dataset: pd.DataFrame) -> List[float]:
         return [
-            self.metrics_func(row, self.pred_colname, self.trg_colname)
+            self.metrics_func(row)
             for _, row in tqdm(dataset.iterrows(), total=len(dataset))
         ]
 
@@ -75,7 +76,7 @@ class TERMetrics(Metrics):
             references=[[sample[self.trg_colname]]],
             case_sensitive=True
         )
-        return ter_result["ter"]
+        return ter_result["score"]
 
 
 class BLEURTMetrics(Metrics):
@@ -90,7 +91,40 @@ class BLEURTMetrics(Metrics):
         )
         return bleurt_result["bleurt"]
 
-# TODO: Comet, Cosine
+# TODO: Cosine
+# TODO: добавить оффлайн загрузку метрик
+
+
+class CometMetrics(Metrics):
+    def __init__(self, metrics_name: str = "Comet", model_path: Optional[str] = None, **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
+        # self.comet_metrics = load_metric("comet")
+        if not model_path:
+            model_path = comet.download_model("wmt20-comet-da")
+        self.comet_metrics = comet.load_from_checkpoint(model_path)
+
+    @staticmethod
+    def _prepare_data(sample: pd.Series) -> List[Dict[str, str]]:
+        return [{
+            "src": sample["sources"],
+            "mt": sample["translations"],
+            "ref": sample["targets"]
+        }]
+
+    def calc_metrics(self, sample: pd.Series) -> float:
+        prepared_data = self._prepare_data(sample)
+        # TODO: set up gpu if available
+        seg_scores, sys_score = self.comet_metrics.predict(prepared_data, gpus=0)
+        return seg_scores[0]
+
+
+class CosineMetrics(Metrics):
+    def __init__(self, metrics_name: str = "Cosine", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
+        self.cosine_metrics = None
+
+    def calc_metrics(self, sample: pd.Series) -> float:
+        pass
 
 
 METRICS_MAPPING = {
@@ -116,6 +150,7 @@ class Calculator:
 
 def main() -> None:
     # TODO: define these variables
+    # TODO: set up model_path for comet metrics
     metrics_names = []
     path = ...
     output_path = ...
