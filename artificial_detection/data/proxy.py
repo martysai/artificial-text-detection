@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import comet
 import pandas as pd
@@ -138,12 +138,24 @@ METRICS_MAPPING = {
 
 
 class Calculator:
-    def __init__(self, path: str):
-        self.dataset = pd.read_csv(path, sep="\t")
+    def __init__(self, df_or_path: Union[pd.DataFrame, str]):
+        if isinstance(df_or_path, str):
+            self.dataset = pd.read_csv(path, sep="\t")
+        else:
+            self.dataset = df_or_path
+
+    @staticmethod
+    def instantiate_metrics(metrics_names: List[str]) -> Dict[str, Metrics]:
+        return {
+            metric_name: METRICS_MAPPING[metric_name](metrics_name=metric_name)
+            for metric_name in metrics_names
+        }
 
     def compute(self, metrics_names: List[str]) -> pd.DataFrame:
+        metrics_instances = self.instantiate_metrics(metrics_names)
+
         for metrics_name in metrics_names:
-            computed_values = METRICS_MAPPING[metrics_name].compute(self.dataset)
+            computed_values = metrics_instances[metrics_name].compute(self.dataset)
             self.dataset[metrics_name] = computed_values
         return self.dataset
 

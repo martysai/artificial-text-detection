@@ -1,11 +1,13 @@
+from typing import List
+
 import pandas as pd
 import pytest
 from hamcrest import assert_that, close_to
 
-from artificial_detection.data.proxy import BLEUMetrics, CometMetrics, METEORMetrics, TERMetrics
+from artificial_detection.data.proxy import BLEUMetrics, Calculator, CometMetrics, METEORMetrics, TERMetrics
 
 
-@pytest.fixture
+@pytest.fixture()
 def mock_dataset() -> pd.DataFrame:
     return pd.DataFrame(
         [
@@ -21,6 +23,16 @@ def mock_dataset() -> pd.DataFrame:
             },
         ]
     )
+
+
+@pytest.fixture()
+def statistical_metrics() -> List[str]:
+    return ["BLEU", "METEOR", "TER"]
+
+
+@pytest.fixture()
+def neural_metrics() -> List[str]:
+    return ["BLEURT", "Comet"]
 
 
 def test_bleu(mock_dataset: pd.DataFrame) -> None:
@@ -61,3 +73,19 @@ def test_comet(mock_dataset: pd.DataFrame) -> None:
 
 def test_cosine(mock_dataset: pd.DataFrame) -> None:
     pass
+
+
+def test_calculator_statistical_metrics(mock_dataset: pd.DataFrame, statistical_metrics: List[str]) -> None:
+    calculator = Calculator(df_or_path=mock_dataset)
+    scores_df = calculator.compute(metrics_names=statistical_metrics)
+    gt_scores = [40.815, 0.489, 82.143]
+    for i, metrics_name in enumerate(statistical_metrics):
+        assert_that(scores_df[metrics_name].mean(), close_to(gt_scores[i], 0.01))
+
+
+def test_calculator_neural_metrics(mock_dataset: pd.DataFrame, neural_metrics: List[str]) -> None:
+    calculator = Calculator(df_or_path=mock_dataset)
+    scores_df = calculator.compute(metrics_names=["bleurt", "comet"])
+    gt_scores = [0.9, 0.9]
+    for i, metrics_name in enumerate(neural_metrics):
+        assert_that(scores_df[metrics_name].mean(), close_to(gt_scores[i], 0.01))
