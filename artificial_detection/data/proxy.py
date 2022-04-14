@@ -1,11 +1,13 @@
 from abc import abstractmethod
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import comet
 import pandas as pd
 from datasets import load_metric
 from sacrebleu import BLEU
 from tqdm import tqdm
+
+from artificial_detection.arguments import form_model_specific_dict, form_proxy_args
 
 
 class Metrics:
@@ -96,11 +98,12 @@ class BLEURTMetrics(Metrics):
 
 
 class CometMetrics(Metrics):
-    def __init__(self, metrics_name: str = "Comet", model_path: Optional[str] = None, **kwargs) -> None:
+    def __init__(self, metrics_name: str = "Comet", model_path: Optional[str] = None, device: str = None, **kwargs) -> None:
         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
         # self.comet_metrics = load_metric("comet")
         if not model_path:
             model_path = comet.download_model("wmt20-comet-da")
+        self.device = device
         self.comet_metrics = comet.load_from_checkpoint(model_path)
 
     @staticmethod
@@ -113,8 +116,8 @@ class CometMetrics(Metrics):
 
     def calc_metrics(self, sample: pd.Series) -> float:
         prepared_data = self._prepare_data(sample)
-        # TODO: set up gpu if available
-        seg_scores, sys_score = self.comet_metrics.predict(prepared_data, gpus=0)
+        # TODO: test gpu setup
+        seg_scores, sys_score = self.comet_metrics.predict(prepared_data, gpus=int(self.device.startswith("cuda")))
         return seg_scores[0]
 
 
@@ -138,16 +141,20 @@ METRICS_MAPPING = {
 
 
 class Calculator:
-    def __init__(self, df_or_path: Union[pd.DataFrame, str]):
+    def __init__(
+        self,
+        df_or_path: Union[pd.DataFrame, str],
+        model_specific_dict: Dict[str, Any]
+    ):
         if isinstance(df_or_path, str):
             self.dataset = pd.read_csv(path, sep="\t")
         else:
             self.dataset = df_or_path
+        self.model_specific_dict = model_specific_dict
 
-    @staticmethod
-    def instantiate_metrics(metrics_names: List[str]) -> Dict[str, Metrics]:
+    def instantiate_metrics(self, metrics_names: List[str]) -> Dict[str, Metrics]:
         return {
-            metric_name: METRICS_MAPPING[metric_name](metrics_name=metric_name)
+            metric_name: METRICS_MAPPING[metric_name](metrics_name=metric_name, **self.model_specific_dict[metric_name])
             for metric_name in metrics_names
         }
 
@@ -161,16 +168,14 @@ class Calculator:
 
 
 def main() -> None:
-    # TODO: define these variables
-    # TODO: set up model_path for comet metrics
-    metrics_names = []
-    path = ...
-    output_path = ...
+    # TODO: test CometMetrics
+    args = form_proxy_args()
+    model_specific_dict = form_model_specific_dict(args)
 
-    calculator = Calculator(path)
+    calculator = Calculator(df_or_path=args.df_path, model_specific_dict=model_specific_dict)
 
-    metrics_df = calculator.compute(metrics_names)
-    metrics_df.to_csv(output_path, index=False, sep="\t")
+    metrics_df = calculator.compute(args.metrics_names)
+    metrics_df.to_csv(args.output_path, index=False, sep="\t")
 
 
 if __name__ == "__main__":
