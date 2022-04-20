@@ -63,12 +63,12 @@ def test_bleurt(mock_dataset: pd.DataFrame) -> None:
     pass
 
 
-def test_comet(mock_dataset: pd.DataFrame) -> None:
-    metrics = CometMetrics()
-    scores = metrics.compute(mock_dataset)
-    gt_scores = [0.9, 0.9]
-    for i, score in enumerate(scores):
-        assert_that(score, close_to(gt_scores[i], 0.01))
+# def test_comet(mock_dataset: pd.DataFrame) -> None:
+#     metrics = CometMetrics()
+#     scores = metrics.compute(mock_dataset)
+#     gt_scores = [0.9, 0.9]
+#     for i, score in enumerate(scores):
+#         assert_that(score, close_to(gt_scores[i], 0.01))
 
 
 def test_cosine(mock_dataset: pd.DataFrame) -> None:
@@ -83,9 +83,9 @@ def test_calculator_statistical_metrics(mock_dataset: pd.DataFrame, statistical_
         assert_that(scores_df[metrics_name].mean(), close_to(gt_scores[i], 0.01))
 
 
-def test_calculator_neural_metrics(mock_dataset: pd.DataFrame, neural_metrics: List[str]) -> None:
-    calculator = Calculator(df_or_path=mock_dataset)
-    scores_df = calculator.compute(metrics_names=["bleurt", "comet"])
-    gt_scores = [0.9, 0.9]
-    for i, metrics_name in enumerate(neural_metrics):
-        assert_that(scores_df[metrics_name].mean(), close_to(gt_scores[i], 0.01))
+# def test_calculator_neural_metrics(mock_dataset: pd.DataFrame, neural_metrics: List[str]) -> None:
+#     calculator = Calculator(df_or_path=mock_dataset)
+#     scores_df = calculator.compute(metrics_names=["bleurt", "comet"])
+#     gt_scores = [0.9, 0.9]
+#     for i, metrics_name in enumerate(neural_metrics):
+#         assert_that(scores_df[metrics_name].mean(), close_to(gt_scores[i], 0.01))
