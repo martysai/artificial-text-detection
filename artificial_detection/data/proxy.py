@@ -131,10 +131,19 @@ class CometMetrics(Metrics):
         return comet_model, model_path
 
 
-class CosineMetrics(Metrics):
-    def __init__(self, metrics_name: str = "Cosine", **kwargs) -> None:
+# class CosineMetrics(Metrics):
+#     def __init__(self, metrics_name: str = "Cosine", **kwargs) -> None:
+#         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
+#         self.cosine_metrics = None
+#
+#     def calc_metrics(self, sample: pd.Series) -> float:
+#         pass
+
+
+class BERTScoreMetrics(Metrics):
+    def __init__(self, metrics_name: str = "BERTScore", **kwargs) -> None:
         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
-        self.cosine_metrics = None
+        self.bert_score_metrics = None
 
     def calc_metrics(self, sample: pd.Series) -> float:
         pass
@@ -146,7 +155,8 @@ METRICS_MAPPING = {
     "TER": TERMetrics,
     "BLEURT": BLEURTMetrics,
     "Comet": CometMetrics,
-    "Cosine": CosineMetrics
+    "BERTScore": BERTScoreMetrics,
+    # "Cosine": CosineMetrics
 }
 
 
