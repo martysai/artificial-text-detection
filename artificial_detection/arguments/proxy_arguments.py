@@ -1,6 +1,4 @@
 import argparse
-from collections import defaultdict
-from typing import Any, Dict
 
 import torch
 
@@ -14,16 +12,9 @@ def set_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     comet_specific = parser.add_argument_group("Comet Specific")
     comet_specific.add_argument("--model_path", default=None, type=str, help="Path to the model.")
 
+    # TODO: BLEURT specific
+
     return parser
-
-
-def form_model_specific_dict(args: argparse.ArgumentParser) -> Dict[str, Any]:
-    model_specific_dict = {
-        "Comet": {
-            "model_path": args.model_path,
-        }
-    }
-    return defaultdict(dict, model_specific_dict)
 
 
 def form_proxy_args():

@@ -1,13 +1,16 @@
+import argparse
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import comet
 import pandas as pd
+from comet.models import CometModel
 from datasets import load_metric
 from sacrebleu import BLEU
 from tqdm import tqdm
 
-from artificial_detection.arguments import form_model_specific_dict, form_proxy_args
+from artificial_detection.arguments import form_proxy_args
 
 
 class Metrics:
@@ -82,9 +85,12 @@ class TERMetrics(Metrics):
 
 
 class BLEURTMetrics(Metrics):
-    def __init__(self, metrics_name: str = "BLEURT", **kwargs) -> None:
+    def __init__(self, metrics_name: str = "BLEURT", model_path: str = None, **kwargs) -> None:
         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
-        self.bleurt_metrics = load_metric("bleurt", "BLEURT-20")
+        if model_path:
+            self.bleurt_metrics = load_metric(model_path)
+        else:
+            self.bleurt_metrics = load_metric("bleurt", "BLEURT-20")
 
     def calc_metrics(self, sample: pd.Series) -> float:
         bleurt_result = self.bleurt_metrics.compute(
@@ -93,14 +99,10 @@ class BLEURTMetrics(Metrics):
         )
         return bleurt_result["bleurt"]
 
-# TODO: Cosine
-# TODO: добавить оффлайн загрузку метрик
-
 
 class CometMetrics(Metrics):
     def __init__(self, metrics_name: str = "Comet", model_path: Optional[str] = None, device: str = None, **kwargs) -> None:
         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
-        # self.comet_metrics = load_metric("comet")
         if not model_path:
             model_path = comet.download_model("wmt20-comet-da")
         self.device = device
@@ -116,9 +118,17 @@ class CometMetrics(Metrics):
 
     def calc_metrics(self, sample: pd.Series) -> float:
         prepared_data = self._prepare_data(sample)
-        # TODO: test gpu setup
-        seg_scores, sys_score = self.comet_metrics.predict(prepared_data, gpus=int(self.device.startswith("cuda")))
+        seg_scores, sys_score = self.comet_metrics.predict(
+            prepared_data, gpus=int(str(self.device).startswith("cuda"))
+        )
         return seg_scores[0]
+
+    @staticmethod
+    def load_offline(model_path: Optional[str] = None) -> Tuple[CometModel, str]:
+        if not model_path:
+            model_path = comet.download_model("wmt20-comet-da")
+        comet_model = comet.load_from_checkpoint(model_path)
+        return comet_model, model_path
 
 
 class CosineMetrics(Metrics):
@@ -167,8 +177,17 @@ class Calculator:
         return self.dataset
 
 
+def form_model_specific_dict(args: argparse.ArgumentParser) -> Dict[str, Any]:
+    model_specific_dict = {
+        "Comet": {
+            "device": args.device,
+            "model_path": args.model_path,
+        }
+    }
+    return defaultdict(dict, model_specific_dict)
+
+
 def main() -> None:
-    # TODO: test CometMetrics
     args = form_proxy_args()
     model_specific_dict = form_model_specific_dict(args)
 
