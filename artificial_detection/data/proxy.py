@@ -97,7 +97,7 @@ class BLEURTMetrics(Metrics):
             predictions=[sample[self.pred_colname]],
             references=[[sample[self.trg_colname]]],
         )
-        return bleurt_result["bleurt"]
+        return bleurt_result["scores"]
 
 
 class CometMetrics(Metrics):
