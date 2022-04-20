@@ -147,12 +147,14 @@ class Calculator:
         model_specific_dict: Dict[str, Any]
     ):
         if isinstance(df_or_path, str):
-            self.dataset = pd.read_csv(path, sep="\t")
+            self.dataset = pd.read_csv(df_or_path, sep="\t")
         else:
             self.dataset = df_or_path
         self.model_specific_dict = model_specific_dict
 
     def instantiate_metrics(self, metrics_names: List[str]) -> Dict[str, Metrics]:
+        print("METRICS_MAPPING:", METRICS_MAPPING)
+        print("self.model_specific_dict:", self.model_specific_dict)
         return {
             metric_name: METRICS_MAPPING[metric_name](metrics_name=metric_name, **self.model_specific_dict[metric_name])
             for metric_name in metrics_names
