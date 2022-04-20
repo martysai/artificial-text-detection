@@ -153,8 +153,6 @@ class Calculator:
         self.model_specific_dict = model_specific_dict
 
     def instantiate_metrics(self, metrics_names: List[str]) -> Dict[str, Metrics]:
-        print("METRICS_MAPPING:", METRICS_MAPPING)
-        print("self.model_specific_dict:", self.model_specific_dict)
         return {
             metric_name: METRICS_MAPPING[metric_name](metrics_name=metric_name, **self.model_specific_dict[metric_name])
             for metric_name in metrics_names
