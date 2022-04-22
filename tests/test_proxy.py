@@ -4,7 +4,14 @@ import pandas as pd
 import pytest
 from hamcrest import assert_that, close_to
 
-from artificial_detection.data.proxy import BLEUMetrics, Calculator, CometMetrics, METEORMetrics, TERMetrics, BERTScoreMetrics
+from artificial_detection.data.proxy import (
+    BLEUMetrics,
+    Calculator,
+    CometMetrics,
+    METEORMetrics,
+    TERMetrics,
+    BERTScoreMetrics,
+)
 
 
 @pytest.fixture()
