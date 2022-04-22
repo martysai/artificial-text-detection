@@ -1,12 +1,14 @@
+import abc
 import argparse
 from abc import abstractmethod
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import comet
 import pandas as pd
 from comet.models import CometModel
 from datasets import load_metric
+from lexicalrichness import LexicalRichness
 from sacrebleu import BLEU
 from tqdm import tqdm
 
@@ -133,14 +135,64 @@ class CometMetrics(Metrics):
 class BERTScoreMetrics(Metrics):
     def __init__(self, metrics_name: str = "BERTScore", model_path: str = None, **kwargs) -> None:
         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
-        self.bert_score_metrics = None
+        if model_path:
+            self.bert_score_metrics = load_metric(model_path)
+        else:
+            self.bert_score_metrics = load_metric("bertscore")
 
     def calc_metrics(self, sample: pd.Series) -> float:
         bert_score_result = self.bert_score_metrics.compute(
             predictions=[sample[self.pred_colname]],
             references=[sample[self.trg_colname]],
+            lang="ru"
         )
-        return bert_score_result["scores"]
+        return bert_score_result["f1"][0]
+
+
+class LexicalRichnessMetrics(Metrics):
+    def __init__(self, metrics_name: str = "LexicalRichness", attr: str = "general", **kwargs) -> None:
+        super().__init__(metrics_name, **kwargs)
+        self.richness = LexicalRichness
+        self.attr = attr
+
+    def calc_metrics(self, sample: pd.Series) -> float:
+        richness_result = self.richness(sample["translations"])
+        return getattr(richness_result, self.attr)
+
+
+class LexicalRichnessWords(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessWords", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="words", **kwargs)
+
+
+class LexicalRichnessTerms(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessTerms", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="terms", **kwargs)
+
+
+class LexicalRichnessTTR(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessTTR", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="ttr", **kwargs)
+
+
+class LexicalRichnessRTTR(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessRTTR", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="rttr", **kwargs)
+
+
+class LexicalRichnessCTTR(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessCTTR", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="cttr", **kwargs)
+
+
+class LexicalRichnessMTLD(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessMTLD", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="mtld", **kwargs)
+
+
+class LexicalRichnessHerdan(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessHerdan", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="Herdan", **kwargs)
 
 
 METRICS_MAPPING = {
@@ -149,7 +201,14 @@ METRICS_MAPPING = {
     "TER": TERMetrics,
     "BLEURT": BLEURTMetrics,
     "Comet": CometMetrics,
-    "BERTScore": BERTScoreMetrics
+    "BERTScore": BERTScoreMetrics,
+    "LexicalRichnessWords": LexicalRichnessWords,
+    "LexicalRichnessTerms": LexicalRichnessTerms,
+    "LexicalRichnessTTR": LexicalRichnessTTR,
+    "LexicalRichnessRTTR": LexicalRichnessRTTR,
+    "LexicalRichnessCTTR": LexicalRichnessCTTR,
+    "LexicalRichnessMTLD": LexicalRichnessMTLD,
+    "LexicalRichnessHerdan": LexicalRichnessHerdan,
 }
 
 
@@ -186,7 +245,9 @@ def form_model_specific_dict(args: argparse.ArgumentParser) -> Dict[str, Any]:
             "device": args.device,
             "model_path": args.model_path,
         },
-        # TODO: Add metrics for BERTScore
+        "BERTScore": {
+            "model_path": args.model_path,
+        },
     }
     return defaultdict(dict, model_specific_dict)
 

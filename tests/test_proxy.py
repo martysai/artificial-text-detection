@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from hamcrest import assert_that, close_to
 
-from artificial_detection.data.proxy import BLEUMetrics, Calculator, CometMetrics, METEORMetrics, TERMetrics
+from artificial_detection.data.proxy import BLEUMetrics, Calculator, CometMetrics, METEORMetrics, TERMetrics, BERTScoreMetrics
 
 
 @pytest.fixture()
@@ -35,6 +35,19 @@ def neural_metrics() -> List[str]:
     return ["BLEURT", "Comet"]
 
 
+@pytest.fixture()
+def richness_metrics() -> List[str]:
+    return [
+        "LexicalRichnessWords",
+        "LexicalRichnessTerms",
+        "LexicalRichnessTTR",
+        "LexicalRichnessRTTR",
+        "LexicalRichnessCTTR",
+        "LexicalRichnessMTLD",
+        "LexicalRichnessHerdan",
+    ]
+
+
 def test_bleu(mock_dataset: pd.DataFrame) -> None:
     metrics = BLEUMetrics()
     scores = metrics.compute(mock_dataset)
@@ -63,6 +76,12 @@ def test_bleurt(mock_dataset: pd.DataFrame) -> None:
     pass
 
 
+def test_bert_score(mock_dataset: pd.DataFrame) -> None:
+    metrics = BERTScoreMetrics(model_path="/home/masaidov/.cache/huggingface/metrics/bert_score")
+    scores = metrics.compute(mock_dataset)
+    print(scores)
+
+
 # def test_comet(mock_dataset: pd.DataFrame) -> None:
 #     metrics = CometMetrics()
 #     scores = metrics.compute(mock_dataset)
@@ -76,11 +95,22 @@ def test_cosine(mock_dataset: pd.DataFrame) -> None:
 
 
 def test_calculator_statistical_metrics(mock_dataset: pd.DataFrame, statistical_metrics: List[str]) -> None:
-    calculator = Calculator(df_or_path=mock_dataset)
+    model_specific_dict = {metric_name: {} for metric_name in statistical_metrics}
+    calculator = Calculator(df_or_path=mock_dataset, model_specific_dict=model_specific_dict)
     scores_df = calculator.compute(metrics_names=statistical_metrics)
     gt_scores = [40.815, 0.489, 82.143]
     for i, metrics_name in enumerate(statistical_metrics):
         assert_that(scores_df[metrics_name].mean(), close_to(gt_scores[i], 0.01))
+
+
+def test_calculator_lexical_richness_metrics(mock_dataset: pd.DataFrame, richness_metrics: List[str]) -> None:
+    model_specific_dict = {metric_name: {} for metric_name in richness_metrics}
+    calculator = Calculator(df_or_path=mock_dataset, model_specific_dict=model_specific_dict)
+    scores_df = calculator.compute(metrics_names=richness_metrics)
+    print(scores_df[richness_metrics].mean())
+    # gt_scores = [40.815, 0.489, 82.143, 40.815, 0.489, 82.143]
+    # for i, metrics_name in enumerate(richness_metrics):
+    #     assert_that(scores_df[metrics_name].mean(), close_to(gt_scores[i], 0.01))
 
 
 # def test_calculator_neural_metrics(mock_dataset: pd.DataFrame, neural_metrics: List[str]) -> None:
