@@ -1,10 +1,11 @@
 import argparse
 from abc import abstractmethod
 from collections import defaultdict
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import comet
 import pandas as pd
+from comet.models import CometModel
 from datasets import load_metric
 from sacrebleu import BLEU
 from tqdm import tqdm
@@ -102,10 +103,9 @@ class BLEURTMetrics(Metrics):
 class CometMetrics(Metrics):
     def __init__(self, metrics_name: str = "Comet", model_path: Optional[str] = None, device: str = None, **kwargs) -> None:
         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
-        if not model_path:
-            model_path = comet.download_model("wmt20-comet-da")
+        comet_metrics, _ = self.load_offline(model_path)
         self.device = device
-        self.comet_metrics = comet.load_from_checkpoint(model_path)
+        self.comet_metrics = comet_metrics
 
     @staticmethod
     def _prepare_data(sample: pd.Series) -> List[Dict[str, str]]:
@@ -122,14 +122,12 @@ class CometMetrics(Metrics):
         )
         return seg_scores[0]
 
-
-# class CosineMetrics(Metrics):
-#     def __init__(self, metrics_name: str = "Cosine", **kwargs) -> None:
-#         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
-#         self.cosine_metrics = None
-#
-#     def calc_metrics(self, sample: pd.Series) -> float:
-#         pass
+    @staticmethod
+    def load_offline(model_path: Optional[str] = None) -> Tuple[CometModel, str]:
+        if not model_path:
+            model_path = comet.download_model("wmt20-comet-da")
+        comet_model = comet.load_from_checkpoint(model_path)
+        return comet_model, model_path
 
 
 class BERTScoreMetrics(Metrics):
@@ -138,11 +136,11 @@ class BERTScoreMetrics(Metrics):
         self.bert_score_metrics = None
 
     def calc_metrics(self, sample: pd.Series) -> float:
-        bleurt_result = self.bleurt_metrics.compute(
+        bert_score_result = self.bert_score_metrics.compute(
             predictions=[sample[self.pred_colname]],
             references=[sample[self.trg_colname]],
         )
-        return bleurt_result["scores"]
+        return bert_score_result["scores"]
 
 
 METRICS_MAPPING = {
@@ -151,8 +149,7 @@ METRICS_MAPPING = {
     "TER": TERMetrics,
     "BLEURT": BLEURTMetrics,
     "Comet": CometMetrics,
-    "BERTScore": BERTScoreMetrics,
-    # "Cosine": CosineMetrics
+    "BERTScore": BERTScoreMetrics
 }
 
 
@@ -189,7 +186,7 @@ def form_model_specific_dict(args: argparse.ArgumentParser) -> Dict[str, Any]:
             "device": args.device,
             "model_path": args.model_path,
         },
-        # TODO: Add metrics for both BLEURT and BERTScore
+        # TODO: Add metrics for BERTScore
     }
     return defaultdict(dict, model_specific_dict)
 
