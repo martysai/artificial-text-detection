@@ -1,8 +1,7 @@
-import abc
 import argparse
 from abc import abstractmethod
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import comet
 import pandas as pd
@@ -133,18 +132,29 @@ class CometMetrics(Metrics):
 
 
 class BERTScoreMetrics(Metrics):
-    def __init__(self, metrics_name: str = "BERTScore", model_path: str = None, **kwargs) -> None:
+    def __init__(
+        self,
+        metrics_name: str = "BERTScore",
+        model_path: str = None,
+        baseline_path: str = None,
+        device: str = "cpu",
+        **kwargs
+    ) -> None:
         super().__init__(metrics_name, metrics_func=self.calc_metrics, **kwargs)
         if model_path:
             self.bert_score_metrics = load_metric(model_path)
         else:
             self.bert_score_metrics = load_metric("bertscore")
+        self.baseline_path = baseline_path
+        self.device = device
 
     def calc_metrics(self, sample: pd.Series) -> float:
         bert_score_result = self.bert_score_metrics.compute(
             predictions=[sample[self.pred_colname]],
             references=[sample[self.trg_colname]],
-            lang="ru"
+            lang="ru",
+            device=self.device,
+            baseline_path=self.baseline_path
         )
         return bert_score_result["f1"][0]
 
@@ -157,7 +167,10 @@ class LexicalRichnessMetrics(Metrics):
 
     def calc_metrics(self, sample: pd.Series) -> float:
         richness_result = self.richness(sample["translations"])
-        return getattr(richness_result, self.attr)
+        try:
+            return getattr(richness_result, self.attr)
+        except ZeroDivisionError:
+            return 0.0
 
 
 class LexicalRichnessWords(LexicalRichnessMetrics):
@@ -246,6 +259,8 @@ def form_model_specific_dict(args: argparse.ArgumentParser) -> Dict[str, Any]:
             "model_path": args.model_path,
         },
         "BERTScore": {
+            "baseline_path": args.baseline_path,
+            "device": args.device,
             "model_path": args.model_path,
         },
     }
