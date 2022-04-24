@@ -168,7 +168,11 @@ class LexicalRichnessMetrics(Metrics):
     def calc_metrics(self, sample: pd.Series) -> float:
         richness_result = self.richness(sample["translations"])
         try:
-            return getattr(richness_result, self.attr)
+            metrics_value = getattr(richness_result, self.attr)
+            if isinstance(metrics_value, float):
+                return metrics_value
+            else:
+                return metrics_value(threshold=0.72)
         except ZeroDivisionError:
             return 0.0
 
@@ -208,6 +212,11 @@ class LexicalRichnessHerdan(LexicalRichnessMetrics):
         super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="Herdan", **kwargs)
 
 
+class LexicalRichnessSummer(LexicalRichnessMetrics):
+    def __init__(self, metrics_name: str = "LexicalRichnessSummer", **kwargs) -> None:
+        super().__init__(metrics_name, metrics_func=self.calc_metrics, attr="Summer", **kwargs)
+
+
 METRICS_MAPPING = {
     "BLEU": BLEUMetrics,
     "METEOR": METEORMetrics,
@@ -222,6 +231,7 @@ METRICS_MAPPING = {
     "LexicalRichnessCTTR": LexicalRichnessCTTR,
     "LexicalRichnessMTLD": LexicalRichnessMTLD,
     "LexicalRichnessHerdan": LexicalRichnessHerdan,
+    "LexicalRichnessSummer": LexicalRichnessSummer,
 }
 
 
