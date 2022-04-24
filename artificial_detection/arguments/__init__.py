@@ -1,0 +1,2 @@
+from artificial_detection.arguments.arguments import form_args
+from artificial_detection.arguments.proxy_arguments import form_proxy_args
