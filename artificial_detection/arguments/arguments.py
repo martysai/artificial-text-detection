@@ -60,7 +60,6 @@ def form_args():
     known_args, _ = arg_parser.parse_known_args()
     known_args.cuda = torch.cuda.is_available()
     known_args.device = torch.device(f"cuda:{torch.cuda.current_device()}" if torch.cuda.is_available() else "cpu")
-    # known_args.device = "cpu"
 
     if known_args.easy_nmt_offline:
         prefix_name = known_args.offline_prefix[known_args.offline_prefix.rfind("/") + 1 :]

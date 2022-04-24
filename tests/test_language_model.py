@@ -13,7 +13,7 @@ from artificial_detection.data.generate_language_model import (
     super_maximal_repeat,
 )
 from artificial_detection.models.language_model import LanguageModel
-from artificial_detection.unsupervised_baseline import UnsupervisedBaseline
+from artificial_detection.pipelines.unsupervised_baseline import UnsupervisedBaseline
 from artificial_detection.utils import fix_random_seed
 from tests import skip_github
 
