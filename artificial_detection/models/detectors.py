@@ -163,4 +163,17 @@ class SimpleDetector(Detector):
         return pd.DataFrame(logits, columns=["proba"])
 
 
-# class
+# ---------------------
+# Russian Pretrained T5
+# ---------------------
+
+class T5Detector:
+    pass
+
+# ----------------------
+# Russian Pretrained GPT
+# ----------------------
+
+
+class GPTDetector:
+    pass
