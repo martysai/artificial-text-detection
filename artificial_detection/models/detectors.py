@@ -161,3 +161,19 @@ class SimpleDetector(Detector):
         with torch.no_grad():
             logits = np.array([self.get_logit(sample) for sample in dataset]).reshape(-1, 1)
         return pd.DataFrame(logits, columns=["proba"])
+
+
+# ---------------------
+# Russian Pretrained T5
+# ---------------------
+
+class T5Detector:
+    pass
+
+# ----------------------
+# Russian Pretrained GPT
+# ----------------------
+
+
+class GPTDetector:
+    pass

@@ -5,8 +5,8 @@ import pytest
 from hamcrest import assert_that, equal_to
 
 from artificial_detection.arguments import form_args
-from artificial_detection.pipeline import pipeline
-from artificial_detection.unsupervised_baseline import run_unsupervised_baseline_fit, transform_unsupervised_metrics
+from artificial_detection.pipelines.old import pipeline
+from artificial_detection.pipelines.unsupervised_baseline import run_unsupervised_baseline_fit, transform_unsupervised_metrics
 from artificial_detection.utils import fix_random_seed
 from tests import skip_github
 

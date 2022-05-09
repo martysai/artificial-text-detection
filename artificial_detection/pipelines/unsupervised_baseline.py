@@ -108,11 +108,6 @@ class UnsupervisedBaseline:
         return labeled_df
 
     @staticmethod
-    def label_by_given_repeats() -> List[str]:
-        # TODO: add the entrypoint for labeling
-        pass
-
-    @staticmethod
     def label_with_repeats(
         df: pd.DataFrame,
         target_name: str = "target",

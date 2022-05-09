@@ -73,7 +73,7 @@ python detection/data/generate.py --dataset_name='tatoeba' --size=20000 --device
 To run the artificial text detection classifier, execute the pipeline:
 
 ```bash
-python detection/pipeline.py
+python detection/old.py
 ```
 
 [build_status_badge]: https://github.com/MaratSaidov/artificial-text-detection/actions/workflows/build.yml/badge.svg
