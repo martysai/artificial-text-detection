@@ -136,7 +136,7 @@ class SupervisedPipeline:
         tokenizer, model = load_detector(model_name=args.model_name)
         tokenized_splits = prepare_data(tokenizer)
 
-        set_trainer(
+        trainer = set_trainer(
             tokenized_splits=tokenized_splits,
             tokenizer=tokenizer,
             model=model,
@@ -146,6 +146,7 @@ class SupervisedPipeline:
             lr=lr,
             weight_decay=weight_decay
         )
+        trainer.train()
 
         stop_experiment_tracking()
 
@@ -158,10 +159,10 @@ def grid_search():
 
 def main(args: argparse.Namespace) -> None:
     pipeline = SupervisedPipeline(run_name=args.run_name)
-    pipeline.init(args)
-    trained_model = pipeline.train()
-    collected_results = pipeline.evaluate(trained_model)
-    pipeline.save(trained_model, collected_results)
+    # pipeline.init(args)
+    trainer = pipeline.train()
+    # collected_results = pipeline.evaluate(trainer)
+    # pipeline.save(trainer, collected_results)
 
 
 if __name__ == "__main__":
