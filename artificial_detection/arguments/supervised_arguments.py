@@ -8,10 +8,12 @@ def set_supervised_args(parser: argparse.ArgumentParser) -> argparse.ArgumentPar
     train_args.add_argument("--epochs", type=int, default=10, help="Number of epochs")
     train_args.add_argument("--lr", type=float, default=0.001, help="Learning rate")
 
+    train_args.add_argument("--model_name", type=str, default="T5", help="Model name")
+
     return parser
 
 
-def form_args() -> argparse.Namespace:
+def form_supervised_args() -> argparse.Namespace:
     arg_parser = argparse.ArgumentParser("ATD: Supervised Arguments")
     set_supervised_args(arg_parser)
     known_args, _ = arg_parser.parse_known_args()
