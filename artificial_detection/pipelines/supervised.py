@@ -4,9 +4,16 @@ from pathlib import Path
 
 import pandas as pd
 from datasets import Dataset, DatasetDict
-from transformers import AutoTokenizer, EarlyStoppingCallback, TrainerCallback, XLMRobertaForSequenceClassification
+from transformers import (
+    AutoTokenizer,
+    EarlyStoppingCallback,
+    T5Tokenizer,
+    TrainerCallback,
+    XLMRobertaForSequenceClassification,
+)
 
 from artificial_detection.arguments import form_supervised_args
+from artificial_detection.models import T5ForSequenceClassification
 from artificial_detection.pipelines.compute import compute_metrics
 from artificial_detection.utils import setup_experiment_tracking, stop_experiment_tracking
 
@@ -47,18 +54,20 @@ def prepare_data(tokenizer):
 
 class StopCallback(TrainerCallback):
     def on_evaluate(self, args, state, control, metrics, **kwargs):
-        if state.global_step <= 700:
+        if state.global_step <= 500:
             return
-        if metrics["eval_recall"] == 1.0 or metrics["eval_auc"] <= 0.51:
+        if metrics["eval_recall"] == 1.0 or metrics["eval_auc"] <= 0.5:
             raise ValueError("bad metrics")
-        if metrics["eval_accuracy"] <= 0.68 and state.global_step >= 1200:
+        if metrics["eval_accuracy"] <= 0.65 and state.global_step >= 1500:
             raise ValueError("weak hyper parameters")
-        if metrics["eval_accuracy"] <= 0.72 and state.global_step >= 2700:
-            raise ValueError("weak hyper parameters")
+
+
+# TODO: add logging callback
 
 
 prefix = Path(__file__).parents[3]
 model_name_to_path = {
+    "T5": str(prefix / "atd-models/ruT5-large"),
     "XLM": str(prefix / "atd-models/xlm-roberta-large"),
 }
 
@@ -72,6 +81,10 @@ def load_detector(model_name: str, max_length: int = 64):
         model = XLMRobertaForSequenceClassification.from_pretrained(
             model_path, max_length=max_length
         )
+    elif model_name == "T5":
+        config = AutoConfig.from_pretrained(model_path)
+        tokenizer = T5Tokenizer.from_pretrained(model_path)
+        model = T5ForSequenceClassification(config)
     else:
         raise ValueError(f"Model {model_name} not found")
     return tokenizer, model
@@ -105,7 +118,7 @@ def set_trainer(tokenized_splits, tokenizer, model, warmup_ratio, lr_scheduler_t
         load_best_model_at_end=True,
         metric_for_best_model="auc",
         save_total_limit=10,
-        run_name=f"Ru RoBERTa LR={lr} OPTIM={optim} LR_SCH_TYPE={lr_scheduler_type}, WR={warmup_ratio}"
+        run_name=f"Ru T5 LR={lr} OPTIM={optim} LR_SCH_TYPE={lr_scheduler_type}, WR={warmup_ratio}"
     )
     trainer = Trainer(
         model=model,
