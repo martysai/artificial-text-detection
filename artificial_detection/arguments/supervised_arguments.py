@@ -1,4 +1,5 @@
 import argparse
+
 import torch
 
 
@@ -8,7 +9,8 @@ def set_supervised_args(parser: argparse.ArgumentParser) -> argparse.ArgumentPar
     train_args.add_argument("--epochs", type=int, default=10, help="Number of epochs")
     train_args.add_argument("--lr", type=float, default=0.001, help="Learning rate")
 
-    train_args.add_argument("--model_name", type=str, default="T5", help="Model name")
+    train_args.add_argument("--model_name", type=str, default="GPT", help="Model name")
+    train_args.add_argument("--run_name", type=str, default="GPT", help="Run name")
 
     return parser
 

@@ -5,15 +5,18 @@ from pathlib import Path
 import pandas as pd
 from datasets import Dataset, DatasetDict
 from transformers import (
+    AutoModelForSequenceClassification,
     AutoTokenizer,
     EarlyStoppingCallback,
     T5Tokenizer,
+    Trainer,
     TrainerCallback,
+    TrainingArguments,
     XLMRobertaForSequenceClassification,
 )
 
 from artificial_detection.arguments import form_supervised_args
-from artificial_detection.models import T5ForSequenceClassification
+from artificial_detection.models.t5 import T5ForSequenceClassification
 from artificial_detection.pipelines.compute import compute_metrics
 from artificial_detection.utils import setup_experiment_tracking, stop_experiment_tracking
 
@@ -42,6 +45,8 @@ def read_splits(df, as_datasets):
 def prepare_data(tokenizer):
     data_path = str(Path(__file__).parents[3] / "atd-data/metrics_df.tsv")
     df = pd.read_csv(data_path, sep="\t")
+    df = df[["text", "label", "subset"]]
+    df["label"] = df["label"].apply(lambda x: 1 if x == "M" else 0)
 
     splits = read_splits(df, True)
     splits = splits.shuffle(seed=42)
@@ -49,6 +54,15 @@ def prepare_data(tokenizer):
         partial(preprocess_examples, tokenizer=tokenizer),
         batched=True,
     )
+
+    tokenized_splits = tokenized_splits.remove_columns([
+        "text",
+        "subset",
+        "__index_level_0__"
+    ])
+    tokenized_splits = tokenized_splits.rename_column("label", "labels")
+    tokenized_splits.set_format("torch")
+
     return tokenized_splits
 
 
@@ -65,10 +79,11 @@ class StopCallback(TrainerCallback):
 # TODO: add logging callback
 
 
-prefix = Path(__file__).parents[3]
+prefix = Path(__file__).parents[3] / "atd-models"
 model_name_to_path = {
-    "T5": str(prefix / "atd-models/ruT5-large"),
-    "XLM": str(prefix / "atd-models/xlm-roberta-large"),
+    "T5": str(prefix / "ruT5-large"),
+    "XLM": str(prefix / "xlm-roberta-large"),
+    "GPT": str(prefix / "rugpt3medium_based_on_gpt2")
 }
 
 
@@ -85,6 +100,10 @@ def load_detector(model_name: str, max_length: int = 64):
         config = AutoConfig.from_pretrained(model_path)
         tokenizer = T5Tokenizer.from_pretrained(model_path)
         model = T5ForSequenceClassification(config)
+    elif model_name == "GPT":
+        tokenizer = AutoTokenizer.from_pretrained(model_path, max_length=max_length)
+        tokenizer.pad_token = tokenizer.eos_token
+        model = AutoModelForSequenceClassification.from_pretrained(model_path, max_length=max_length)
     else:
         raise ValueError(f"Model {model_name} not found")
     return tokenizer, model
@@ -118,13 +137,13 @@ def set_trainer(tokenized_splits, tokenizer, model, warmup_ratio, lr_scheduler_t
         load_best_model_at_end=True,
         metric_for_best_model="auc",
         save_total_limit=10,
-        run_name=f"Ru T5 LR={lr} OPTIM={optim} LR_SCH_TYPE={lr_scheduler_type}, WR={warmup_ratio}"
+        run_name=f"Ru GPT LR={lr} OPTIM={optim} LR_SCH_TYPE={lr_scheduler_type}, WR={warmup_ratio}"
     )
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=tokenized_splits['train'],
-        eval_dataset=tokenized_splits['dev'],
+        train_dataset=tokenized_splits["train"],
+        eval_dataset=tokenized_splits["dev"],
         compute_metrics=compute_metrics,
         tokenizer=tokenizer,
         callbacks=[StopCallback(), es_callback]
@@ -133,7 +152,8 @@ def set_trainer(tokenized_splits, tokenizer, model, warmup_ratio, lr_scheduler_t
 
 
 class SupervisedPipeline:
-    def __init__(self, run_name: str):
+    def __init__(self, model_name: str, run_name: str):
+        self.model_name = model_name
         self.run_name = run_name
 
     def train(
@@ -146,7 +166,7 @@ class SupervisedPipeline:
     ):
         setup_experiment_tracking(run_name=self.run_name)
 
-        tokenizer, model = load_detector(model_name=args.model_name)
+        tokenizer, model = load_detector(model_name=self.model_name)
         tokenized_splits = prepare_data(tokenizer)
 
         trainer = set_trainer(
@@ -171,7 +191,7 @@ def grid_search():
 
 
 def main(args: argparse.Namespace) -> None:
-    pipeline = SupervisedPipeline(run_name=args.run_name)
+    pipeline = SupervisedPipeline(model_name=args.model_name, run_name=args.run_name)
     # pipeline.init(args)
     trainer = pipeline.train()
     # collected_results = pipeline.evaluate(trainer)
