@@ -11,12 +11,6 @@ MODEL_TO_HUB_NAME = {
     't5-large': 'sberbank-ai/ruT5-large',
 }
 
-N_SEEDS = 1
-N_EPOCHS = 1
-BATCH_SIZES = (8,)
-LR_VALUES = (1e-5,)
-DECAY_VALUES = (1e-4,)
-
 
 class Pooler(nn.Module):
     def __init__(self, config):
