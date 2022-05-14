@@ -44,8 +44,6 @@ def read_splits(df, as_datasets):
 
 
 def prepare_data(tokenizer):
-    # prefix = str(Path(__file__).parents[2])
-    # prefix = prefix[:prefix.rfind("/")]
     data_path = "/home/masaidov/atd-data/metrics_df.tsv"
     df = pd.read_csv(data_path, sep="\t")
     df = df[["text", "label", "subset"]]
