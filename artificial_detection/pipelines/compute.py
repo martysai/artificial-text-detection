@@ -140,4 +140,5 @@ def compute_metrics(p: EvalPrediction):
         'f2': f2_result["fbeta"],
         'brier': brier["brier"]
     }
+    print(result)
     return result

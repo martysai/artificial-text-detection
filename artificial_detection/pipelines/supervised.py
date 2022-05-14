@@ -1,13 +1,14 @@
 import argparse
 from functools import partial
-from pathlib import Path
 
 import pandas as pd
 from datasets import Dataset, DatasetDict
 from transformers import (
-    AutoModelForSequenceClassification,
+    AutoConfig,
     AutoTokenizer,
     EarlyStoppingCallback,
+    GPT2ForSequenceClassification,
+    GPT2Tokenizer,
     T5Tokenizer,
     Trainer,
     TrainerCallback,
@@ -43,7 +44,9 @@ def read_splits(df, as_datasets):
 
 
 def prepare_data(tokenizer):
-    data_path = str(Path(__file__).parents[3] / "atd-data/metrics_df.tsv")
+    # prefix = str(Path(__file__).parents[2])
+    # prefix = prefix[:prefix.rfind("/")]
+    data_path = "/home/masaidov/atd-data/metrics_df.tsv"
     df = pd.read_csv(data_path, sep="\t")
     df = df[["text", "label", "subset"]]
     df["label"] = df["label"].apply(lambda x: 1 if x == "M" else 0)
@@ -78,12 +81,16 @@ class StopCallback(TrainerCallback):
 
 # TODO: add logging callback
 
-
-prefix = Path(__file__).parents[3] / "atd-models"
+# prefix = str(Path(__file__).parents[2])
+# prefix = prefix[:prefix.rfind("/")] + "/atd-models"
+# model_name_to_path = {
+#     "T5": str(prefix + "/ruT5-large"),
+#     "XLM": str(prefix + "/xlm-roberta-large"),
+#     "GPT": str(prefix + "/rugpt3medium_based_on_gpt2")
+# }
 model_name_to_path = {
-    "T5": str(prefix / "ruT5-large"),
-    "XLM": str(prefix / "xlm-roberta-large"),
-    "GPT": str(prefix / "rugpt3medium_based_on_gpt2")
+    "GPT": "/home/masaidov/atd-models/rugpt3medium_based_on_gpt2",
+    "XLM": "/home/masaidov/atd-models/xlm-roberta-large",
 }
 
 
@@ -96,14 +103,16 @@ def load_detector(model_name: str, max_length: int = 64):
         model = XLMRobertaForSequenceClassification.from_pretrained(
             model_path, max_length=max_length
         )
+        tokenizer.pad_token = tokenizer.eos_token
     elif model_name == "T5":
         config = AutoConfig.from_pretrained(model_path)
         tokenizer = T5Tokenizer.from_pretrained(model_path)
         model = T5ForSequenceClassification(config)
     elif model_name == "GPT":
-        tokenizer = AutoTokenizer.from_pretrained(model_path, max_length=max_length)
-        tokenizer.pad_token = tokenizer.eos_token
-        model = AutoModelForSequenceClassification.from_pretrained(model_path, max_length=max_length)
+        tokenizer = GPT2Tokenizer.from_pretrained(model_path)
+        tokenizer.add_special_tokens({'pad_token': '<pad>'})
+        model = GPT2ForSequenceClassification.from_pretrained(model_path, num_labels=2)
+        model.config.pad_token_id = 0
     else:
         raise ValueError(f"Model {model_name} not found")
     return tokenizer, model
@@ -116,11 +125,11 @@ def set_trainer(tokenized_splits, tokenizer, model, warmup_ratio, lr_scheduler_t
     )
     training_args = TrainingArguments(
         output_dir='./results',
-        num_train_epochs=2,
+        num_train_epochs=1,
         do_train=True,
         do_eval=True,
-        per_device_train_batch_size=16,
-        per_device_eval_batch_size=8,
+        per_device_train_batch_size=32,
+        per_device_eval_batch_size=16,
         learning_rate=lr,
         lr_scheduler_type=lr_scheduler_type,
         warmup_ratio=warmup_ratio,
@@ -196,6 +205,7 @@ def main(args: argparse.Namespace) -> None:
     trainer = pipeline.train()
     # collected_results = pipeline.evaluate(trainer)
     # pipeline.save(trainer, collected_results)
+    trainer.save_model(f"{args.model_name}_model")
 
 
 if __name__ == "__main__":
