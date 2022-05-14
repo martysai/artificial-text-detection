@@ -79,15 +79,6 @@ class StopCallback(TrainerCallback):
             raise ValueError("weak hyper parameters")
 
 
-# TODO: add logging callback
-
-# prefix = str(Path(__file__).parents[2])
-# prefix = prefix[:prefix.rfind("/")] + "/atd-models"
-# model_name_to_path = {
-#     "T5": str(prefix + "/ruT5-large"),
-#     "XLM": str(prefix + "/xlm-roberta-large"),
-#     "GPT": str(prefix + "/rugpt3medium_based_on_gpt2")
-# }
 model_name_to_path = {
     "GPT": "/home/masaidov/atd-models/rugpt3medium_based_on_gpt2",
     "XLM": "/home/masaidov/atd-models/xlm-roberta-large",
@@ -195,16 +186,9 @@ class SupervisedPipeline:
         return model
 
 
-def grid_search():
-    pass
-
-
 def main(args: argparse.Namespace) -> None:
     pipeline = SupervisedPipeline(model_name=args.model_name, run_name=args.run_name)
-    # pipeline.init(args)
     trainer = pipeline.train()
-    # collected_results = pipeline.evaluate(trainer)
-    # pipeline.save(trainer, collected_results)
     trainer.save_model(f"{args.model_name}_model")
 
 
