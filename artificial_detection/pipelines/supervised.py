@@ -44,6 +44,7 @@ def read_splits(df, as_datasets):
 
 
 def prepare_data(tokenizer):
+    # TODO: get rid of prefixes which include my root
     data_path = "/home/masaidov/atd-data/metrics_df.tsv"
     df = pd.read_csv(data_path, sep="\t")
     df = df[["text", "label", "subset"]]

@@ -6,7 +6,6 @@ from hamcrest import assert_that, equal_to, has_items
 
 from artificial_detection.models.translation import TranslationModel
 from artificial_detection.utils import get_dataset_path, save_translations_texts
-from tests import skip_github
 
 
 class TestTranslate(TestCase):
@@ -55,8 +54,3 @@ class TestTranslate(TestCase):
         assert_that(df_sample.columns.tolist(), has_items(*["sources", "targets", "translations"]))
         assert_that(len(df_sample), equal_to(5))
         os.remove(dataset_path)
-
-    @skip_github
-    def test_gpu_usage(self) -> None:
-        # TODO
-        pass
