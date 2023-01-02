@@ -1,6 +1,8 @@
-# Data generation description
+# Data
 
-Some additional information about datasets.
+A part of the documentation related to datasets and a generative part.
+
+
 
 ### Data naming rules:
 
@@ -64,3 +66,19 @@ Then, run generate script:
 ```bash
 python detection/data/generate.py --dataset_name='tatoeba' --size=20000 --device='cuda:0'
 ```
+
+TODO: refactoring
+
+The purpose of the Detection framework is to generalize artificial text detection approaches.
+
+At the current stage this framework provides the support of:
+
+- Datasets from [tatoeba](https://huggingface.co/datasets/tatoeba),
+[WikiMatrix](https://github.com/facebookresearch/LASER/tree/main/tasks/WikiMatrix);
+- Models from [EasyNMT](https://github.com/UKPLab/EasyNMT).
+
+Here is a list of supported languages:
+
+| Source language  | Target Language | Dataset |
+| :---: | :---: | :---: |
+| Russian | English | Tatoeba |
