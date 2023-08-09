@@ -168,9 +168,7 @@ def construct_buckets(encoded_string, mapping):
 
 
 def get_bucket_heads(buckets):
-    heads = [0]
-    for bucket_size in buckets[:-1]:
-        heads.append(heads[-1] + bucket_size)
+    heads = [0] + np.cumsum(buckets[:-1]).tolist()
     return heads
 
 
