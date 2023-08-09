@@ -1,3 +1,4 @@
+import numpy as np
 def construct_suffix_array(string):
     ta = construct_type_array(string)
     mapping = construct_alphabet_mapping(string)
@@ -174,7 +175,5 @@ def get_bucket_heads(buckets):
 
 
 def get_bucket_tails(buckets):
-    tails = [0]
-    for bucket_size in buckets[1:]:
-        tails.append(tails[-1] + bucket_size)
+    tails = [0] + np.cumsum(buckets[1:]).tolist()
     return tails
